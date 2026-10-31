@@ -1564,6 +1564,7 @@ class RunManager:
         viewport or o["viewport"], generator.VIEWPORTS["phone"]
     )
     custom_defs = self.custom_components_for_run(run)
+    run_cat = ((run or {}).get("config") or {}).get("catalog") or {}
     msgs = o.get("a2ui") or []
     if any(
         lowering.should_lower_for_renderer(d, "web")
@@ -1579,6 +1580,13 @@ class RunManager:
         "framing": framing,
         "validation": o.get("validation"),
         "custom_components": custom_defs,
+        # Which catalogs the host registers: the project catalog (custom
+        # components) and, only when the project opted in, the extension
+        # catalog (HeroCard / SvgIcon).
+        "catalogs": {
+            "projectCatalogId": run_cat.get("catalog_id") or None,
+            "extensions": bool(run_cat.get("extensions")),
+        },
     }
 
   @staticmethod

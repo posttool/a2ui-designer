@@ -9,6 +9,9 @@ import {debounce, h, icon, mount, relTime, spinner} from '../components/dom.js';
 import {navigate} from '../components/store.js';
 import {confirmDialog, segmented, toast} from '../components/ui.js';
 
+const BASIC_CATALOG_ID =
+    'https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json';
+
 const REF = 'common_types.json#/$defs/';
 // [type key, short label, title]
 const PROP_TYPES = [
@@ -119,7 +122,8 @@ export async function render(root, params) {
   let comp = loaded;
   const settings = settingsRes.settings || {};
   const catalogId = (settings.catalog && settings.catalog.catalog_id) ||
-      listRes.catalog_id || 'https://dcb.local/catalogs/project';
+      listRes.catalog_id ||
+      'https://posttool.github.io/a2ui-designer/catalogs/projects/default/catalog.json';
   let def = normalizeDef(comp.definition);
   if (def.web.template && !def.web.template.trim().includes('\n') &&
       def.web.template.includes('><')) {
@@ -852,19 +856,19 @@ export async function render(root, params) {
     const name = def.name || 'Untitled';
     const sp = def.sample.props || {};
     return [
-      {version: 'v0.9', createSurface: {surfaceId: 'preview', catalogId}},
+      {version: 'v1.0', createSurface: {surfaceId: 'preview', catalogId: BASIC_CATALOG_ID}},
       {
-        version: 'v0.9',
+        version: 'v1.0',
         updateComponents: {
           surfaceId: 'preview',
           components: [
-            {...sp, id: 'root', component: name},
+            {...sp, id: 'root', component: name, catalogId},
             ...(def.sample.components || []),
           ],
         },
       },
       {
-        version: 'v0.9',
+        version: 'v1.0',
         updateDataModel:
             {surfaceId: 'preview', path: '/', value: def.sample.data || {}},
       },

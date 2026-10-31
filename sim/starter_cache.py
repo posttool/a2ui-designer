@@ -72,6 +72,32 @@ def prompt_sha() -> str:
     return ""
 
 
+# Files whose content changes what a cached screenshot / payload looks like:
+# the vendored official renderer bundle and the host layer around it.
+RENDERER_FILES = (
+    ("web", "vendor", "a2ui.bundle.js"),
+    ("web", "renderer", "host.js"),
+    ("web", "renderer", "tokens.js"),
+    ("web", "renderer", "host.css"),
+    ("web", "renderer", "custom_element.js"),
+    ("web", "renderer", "markdown.js"),
+    ("web", "render.html"),
+)
+
+
+def renderer_sha() -> str:
+  """Fingerprint of the web renderer, so renderer changes invalidate hits."""
+  root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+  h = hashlib.sha256()
+  for parts in RENDERER_FILES:
+    try:
+      with open(os.path.join(root, *parts), "rb") as fh:
+        h.update(hashlib.sha256(fh.read()).digest())
+    except OSError:
+      h.update(b"-")
+  return h.hexdigest()
+
+
 def seed_id_of(sample: dict[str, Any] | None) -> str:
   return str(((sample or {}).get("meta") or {}).get("wizard_seed_id") or "")
 
@@ -159,6 +185,7 @@ def key_inputs(
       "constitution_sha": _sha((constitution_md or "").strip()),
       "prompt_sha": prompt_sha(),
       "renderer": RENDERER,
+      "renderer_sha": renderer_sha(),
       "protocol": PROTOCOL,
   }
 
