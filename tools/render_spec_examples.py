@@ -42,7 +42,7 @@ import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 WEB = ROOT / 'web'
-EXAMPLES = ROOT / 'seeds' / 'spec_examples'
+EXAMPLES = ROOT / 'seeds' / 'a2ui' / 'catalogs' / 'basic' / 'v1' / 'examples'
 if str(ROOT) not in sys.path:
   sys.path.insert(0, str(ROOT))
 from render import cdp as _cdp  # pylint: disable=g-import-not-at-top,wrong-import-position
@@ -517,7 +517,7 @@ def main(argv=None):
   sheet = write_contact_sheet(
       out_dir,
       rows,
-      f'A2UI v0.9 spec examples — {args.viewport} {width}px · {args.scheme} · '
+      f'A2UI v1.0 Basic catalog examples — {args.viewport} {width}px · {args.scheme} · '
       f'{args.framing}',
   )
   print(sheet)

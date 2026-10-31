@@ -145,6 +145,19 @@ class Node:
     self.order = 0
 
   def variant(self) -> str:
+    """Text emphasis: a Markdown heading level ("h2") or the variant.
+
+    A2UI v1.0 Text has only body|caption; headings are Markdown in the text
+    (`"## Title"`, also inside a formatString template).
+    """
+    if self.type == "Text":
+      t = self.comp.get("text")
+      if isinstance(t, dict) and t.get("@call", t.get("call")) == "formatString":
+        t = (t.get("args") or {}).get("value")
+      if isinstance(t, str):
+        m = re.match(r"^\s*(#{1,6})\s", t)
+        if m:
+          return f"h{len(m.group(1))}"
     v = self.comp.get("variant")
     return v if isinstance(v, str) else ""
 
@@ -157,11 +170,15 @@ class Tree:
     for msg in messages if isinstance(messages, list) else []:
       if not isinstance(msg, dict):
         continue
-      uc = msg.get("updateComponents")
-      if isinstance(uc, dict):
-        for c in uc.get("components") or []:
-          if isinstance(c, dict) and isinstance(c.get("id"), str):
-            self.components[c["id"]] = c
+      cs = msg.get("createSurface")
+      if isinstance(cs, dict) and isinstance(cs.get("dataModel"), dict):
+        self.data = cs["dataModel"]
+      for kind in ("createSurface", "updateComponents"):
+        uc = msg.get(kind)
+        if isinstance(uc, dict):
+          for c in uc.get("components") or []:
+            if isinstance(c, dict) and isinstance(c.get("id"), str):
+              self.components[c["id"]] = c
       ud = msg.get("updateDataModel")
       if isinstance(ud, dict):
         p = ud.get("path") or "/"
@@ -238,9 +255,11 @@ class Tree:
   # ----------------------------------------------------------- content
   def resolve(self, v: Any, scope: str) -> Any:
     if isinstance(v, dict):
-      if "path" in v and isinstance(v["path"], str):
-        return _get(self.data, resolve_path(scope, v["path"]))
-      if v.get("call") == "formatString":
+      bound = v.get("@path", v.get("path"))
+      if isinstance(bound, str) and "componentId" not in v:
+        return _get(self.data, resolve_path(scope, bound))
+      call = v.get("@call", v.get("call"))
+      if call == "formatString":
         tpl = (v.get("args") or {}).get("value")
         if isinstance(tpl, str):
           return re.sub(
@@ -250,7 +269,7 @@ class Tree:
               ),
               tpl,
           )
-      if "call" in v:
+      if isinstance(call, str):
         args = v.get("args") or {}
         vals = (
             [self.resolve(a, scope) for a in args.values()]

@@ -60,9 +60,9 @@ class GenerationResult:
 def system_prompt(ctx: GenerationContext) -> str:
   vp = VIEWPORTS.get(ctx.viewport, VIEWPORTS["phone"])
   parts = [
-      common.prompt("generate_ui.md").replace(
-          "<catalog id>", ctx.catalog.catalog_id
-      )
+      common.prompt("generate_ui.md")
+      .replace("<catalog id>", ctx.catalog.basic_catalog_id)
+      .replace("<project catalog id>", ctx.catalog.catalog_id)
   ]
   cons = (ctx.constitution_md or "").strip()
   parts.append(
@@ -185,12 +185,12 @@ def generate(
       model=ctx.model,
   )
   latency = resp.latency_ms
-  msgs = normalize.to_messages(resp.data, catalog_id=ctx.catalog.catalog_id)
+  msgs = normalize.to_messages(resp.data, catalog=ctx.catalog)
   result = validator.validate(msgs, ctx.catalog)
   raw = resp.text
   repairs = 0
   model = resp.model
-  while not result.ok and repairs < ctx.max_repairs:
+  while not result.clean and repairs < ctx.max_repairs:
     repairs += 1
     repair = (
         user
@@ -213,12 +213,12 @@ def generate(
     except LlmError:
       break
     latency += resp.latency_ms
-    new_msgs = normalize.to_messages(
-        resp.data, catalog_id=ctx.catalog.catalog_id
-    )
+    new_msgs = normalize.to_messages(resp.data, catalog=ctx.catalog)
     new_result = validator.validate(new_msgs, ctx.catalog)
     if new_msgs and (
-        new_result.ok or len(new_result.errors) <= len(result.errors)
+        new_result.clean
+        or len(new_result.errors) + len(new_result.lint)
+        <= len(result.errors) + len(result.lint)
     ):
       msgs, result, raw, model = new_msgs, new_result, resp.text, resp.model
   if not msgs:

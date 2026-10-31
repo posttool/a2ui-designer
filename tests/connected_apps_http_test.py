@@ -31,16 +31,16 @@ def form_handler(system, parts):
     return {
         "messages": [
             {
-                "version": "v0.9",
+                "version": "v1.0",
                 "createSurface": {
                     "surfaceId": "f",
                     "catalogId": (
-                        "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+                        "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json"
                     ),
                 },
             },
             {
-                "version": "v0.9",
+                "version": "v1.0",
                 "updateComponents": {
                     "surfaceId": "f",
                     "components": [
@@ -53,7 +53,7 @@ def form_handler(system, parts):
                             "id": "q",
                             "component": "TextField",
                             "label": "Medication",
-                            "value": {"path": "/form/query"},
+                            "value": {"@path": "/form/query"},
                         },
                         {
                             "id": "b",
@@ -63,7 +63,7 @@ def form_handler(system, parts):
                             "action": {
                                 "event": {
                                     "name": "submit",
-                                    "context": {"form": {"path": "/form"}},
+                                    "context": {"form": {"@path": "/form"}},
                                 }
                             },
                         },

@@ -815,9 +815,7 @@ VALID_STRATEGIES = (
     "auto",
     "web_template",
     "basic_composition",
-    "native_targets",
 )
-TARGET_PLATFORMS = ("android_compose", "android_remote_compose", "ios_swiftui")
 
 
 def normalize_definition(raw: dict[str, Any]) -> dict[str, Any]:
@@ -872,20 +870,6 @@ def normalize_definition(raw: dict[str, Any]) -> dict[str, Any]:
     ]
     if c_root or c_list:
       out["composition"] = {"root": c_root, "components": c_list}
-  targets_raw = raw.get("targets")
-  if isinstance(targets_raw, dict):
-    targets: dict[str, dict[str, str]] = {}
-    for tid in TARGET_PLATFORMS:
-      ent = targets_raw.get(tid)
-      if isinstance(ent, dict):
-        code = str(ent.get("code") or "").strip()
-        ep = str(ent.get("entrypoint") or "").strip()
-        if code or ep:
-          targets[tid] = {"code": code, "entrypoint": ep}
-      elif isinstance(ent, str) and ent.strip():
-        targets[tid] = {"code": ent.strip(), "entrypoint": ""}
-    if targets:
-      out["targets"] = targets
   return out
 
 

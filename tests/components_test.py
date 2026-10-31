@@ -174,7 +174,11 @@ class CatalogTest(unittest.TestCase):
     })
     self.assertIn("Chart", cat.components)
     self.assertFalse(cat.components["Chart"].has_web)
-    self.assertEqual(cat.catalog_id, catalog_mod.BASIC_CATALOG_ID)
+    self.assertEqual(cat.catalog_id, catalog_mod.DEFAULT_PROJECT_CATALOG_ID)
+    self.assertEqual(
+        cat.components["Chart"].catalog_id,
+        catalog_mod.DEFAULT_PROJECT_CATALOG_ID,
+    )
 
   def test_catalog_json(self):
     cat = self.cat(disabled_components=["Slider"])
@@ -183,15 +187,17 @@ class CatalogTest(unittest.TestCase):
     self.assertEqual(cj["catalogId"], "https://dcb.local/catalogs/shop")
     self.assertNotIn("Slider", cj["components"])
     self.assertIn("Text", cj["components"])
-    pt = cj["components"]["ProductTile"]
-    body = pt["allOf"][2]
+    self.assertEqual(cj["protocolVersion"], "1.0")
+    self.assertEqual(catalog_mod.catalog_shape_issues(cj), [])
+    body = cj["components"]["ProductTile"]
+    self.assertNotIn("allOf", body)
     self.assertEqual(body["properties"]["component"], {"const": "ProductTile"})
-    self.assertTrue(
-        body["properties"]["title"]["$ref"].startswith(
-            catalog_mod.COMMON_TYPES_ID
-        )
+    self.assertEqual(
+        body["properties"]["title"]["$ref"],
+        "common_types.json#/$defs/DynamicString",
     )
     self.assertEqual(body["required"], ["component", "title", "price"])
+    self.assertIn("Use for 1-4 products", cj["instructions"])
     refs = [x["$ref"] for x in cj["$defs"]["anyComponent"]["oneOf"]]
     self.assertIn("#/components/ProductTile", refs)
     self.assertNotIn("#/components/Slider", refs)
@@ -199,6 +205,13 @@ class CatalogTest(unittest.TestCase):
   def test_validator_custom_instances(self):
     cat = self.cat()
     msgs = sample_messages(TILE, cat.catalog_id)
+    self.assertEqual(
+        msgs[0]["createSurface"]["catalogId"], catalog_mod.BASIC_CATALOG_ID
+    )
+    self.assertEqual(
+        msgs[1]["updateComponents"]["components"][0]["catalogId"],
+        "https://dcb.local/catalogs/shop",
+    )
     res = validator.validate(msgs, cat)
     self.assertTrue(res.ok, res.errors)
     bad = copy.deepcopy(msgs)
@@ -524,7 +537,10 @@ class CompilerLoweringAndNativeCodegenTest(unittest.TestCase):
     comps = lowered[1]["updateComponents"]["components"]
     by_id = {c["id"]: c for c in comps}
     self.assertEqual(by_id["root"]["component"], "Card")
-    self.assertEqual(by_id["root__h_txt"]["text"], "Ready")
+    # v0.9 "variant": "h3" in a stored composition lowers to Markdown.
+    self.assertEqual(by_id["root__h_txt"]["text"], "### Ready")
+    self.assertNotIn("variant", by_id["root__h_txt"])
+    self.assertNotIn("catalogId", by_id["root"])
     self.assertEqual(by_id["root__s_txt"]["text"], "2 items")
     basic_cat = catalog_mod.build_catalog({})
     self.assertTrue(validator.validate(lowered, basic_cat).ok)

@@ -221,7 +221,7 @@ class ComponentBuilder:
   def _unique_name(self, pid: str, name: str, cid: str | None) -> str:
     base = _pascal(name) or "Component"
     taken = self.comps.names_in_project(pid, exclude=cid) | set(
-        catalog_mod.basic_names()
+        catalog_mod.reserved_names()
     )
     if base not in taken:
       return base

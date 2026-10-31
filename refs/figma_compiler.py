@@ -644,8 +644,7 @@ def compile_node_to_basic_skeleton(
                 {
                     "id": "title_txt",
                     "component": "Text",
-                    "text": "{{title}}",
-                    "variant": "h3",
+                    "text": "### {{title}}",
                 },
             ],
         },
@@ -763,26 +762,25 @@ def compile_node_to_basic_skeleton(
       )
       fsize = float(st.get("size") or st.get("fontSize") or 14)
       fweight = int(st.get("weight") or st.get("fontWeight") or 400)
-      variant = (
-          "h2"
+      # A2UI v1.0 Text has only body|caption; headings are Markdown.
+      heading = (
+          "## "
           if fsize >= 24
           else (
-              "h3"
+              "### "
               if fsize >= 20
-              else (
-                  "h4"
-                  if fsize >= 16 and fweight >= 600
-                  else ("caption" if fsize <= 12 else "body")
-              )
+              else ("#### " if fsize >= 16 and fweight >= 600 else "")
           )
       )
       tid = next_id(nname or "txt")
-      components.append({
+      tnode: dict[str, Any] = {
           "id": tid,
           "component": "Text",
-          "text": f"{{{{{pname}}}}}",
-          "variant": variant,
-      })
+          "text": f"{heading}{{{{{pname}}}}}",
+      }
+      if not heading:
+        tnode["variant"] = "caption" if fsize <= 12 else "body"
+      components.append(tnode)
       return tid
 
     fill = "image" if n.get("image_fill") else _extract_node_fill(n, None)
@@ -876,8 +874,7 @@ def compile_node_to_basic_skeleton(
       components.append({
           "id": tid,
           "component": "Text",
-          "text": f"{{{{{pname}}}}}",
-          "variant": "h3",
+          "text": f"### {{{{{pname}}}}}",
       })
       child_ids.append(tid)
 

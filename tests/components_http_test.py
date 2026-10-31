@@ -245,7 +245,12 @@ class ComponentsHttpTest(unittest.TestCase):
     self.assertIn("ProductTile", rd["custom_components"])
     self.assertEqual(
         rd["messages"][0]["createSurface"]["catalogId"],
-        "https://dcb.local/catalogs/shop-app",
+        "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+    )
+    self.assertEqual(
+        rd["messages"][1]["updateComponents"]["components"][0]["catalogId"],
+        "https://posttool.github.io/a2ui-designer/catalogs/projects/shop-app/"
+        "catalog.json",
     )
     st, _ = self.s.call("GET", f"/api/render_component/{cid}?token=bad")
     self.assertEqual(st, 403)
@@ -255,7 +260,12 @@ class ComponentsHttpTest(unittest.TestCase):
     self.assertTrue(pt["custom"] and pt["has_web"])
     self.assertEqual(pt["component_id"], cid)
     st, cj = self.s.call("GET", f"/api/projects/{self.pid}/catalog.json")
-    self.assertEqual(cj["$id"], "https://dcb.local/catalogs/shop-app")
+    self.assertEqual(
+        cj["$id"],
+        "https://posttool.github.io/a2ui-designer/catalogs/projects/shop-app/"
+        "catalog.json",
+    )
+    self.assertEqual(cj["protocolVersion"], "1.0")
     self.assertIn("ProductTile", cj["components"])
     # The generator prompt lists the component; runs snapshot definitions.
     st, body = self.s.call(
@@ -657,8 +667,7 @@ class ComponentsHttpTest(unittest.TestCase):
                 {
                     "id": "val",
                     "component": "Text",
-                    "text": "{{value}}",
-                    "variant": "h2",
+                    "text": "## {{value}}",
                 },
             ],
         },

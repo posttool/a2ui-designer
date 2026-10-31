@@ -536,15 +536,17 @@ def format_for_prompt(styles: list[dict[str, Any]] | None) -> str:
       lines.append(f"- **Visual style guidance**: {st_text}")
     if svg_mode:
       lines.append(
-          '- **How to emit in A2UI**: On `Icon`, set `"name": {"url":'
-          f' "/gen/svg?prompt=<concise visual subject>&style={slug}"}}` (or on'
+          "- **How to emit in A2UI**: With the extension catalog, use"
+          ' `SvgIcon` with `"url":'
+          f' "/gen/svg?prompt=<concise visual subject>&style={slug}"` (or on'
           f' `Image`, set `"url": "/gen/svg?prompt=<subject>&style={slug}"`).'
       )
     elif slot == "card_background":
       lines.append(
-          '- **How to emit in A2UI**: On `Card`, set `"backgroundImage":'
-          ' {"url": "/gen/img?prompt=<specific visual scene from'
-          f' data>&style={slug}&aspect={aspect}", "scrim": "{scrim}"}}`.'
+          "- **How to emit in A2UI**: With the extension catalog, use a"
+          ' `HeroCard` with `"image": "/gen/img?prompt=<specific visual scene'
+          f' from data>&style={slug}&aspect={aspect}"` and `"scrim":'
+          f' "{scrim}"`; otherwise a header `Image` with that `url`.'
       )
     else:
       lines.append(

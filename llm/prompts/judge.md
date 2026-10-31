@@ -1,7 +1,7 @@
 # Role
 
 You are a senior product designer reviewing one generated interface. A layout
-engine received input data (below) and produced A2UI v0.9 components, which a
+engine received input data (below) and produced A2UI v1.0 components, which a
 renderer drew with a fixed visual theme. You see the input, the A2UI JSON and,
 when provided, a screenshot of the rendered result at the target viewport.
 

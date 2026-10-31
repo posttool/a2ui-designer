@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://posttool.github.io/a2ui-designer/catalogs/extensions/v1/catalog.json",
+  "protocolVersion": "1.0",
+  "title": "A2UI Designer extension catalog",
+  "description": "Opt-in components that A2UI Designer adds on top of the A2UI Basic catalog: a full-bleed image card and an icon drawn from an image URL or inline SVG. Mix with the Basic catalog per the A2UI 1.0 mixed-catalog rules: every instance sets \"catalogId\" to this catalog's id.",
+  "catalogId": "https://posttool.github.io/a2ui-designer/catalogs/extensions/v1/catalog.json",
+  "instructions": "These components come from the A2UI Designer extension catalog. Every instance MUST carry \"catalogId\": \"https://posttool.github.io/a2ui-designer/catalogs/extensions/v1/catalog.json\" on the component object (the surface default stays the Basic catalog).\n\n- HeroCard: a card whose background is a full-bleed image (photo, artwork, map) with the content of its single `child` laid over it. Use it for hero/header moments where the image IS the visual (weather conditions, destinations, events, media). Set `scrim` so text stays legible: `auto` (default) picks a dark or light gradient from the image, `dark`/`light` force one, `none` only when the image itself is already calm behind the text. `fit` is `cover` (default, crops to fill) or `contain`. Put a Column with Text in `child`; keep overlaid copy short. Do not use a HeroCard just to show a picture — use Image for that.\n- SvgIcon: a small icon drawn from an image `url` (SVG/PNG) or inline `svg` markup, for brand marks or glyphs the Basic Icon name list does not have. Set exactly one of `url` or `svg`. `size` is the edge length in px (12-96, default 20). Prefer the Basic Icon component whenever one of its names fits. Always set `accessibility.label` unless the icon is purely decorative next to a text label.\n\nExample:\n```json\n{\"id\": \"hero\", \"component\": \"HeroCard\", \"catalogId\": \"https://posttool.github.io/a2ui-designer/catalogs/extensions/v1/catalog.json\", \"image\": {\"@path\": \"/city/photo\"}, \"scrim\": \"auto\", \"child\": \"heroText\"}\n{\"id\": \"brand\", \"component\": \"SvgIcon\", \"catalogId\": \"https://posttool.github.io/a2ui-designer/catalogs/extensions/v1/catalog.json\", \"url\": \"https://example.com/logo.svg\", \"size\": 24, \"accessibility\": {\"label\": \"Acme\"}}\n```",
+  "components": {
+    "HeroCard": {
+      "type": "object",
+      "description": "A card with a full-bleed background image and a single child laid over it, with an optional legibility scrim.",
+      "properties": {
+        "component": {
+          "const": "HeroCard"
+        },
+        "child": {
+          "$ref": "common_types.json#/$defs/Child",
+          "description": "The ID of the single child component rendered on top of the image. To display multiple elements, wrap them in a Column or Row and pass that container's ID."
+        },
+        "image": {
+          "$ref": "common_types.json#/$defs/DynamicString",
+          "description": "The URL of the background image."
+        },
+        "scrim": {
+          "type": "string",
+          "description": "Legibility overlay between the image and the child. 'auto' picks a dark or light gradient from the image; 'none' disables it.",
+          "enum": ["auto", "dark", "light", "none"],
+          "default": "auto"
+        },
+        "fit": {
+          "type": "string",
+          "description": "How the image fills the card, like CSS 'object-fit'.",
+          "enum": ["cover", "contain"],
+          "default": "cover"
+        },
+        "weight": {
+          "type": "number",
+          "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+        }
+      },
+      "required": ["component", "child", "image"]
+    },
+    "SvgIcon": {
+      "type": "object",
+      "description": "An icon drawn from an image URL or from inline SVG markup (sanitized by the renderer). Exactly one of 'url' or 'svg' must be set.",
+      "properties": {
+        "component": {
+          "const": "SvgIcon"
+        },
+        "url": {
+          "$ref": "common_types.json#/$defs/DynamicString",
+          "description": "The URL of an SVG or raster icon image."
+        },
+        "svg": {
+          "type": "string",
+          "description": "Inline SVG markup (a single <svg> element). Scripts, event handlers, external references and foreignObject are stripped."
+        },
+        "size": {
+          "type": "number",
+          "description": "Edge length of the icon in CSS pixels.",
+          "minimum": 12,
+          "maximum": 96,
+          "default": 20
+        },
+        "weight": {
+          "type": "number",
+          "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+        }
+      },
+      "required": ["component"],
+      "oneOf": [
+        {"required": ["url"]},
+        {"required": ["svg"]}
+      ]
+    }
+  },
+  "functions": {},
+  "$defs": {
+    "anyComponent": {
+      "oneOf": [
+        {"$ref": "#/components/HeroCard"},
+        {"$ref": "#/components/SvgIcon"}
+      ],
+      "discriminator": {
+        "propertyName": "component"
+      }
+    },
+    "anyFunction": {
+      "description": "This catalog defines no functions.",
+      "not": {}
+    }
+  }
+}

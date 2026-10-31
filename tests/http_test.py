@@ -581,7 +581,7 @@ class HttpTest(unittest.TestCase):
     treated = json.loads(json.dumps(fixtures.GOOD_A2UI))
     comps = treated["messages"][1]["updateComponents"]["components"]
     comps[1]["component"] = "List"  # col: Column → List
-    comps[2]["variant"] = "h1"  # title emphasis
+    comps[2]["text"]["args"]["value"] = "# ${/title}"  # title emphasis
     gen_systems = []
 
     def gen(system, parts):

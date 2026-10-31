@@ -1,7 +1,7 @@
 """Design package export: catalog + components + tokens + constitution.
 
 `GET /api/export/projects/{pid}/package.zip` → a self-contained folder that a
-client/model team can use directly: the A2UI v0.9 catalog (`$id` =
+client/model team can use directly: the A2UI v1.0 catalog (`$id` =
 project catalogId), usage rules for prompts, one validated example surface per
 custom component, each component's web implementation (template + CSS) and
 previews, the theme tokens in three formats, the constitution, and a static
@@ -313,13 +313,7 @@ def dtcg_tokens(theme: dict[str, Any]) -> dict[str, Any]:
 
 
 def rules_txt(catalog: catalog_mod.Catalog) -> str:
-  try:
-    with open(
-        os.path.join(SEEDS, "a2ui_basic_rules_v0_9.txt"), encoding="utf-8"
-    ) as fh:
-      base = fh.read().strip()
-  except OSError:
-    base = ""
+  base = catalog_mod.basic_instructions().strip()
   parts = [base] if base else []
   basic_disabled = [
       n for n in catalog.disabled if not catalog.components[n].custom
@@ -357,8 +351,8 @@ Constitution revision {rev.get('number', '?')}.
 | Path | What |
 |---|---|
 | `constitution.md` | Layout/decision rules for the A2UI generator (put it in the system prompt). |
-| `catalog/catalog.json` | A2UI v0.9 catalog, `$id` = `catalogId` = `{catalog_id}`. Enabled Basic components + design-system components. |
-| `catalog/rules.txt` | Catalog rules for the generator prompt (Basic rules, disabled components, component usage). |
+| `catalog/catalog.json` | A2UI v1.0 catalog, `$id` = `catalogId` = `{catalog_id}`. Enabled Basic components + design-system components; `instructions` embedded. |
+| `catalog/rules.txt` | Catalog rules for the generator prompt (Basic catalog instructions, disabled components, component usage). |
 | `catalog/examples/<Name>.json` | One example surface per custom component (`{{name, description, messages}}`), validated against the catalog. |
 | `catalog/components/<Name>/` | `definition.json` (props, description, usage, sample), `template.html` + `styles.css` (web implementation), `preview.png`, `reference.png` (design source, when available). |
 | `tokens/theme.json` | Resolved theme tokens (DCB canonical keys). |
@@ -373,11 +367,13 @@ Custom components: {names}.
 
 Generators: include `catalog/catalog.json` (or the A2UI Python SDK's
 `A2uiSchemaManager` / `PromptGenerator` pointed at it), `catalog/rules.txt`,
-and `constitution.md` in the system prompt, and set
-`createSurface.catalogId` to `{catalog_id}`. Clients must advertise the same
-catalogId.
+and `constitution.md` in the system prompt. Surfaces use the A2UI Basic
+catalog (`https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json`) as
+`createSurface.catalogId`; every design-system component instance carries
+`"catalogId": "{catalog_id}"` (A2UI v1.0 mixed catalogs). Clients must
+advertise both catalogIds.
 
-Renderers: the Basic components follow the A2UI v0.9 Basic catalog. Each
+Renderers: the Basic components follow the A2UI v1.0 Basic catalog. Each
 custom component ships a reference web implementation as a declarative
 template:
 
@@ -542,7 +538,7 @@ def package_files(
             "messages": msgs,
         },
     )
-    chk = custom_web.check_definition(d, catalog_mod.basic_names())
+    chk = custom_web.check_definition(d, catalog_mod.reserved_names())
     put(
         f"catalog/components/{name}/definition.json",
         {

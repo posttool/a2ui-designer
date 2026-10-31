@@ -37,6 +37,10 @@ from sim.teach_ledger import TeachLedger
 PKG = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WEB = os.path.join(PKG, "web")
 SEEDS = os.path.join(PKG, "seeds")
+# Upstream A2UI v1 Basic catalog examples (verbatim, seeds/a2ui/).
+EXAMPLES_DIR = os.path.join(
+    SEEDS, "a2ui", "catalogs", "basic", "v1", "examples"
+)
 DOCS = os.path.join(PKG, "docs")
 PUBLIC_DOCS = ("DESIGN_REFERENCE_GUIDELINES.md",)
 
@@ -187,7 +191,7 @@ class App:
       return file_response(os.path.join(DOCS, name))
     if p.startswith("/seeds/spec_examples/"):
       return file_response(
-          os.path.join(SEEDS, "spec_examples", os.path.basename(p))
+          os.path.join(EXAMPLES_DIR, os.path.basename(p))
       )
     rel = os.path.normpath(p).lstrip("/")
     if rel.startswith(".."):
@@ -1539,7 +1543,7 @@ class App:
 
   def render_example(self, req: Request) -> Response:
     name = os.path.basename(req.params["name"]).removesuffix(".json")
-    path = os.path.join(SEEDS, "spec_examples", name + ".json")
+    path = os.path.join(EXAMPLES_DIR, name + ".json")
     if not os.path.isfile(path):
       raise ApiError(404, "No such example")
     with open(path, encoding="utf-8") as fh:
@@ -1562,7 +1566,7 @@ class App:
     del req
     names = sorted(
         f.removesuffix(".json")
-        for f in os.listdir(os.path.join(SEEDS, "spec_examples"))
+        for f in os.listdir(EXAMPLES_DIR)
         if f.endswith(".json")
     )
     return json_response({"examples": names})

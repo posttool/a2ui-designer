@@ -31,11 +31,11 @@ SAMPLE = {
 
 MSGS = [
     {
-        "version": "v0.9",
+        "version": "v1.0",
         "createSurface": {"surfaceId": "main", "catalogId": "x"},
     },
     {
-        "version": "v0.9",
+        "version": "v1.0",
         "updateComponents": {
             "surfaceId": "main",
             "components": [
@@ -47,14 +47,14 @@ MSGS = [
                 {
                     "id": "name",
                     "component": "Text",
-                    "text": {"path": "/r/name"},
+                    "text": {"@path": "/r/name"},
                 },
-                {"id": "img", "component": "Image", "url": {"path": "/r/hero"}},
+                {"id": "img", "component": "Image", "url": {"@path": "/r/hero"}},
                 {
                     "id": "rating",
                     "component": "Text",
                     "text": {
-                        "call": "formatString",
+                        "@call": "formatString",
                         "args": {"value": "★ ${/r/rating}"},
                     },
                 },
@@ -64,14 +64,14 @@ MSGS = [
                     "children": {"componentId": "row", "path": "/items"},
                 },
                 {"id": "row", "component": "Row", "children": ["it", "pr"]},
-                {"id": "it", "component": "Text", "text": {"path": "item"}},
-                {"id": "pr", "component": "Text", "text": {"path": "price"}},
+                {"id": "it", "component": "Text", "text": {"@path": "item"}},
+                {"id": "pr", "component": "Text", "text": {"@path": "price"}},
                 {"id": "total", "component": "Text", "text": "Total $93.95"},
             ],
         },
     },
     {
-        "version": "v0.9",
+        "version": "v1.0",
         "updateDataModel": {
             "surfaceId": "main",
             "path": "/",
@@ -134,7 +134,7 @@ class DataLinksTest(unittest.TestCase):
   def test_small_count_next_to_its_field_name(self):
     s = {"payload": {"events": [{"attendees": 4, "rooms": 2}]}}
     m = [{
-        "version": "v0.9",
+        "version": "v1.0",
         "updateComponents": {
             "surfaceId": "main",
             "components": [{

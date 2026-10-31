@@ -36,8 +36,8 @@ IMAGERY_CHANGE_ITEM_SCHEMA = obj({
     },
     "incorporation": str_schema(
         "Where and how this generated asset should be incorporated (e.g. 'Use"
-        " as a full-bleed Card.backgroundImage in weather widgets with scrim"
-        " auto' or 'Use a 24px generated SVG Icon next to each list item row')."
+        " as a full-bleed HeroCard image in weather widgets with scrim"
+        " auto' or 'Use a 24px generated SvgIcon next to each list item row')."
     ),
     "style_text": str_schema(
         "Visual style guidance for generating the image or SVG (e.g. 'Soft"

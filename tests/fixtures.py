@@ -40,16 +40,16 @@ PNG = base64.b64decode(
 GOOD_A2UI = {
     "messages": [
         {
-            "version": "v0.9",
+            "version": "v1.0",
             "createSurface": {
                 "surfaceId": "main",
                 "catalogId": (
-                    "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+                    "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json"
                 ),
             },
         },
         {
-            "version": "v0.9",
+            "version": "v1.0",
             "updateComponents": {
                 "surfaceId": "main",
                 "components": [
@@ -62,8 +62,10 @@ GOOD_A2UI = {
                     {
                         "id": "t",
                         "component": "Text",
-                        "text": {"path": "/title"},
-                        "variant": "h2",
+                        "text": {
+                            "@call": "formatString",
+                            "args": {"value": "## ${/title}"},
+                        },
                     },
                     {
                         "id": "b",
@@ -76,7 +78,7 @@ GOOD_A2UI = {
             },
         },
         {
-            "version": "v0.9",
+            "version": "v1.0",
             "updateDataModel": {
                 "surfaceId": "main",
                 "path": "/",
@@ -88,7 +90,7 @@ GOOD_A2UI = {
 
 BAD_A2UI = {
     "messages": [{
-        "version": "v0.9",
+        "version": "v1.0",
         "updateComponents": {
             "surfaceId": "main",
             "components": [

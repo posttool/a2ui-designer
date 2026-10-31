@@ -20,6 +20,7 @@ from core import util
 from core.a2ui import catalog as catalog_mod
 from core.a2ui import custom_web
 from core.a2ui import lowering
+from core.a2ui import normalize
 from core.a2ui import validator
 from core.service import ApiError
 from refs import figma_compiler
@@ -32,36 +33,51 @@ PREVIEW_MIN_W, PREVIEW_MAX_W = 192, 1280
 def sample_messages(
     defn: dict[str, Any], catalog_id: str, surface_id: str = "preview"
 ) -> list[dict[str, Any]]:
-  """A2UI surface showing one instance of `defn` with its sample props."""
+  """A2UI v1.0 surface showing one instance of `defn` with its sample props.
+
+  The surface default is the Basic catalog; the instance carries
+  `"catalogId": catalog_id` (the project catalog). Stored samples written in
+  v0.9 syntax are upgraded by `normalize.to_messages`.
+  """
   sample = defn.get("sample") or {}
   props = dict(sample.get("props") or {})
-  props.pop("id", None)
-  props.pop("component", None)
-  comps = [{"id": "root", "component": defn.get("name"), **props}]
+  for k in ("id", "component", "catalogId"):
+    props.pop(k, None)
+  root: dict[str, Any] = {"id": "root", "component": defn.get("name"), **props}
+  comps = [root]
   for c in sample.get("components") or []:
     if isinstance(c, dict) and c.get("id") and c.get("id") != "root":
       comps.append(c)
   msgs: list[dict[str, Any]] = [
       {
-          "version": "v0.9",
-          "createSurface": {"surfaceId": surface_id, "catalogId": catalog_id},
+          "version": catalog_mod.PROTOCOL_VERSION,
+          "createSurface": {
+              "surfaceId": surface_id,
+              "catalogId": catalog_mod.BASIC_CATALOG_ID,
+          },
       },
       {
-          "version": "v0.9",
+          "version": catalog_mod.PROTOCOL_VERSION,
           "updateComponents": {"surfaceId": surface_id, "components": comps},
       },
   ]
   data = sample.get("data")
   if data:
     msgs.append({
-        "version": "v0.9",
+        "version": catalog_mod.PROTOCOL_VERSION,
         "updateDataModel": {
             "surfaceId": surface_id,
             "path": "/",
             "value": data,
         },
     })
-  return msgs
+  name = str(defn.get("name") or "")
+  cat = None
+  if name and name not in catalog_mod.reserved_names():
+    cat = catalog_mod.build_catalog(
+        {"catalog_id": catalog_id, "custom_components": {name: defn}}
+    )
+  return normalize.to_messages(msgs, surface_id=surface_id, catalog=cat)
 
 
 class ComponentManager:
@@ -180,7 +196,7 @@ class ComponentManager:
     }
 
   def check(self, defn: dict[str, Any]) -> dict[str, Any]:
-    return custom_web.check_definition(defn, catalog_mod.basic_names())
+    return custom_web.check_definition(defn, catalog_mod.reserved_names())
 
   def new_row(
       self,
@@ -304,8 +320,10 @@ class ComponentManager:
     defn = custom_web.normalize_definition(defn)
     if not defn["name"]:
       raise ApiError(400, "Give the component a name")
-    if defn["name"] in catalog_mod.basic_names():
-      raise ApiError(400, f"'{defn['name']}' is a Basic catalog component")
+    if defn["name"] in catalog_mod.reserved_names():
+      raise ApiError(
+          400, f"'{defn['name']}' is a Basic or extension catalog component"
+      )
     if defn["name"] in self.names_in_project(pid):
       raise ApiError(400, f"A component named {defn['name']} already exists")
     status = body.get("status") or "draft"

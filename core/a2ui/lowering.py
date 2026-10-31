@@ -1,14 +1,13 @@
 """Deterministic lowering of composite custom components to A2UI Basic Catalog.
 
 When a custom component defines `composition: {root, components}` (either under
-the `basic_composition` strategy or as the multi-platform fallback for
-`native_targets`), `expand_composite_components` rewrites each instance of that
-custom component in `updateComponents` into standard A2UI Basic Catalog nodes
+the `basic_composition` strategy or as the fallback when no web template
+exists), `expand_composite_components` rewrites each instance of that custom
+component in `updateComponents` into standard A2UI Basic Catalog nodes
 (`Card`, `Row`, `Column`, `Text`, `Image`, `Icon`, `Button`, etc.).
 
-This allows custom components to render natively on Android Jetpack Compose,
-Android RemoteCompose, iOS SwiftUI, and Web without requiring custom native
-renderer binaries at simulation time.
+This lets such components render on any A2UI renderer that only implements the
+Basic catalog.
 """
 
 from __future__ import annotations
@@ -19,6 +18,7 @@ from typing import Any
 
 from core.a2ui import catalog as catalog_mod
 from core.a2ui import custom_web
+from core.a2ui import normalize
 
 _SINGLE_BIND_RE = re.compile(r"^\{\{\s*([A-Za-z_]\w*(?:\.\w+)*)\s*\}\}$")
 _INLINE_BIND_RE = re.compile(r"\{\{\s*([A-Za-z_]\w*(?:\.\w+)*)\s*\}\}")
@@ -43,10 +43,9 @@ def should_lower_for_renderer(
     defn: dict[str, Any] | None, renderer: str = "web"
 ) -> bool:
   """Returns True if `defn` should be lowered into Basic components on `renderer`."""
+  del renderer  # Only the web renderer exists; kept for call compatibility.
   if not has_composition(defn):
     return False
-  if renderer in ("android_compose", "android_remote_compose", "ios_swiftui"):
-    return True
   strategy = str((defn or {}).get("strategy") or "").strip().lower()
   has_web = bool(
       (((defn or {}).get("web") or {}).get("template") or "").strip()
@@ -100,16 +99,26 @@ def _interpolate_value(val: Any, props: dict[str, Any]) -> Any:
       return ""
 
     if _INLINE_BIND_RE.search(val):
+      bound = False
 
       def _repl(match: re.Match[str]) -> str:
+        nonlocal bound
         v = _lookup_expr(props, match.group(1))
         if v is None:
           return ""
-        if isinstance(v, dict) and "path" in v:
+        if isinstance(v, dict):
+          ptr = v.get("@path", v.get("path"))
+          if isinstance(ptr, str):
+            bound = True
+            return "${" + ptr + "}"
           return ""
-        return str(v)
+        return str(v).replace("${", "\\${")
 
-      return _INLINE_BIND_RE.sub(_repl, val)
+      out = _INLINE_BIND_RE.sub(_repl, val)
+      if bound:
+        # e.g. "### {{title}}" with title={"@path": "/t"} → formatString.
+        return {"@call": "formatString", "args": {"value": out}}
+      return out.replace("\\${", "${")
     return val
 
   if isinstance(val, list):
@@ -199,7 +208,9 @@ def _expand_instance(
   comp_spec = defn.get("composition") or {}
   comp_root = str(comp_spec.get("root") or "").strip()
   tpl_nodes = [
-      n for n in comp_spec.get("components") or [] if isinstance(n, dict)
+      normalize.upgrade_component(n)
+      for n in comp_spec.get("components") or []
+      if isinstance(n, dict)
   ]
   if not comp_root or not tpl_nodes:
     return [inst]
@@ -207,7 +218,7 @@ def _expand_instance(
   inst_id = str(inst.get("id") or "root")
   props = _default_props(defn)
   for k, v in inst.items():
-    if k not in ("id", "component", "weight", "accessibility"):
+    if k not in ("id", "component", "catalogId", "weight", "accessibility"):
       props[k] = copy.deepcopy(v)
 
   internal_ids = {
@@ -219,7 +230,9 @@ def _expand_instance(
     comp_root = str(tpl_nodes[0].get("id") or "root")
 
   id_map = {
-      cid: inst_id if cid == comp_root else f"{inst_id}__{cid}"
+      cid: inst_id
+      if cid == comp_root
+      else f"{inst_id}__{re.sub(r'[^0-9A-Za-z_]+', '_', cid)}"
       for cid in internal_ids
   }
 
@@ -240,7 +253,7 @@ def _expand_instance(
         out_node["accessibility"] = copy.deepcopy(inst["accessibility"])
 
     for k, v in node.items():
-      if k in ("id", "component"):
+      if k in ("id", "component", "catalogId"):
         continue
       if k in _CHILD_ID_FIELDS:
         resolved_child = _resolve_child_id(v, id_map, props)
@@ -302,7 +315,7 @@ def expand_composite_components(
     messages: list[dict[str, Any]],
     custom_defs: dict[str, dict[str, Any]] | catalog_mod.Catalog | None,
     *,
-    renderer: str = "android_compose",
+    renderer: str = "web",
     max_depth: int = 3,
 ) -> list[dict[str, Any]]:
   """Expands custom components with `composition` into Basic Catalog components."""
@@ -328,7 +341,7 @@ def expand_composite_components(
   for msg in out_msgs:
     if not isinstance(msg, dict):
       continue
-    uc = msg.get("updateComponents")
+    uc = msg.get("updateComponents") or msg.get("createSurface")
     if not isinstance(uc, dict) or not isinstance(uc.get("components"), list):
       continue
     comps = uc["components"]

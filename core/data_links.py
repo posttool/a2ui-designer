@@ -8,7 +8,7 @@ The generator usually copies (and often renames/restructures) the payload into
 the surface data model and binds components to it, or writes values as literal
 text. So a payload leaf is linked to a component when either
 
-  * bound:   the component reads a data-model pointer (`{path}` or a
+  * bound:   the component reads a data-model pointer (`{"@path"}` or a
              `${/x}` inside `formatString`) whose resolved value equals the
              leaf's value — ties broken by key name and array index; or
   * literal: the leaf's value appears in the component's resolved text
@@ -244,15 +244,16 @@ def _pointers_read(comp: dict[str, Any], scope: str) -> list[str]:
 
   def rec(v: Any, key: str = "") -> None:
     if isinstance(v, dict):
-      if isinstance(v.get("path"), str) and "componentId" not in v:
-        out.append(layout_diff.resolve_path(scope, v["path"]))
-      if v.get("call") == "formatString":
+      bound = v.get("@path", v.get("path"))
+      if isinstance(bound, str) and "componentId" not in v:
+        out.append(layout_diff.resolve_path(scope, bound))
+      if v.get("@call", v.get("call")) == "formatString":
         tpl = (v.get("args") or {}).get("value")
         if isinstance(tpl, str):
           for m in re.finditer(r"\$\{([^}]*)\}", tpl):
             out.append(layout_diff.resolve_path(scope, m.group(1).strip()))
       for kk, x in v.items():
-        if kk in ("path",):
+        if kk in ("path", "@path"):
           continue
         rec(x, kk)
     elif isinstance(v, list):
@@ -261,7 +262,7 @@ def _pointers_read(comp: dict[str, Any], scope: str) -> list[str]:
 
   for k, v in comp.items():
     if (
-        k in ("id", "component")
+        k in ("id", "component", "catalogId")
         or k in layout_diff.CHILD_KEYS
         and isinstance(v, (str, list))
     ):

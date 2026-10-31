@@ -71,28 +71,31 @@ class ImageryTest(unittest.TestCase):
     )
 
   def test_validator_and_custom_web_support_imagery_and_svg(self):
-    cat = catalog_mod.build_catalog({})
+    cat = catalog_mod.build_catalog({"extensions": ["a2ui-designer"]})
+    ext = catalog_mod.EXTENSION_CATALOG_ID
     msgs = [
         {
-            "version": "v0.9",
-            "createSurface": {"surfaceId": "main", "catalogId": cat.catalog_id},
+            "version": "v1.0",
+            "createSurface": {
+                "surfaceId": "main",
+                "catalogId": catalog_mod.BASIC_CATALOG_ID,
+            },
         },
         {
-            "version": "v0.9",
+            "version": "v1.0",
             "updateComponents": {
                 "surfaceId": "main",
                 "components": [
                     {
                         "id": "root",
-                        "component": "Card",
+                        "component": "HeroCard",
+                        "catalogId": ext,
                         "child": "col",
-                        "backgroundImage": {
-                            "url": (
-                                "/gen/img?style=weather-bg&prompt=sunny+coast&aspect=16:9"
-                            ),
-                            "scrim": "auto",
-                            "fit": "cover",
-                        },
+                        "image": (
+                            "/gen/img?style=weather-bg&prompt=sunny+coast&aspect=16:9"
+                        ),
+                        "scrim": "auto",
+                        "fit": "cover",
                     },
                     {
                         "id": "col",
@@ -106,12 +109,9 @@ class ImageryTest(unittest.TestCase):
                     },
                     {
                         "id": "ic1",
-                        "component": "Icon",
-                        "name": {
-                            "url": (
-                                "/gen/svg?style=list-item-icon&prompt=umbrella"
-                            )
-                        },
+                        "component": "SvgIcon",
+                        "catalogId": ext,
+                        "url": "/gen/svg?style=list-item-icon&prompt=umbrella",
                         "size": 24,
                     },
                     {"id": "t1", "component": "Text", "text": "Bring umbrella"},
@@ -122,13 +122,12 @@ class ImageryTest(unittest.TestCase):
                     },
                     {
                         "id": "ic2",
-                        "component": "Icon",
-                        "name": {
-                            "svg": (
-                                '<svg viewBox="0 0 24 24"><circle cx="12"'
-                                ' cy="12" r="8"/></svg>'
-                            )
-                        },
+                        "component": "SvgIcon",
+                        "catalogId": ext,
+                        "svg": (
+                            '<svg viewBox="0 0 24 24"><circle cx="12"'
+                            ' cy="12" r="8"/></svg>'
+                        ),
                     },
                     {"id": "t2", "component": "Text", "text": "Inline SVG"},
                 ],
@@ -137,6 +136,9 @@ class ImageryTest(unittest.TestCase):
     ]
     res = validator.validate(msgs, cat)
     self.assertTrue(res.ok, res.errors)
+    # Without the opt-in extension catalog the same payload is rejected.
+    res = validator.validate(msgs, catalog_mod.build_catalog({}))
+    self.assertFalse(res.ok)
 
     chk = custom_web.check_definition(
         {
@@ -180,7 +182,7 @@ class ImageryTest(unittest.TestCase):
             "aspect_ratio": "16:9",
             "scrim": "auto",
             "incorporation": (
-                "Use as full-bleed Card.backgroundImage on weather widgets."
+                "Use as a full-bleed HeroCard image on weather widgets."
             ),
             "style_text": "Atmospheric gouache sky with warm horizon light.",
             "reference_images": [{
@@ -244,24 +246,26 @@ class ImageryTest(unittest.TestCase):
     # Materialize messages containing /gen/img and /gen/svg URLs
     a2ui_msgs = [
         {
-            "version": "v0.9",
-            "createSurface": {"surfaceId": "main", "catalogId": "basic"},
+            "version": "v1.0",
+            "createSurface": {
+                "surfaceId": "main",
+                "catalogId": catalog_mod.BASIC_CATALOG_ID,
+            },
         },
         {
-            "version": "v0.9",
+            "version": "v1.0",
             "updateComponents": {
                 "surfaceId": "main",
                 "components": [
                     {
                         "id": "root",
-                        "component": "Card",
+                        "component": "HeroCard",
+                        "catalogId": catalog_mod.EXTENSION_CATALOG_ID,
                         "child": "row",
-                        "backgroundImage": {
-                            "url": (
-                                "/gen/img?style=weather-bg&prompt=partly+cloudy+68F&aspect=16:9"
-                            ),
-                            "scrim": "auto",
-                        },
+                        "image": (
+                            "/gen/img?style=weather-bg&prompt=partly+cloudy+68F&aspect=16:9"
+                        ),
+                        "scrim": "auto",
                     },
                     {
                         "id": "row",
@@ -270,12 +274,11 @@ class ImageryTest(unittest.TestCase):
                     },
                     {
                         "id": "ic",
-                        "component": "Icon",
-                        "name": {
-                            "url": (
-                                "/gen/svg?style=list-item-icon&prompt=rain+umbrella"
-                            )
-                        },
+                        "component": "SvgIcon",
+                        "catalogId": catalog_mod.EXTENSION_CATALOG_ID,
+                        "url": (
+                            "/gen/svg?style=list-item-icon&prompt=rain+umbrella"
+                        ),
                     },
                     {
                         "id": "txt",
@@ -294,8 +297,8 @@ class ImageryTest(unittest.TestCase):
         styles=imagery_mod.list_styles(self.s.app.store, self.pid),
     )
     comps = materialized[1]["updateComponents"]["components"]
-    bg_url = comps[0]["backgroundImage"]["url"]
-    ic_url = comps[2]["name"]["url"]
+    bg_url = comps[0]["image"]
+    ic_url = comps[2]["url"]
     self.assertTrue(bg_url.startswith("/api/gen/"), bg_url)
     self.assertTrue(
         ic_url.startswith("/api/gen/") and ic_url.endswith(".svg"), ic_url
@@ -321,7 +324,7 @@ class ImageryTest(unittest.TestCase):
         "proposal": {
             "has_proposal": True,
             "constitution_md": (
-                "# Weather Widgets\n\n- Use a full-bleed `Card.backgroundImage`"
+                "# Weather Widgets\n\n- Use a full-bleed `HeroCard` image"
                 ' with `style=weather-bg` and `scrim: "auto"` on weather'
                 " summary cards.\n"
             ),
@@ -336,7 +339,7 @@ class ImageryTest(unittest.TestCase):
                 "medium": "raster_image",
                 "target_slot": "card_background",
                 "incorporation": (
-                    "Full-bleed Card.backgroundImage on weather widgets"
+                    "Full-bleed HeroCard image on weather widgets"
                 ),
                 "style_text": "Soft atmospheric gouache sky matching reference",
                 "aspect_ratio": "16:9",

@@ -184,14 +184,14 @@ BENCHMARK_README = """# Design Constitution benchmark bundle
 
 Exported from the Design Constitution Builder. Each line of `cases.jsonl` is
 one judged case: the synthetic input sample, the constitution revision that
-guided generation, the generated A2UI v0.9 output, its screenshot, the human
+guided generation, the generated A2UI v1.0 output, its screenshot, the human
 verdict and (when present) the Do/Don't the designer catalogued.
 
 Fields:
 - case_id, project, constitution_ref (path to the markdown snapshot)
 - catalog: base catalog id + disabled/custom components used for the run
 - sample: {genre, group, title, intent, context, state, payload}
-- a2ui_output: A2UI v0.9 message list
+- a2ui_output: A2UI v1.0 message list
 - viewport: {id, width, height}
 - screenshot_ref: path to the PNG in this bundle (may be null)
 - human_verdict (good|bad|mixed|null), human_note
@@ -288,7 +288,7 @@ def benchmark_zip(
           "constitution_ref": cref,
           "constitution_revision": rev["number"] if rev else None,
           "catalog": {
-              "base": "a2ui-basic-v0.9",
+              "base": "a2ui-basic-v1",
               "disabled_components": cat.get("disabled_components", []),
               "custom_components": list(
                   (cat.get("custom_components") or {}).keys()

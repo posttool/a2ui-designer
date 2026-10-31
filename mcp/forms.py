@@ -1,8 +1,8 @@
-"""Deterministic JSON Schema → A2UI v0.9 form (the "simple form").
+"""Deterministic JSON Schema → A2UI v1.0 form (the "simple form").
 
 Used when LLM form generation fails or is not requested, and as the reference
 shape for LLM-generated forms: values live at `/form/<field>`, and the primary
-Button fires `action.event = {name: "submit", context: {form: {path:
+Button fires `action.event = {name: "submit", context: {form: {"@path":
 "/form"}}}`.
 """
 
@@ -12,6 +12,7 @@ import re
 from typing import Any
 
 from core.a2ui.catalog import BASIC_CATALOG_ID
+from core.a2ui.catalog import PROTOCOL_VERSION
 
 SUBMIT_EVENT = "submit"
 DATA_ROOT = "/form"
@@ -124,7 +125,7 @@ def schema_form(
           "id": cid,
           "component": "CheckBox",
           "label": label,
-          "value": {"path": path},
+          "value": {"@path": path},
       })
     elif enum or (t == "array" and (spec.get("items") or {}).get("enum")):
       opts = enum or spec["items"]["enum"]
@@ -139,7 +140,7 @@ def schema_form(
           "options": [
               {"label": _label(str(o), {}), "value": str(o)} for o in opts
           ],
-          "value": {"path": path},
+          "value": {"@path": path},
       })
     elif (
         t in ("integer", "number")
@@ -153,7 +154,7 @@ def schema_form(
           "label": label,
           "min": spec["minimum"],
           "max": spec["maximum"],
-          "value": {"path": path},
+          "value": {"@path": path},
       })
     elif spec.get("format") in ("date", "date-time", "time"):
       f = spec["format"]
@@ -163,7 +164,7 @@ def schema_form(
           "label": label,
           "enableDate": f != "time",
           "enableTime": f != "date",
-          "value": {"path": path},
+          "value": {"@path": path},
       })
     else:
       variant = "shortText"
@@ -177,11 +178,20 @@ def schema_form(
           "id": cid,
           "component": "TextField",
           "label": label,
-          "value": {"path": path},
+          "value": {"@path": path},
           "variant": variant,
       }
       if spec.get("pattern"):
-        c["validationRegexp"] = spec["pattern"]
+        c["checks"] = [{
+            "condition": {
+                "@call": "regex",
+                "args": {
+                    "value": {"@path": path},
+                    "pattern": str(spec["pattern"]),
+                },
+            },
+            "message": f"{label} has an invalid format",
+        }]
       comps.append(c)
     field_ids.append(cid)
     if spec.get("description"):
@@ -195,7 +205,7 @@ def schema_form(
       field_ids.append(hid)
   submit_label = "Search" if "search" in (tool.get("name") or "") else "Submit"
   head = [
-      {"id": "title", "component": "Text", "text": title, "variant": "h3"},
+      {"id": "title", "component": "Text", "text": f"### {title}"},
   ]
   if tool.get("description"):
     head.append({
@@ -226,7 +236,7 @@ def schema_form(
               "action": {
                   "event": {
                       "name": SUBMIT_EVENT,
-                      "context": {"form": {"path": DATA_ROOT}},
+                      "context": {"form": {"@path": DATA_ROOT}},
                   }
               },
           },
@@ -245,7 +255,7 @@ def schema_form(
   comps.insert(0, {"id": "root", "component": "Card", "child": "col"})
   messages = [
       {
-          "version": "v0.9",
+          "version": PROTOCOL_VERSION,
           "createSurface": {
               "surfaceId": surface_id,
               "catalogId": BASIC_CATALOG_ID,
@@ -253,11 +263,11 @@ def schema_form(
           },
       },
       {
-          "version": "v0.9",
+          "version": PROTOCOL_VERSION,
           "updateComponents": {"surfaceId": surface_id, "components": comps},
       },
       {
-          "version": "v0.9",
+          "version": PROTOCOL_VERSION,
           "updateDataModel": {
               "surfaceId": surface_id,
               "path": "/",

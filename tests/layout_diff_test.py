@@ -12,23 +12,34 @@ from core import layout_diff  # noqa: E402
 def msgs(components, data=None):
   out = [
       {
-          "version": "v0.9",
+          "version": "v1.0",
           "createSurface": {"surfaceId": "main", "catalogId": "x"},
       },
       {
-          "version": "v0.9",
+          "version": "v1.0",
           "updateComponents": {"surfaceId": "main", "components": components},
       },
   ]
   if data is not None:
     out.append({
-        "version": "v0.9",
+        "version": "v1.0",
         "updateDataModel": {"surfaceId": "main", "path": "/", "value": data},
     })
   return out
 
 
 def t(cid, text, variant=None):
+  """Text component; "h1".."h6" become Markdown headings (A2UI v1.0)."""
+  if variant and variant.startswith("h"):
+    hashes = "#" * int(variant[1:])
+    if isinstance(text, dict) and "@path" in text:
+      text = {
+          "@call": "formatString",
+          "args": {"value": f"{hashes} ${{{text['@path']}}}"},
+      }
+    else:
+      text = f"{hashes} {text}"
+    variant = None
   c = {"id": cid, "component": "Text", "text": text}
   if variant:
     c["variant"] = variant
@@ -159,13 +170,13 @@ class LayoutDiffTest(unittest.TestCase):
                 "component": "Column",
                 "children": ["title", "meds", "ok"],
             },
-            t("title", {"path": "/title"}, "h3"),
+            t("title", {"@path": "/title"}, "h3"),
             {
                 "id": "meds",
                 "component": "List",
                 "children": {"componentId": "row", "path": "/meds"},
             },
-            t("row", {"path": "n"}),
+            t("row", {"@path": "n"}),
             {
                 "id": "ok",
                 "component": "Button",
@@ -192,8 +203,8 @@ class LayoutDiffTest(unittest.TestCase):
                 "children": {"componentId": "row", "path": "/rows"},
             },
             {"id": "row", "component": "Column", "children": ["n", "d"]},
-            t("n", {"path": "n"}),
-            t("d", {"path": "d"}),
+            t("n", {"@path": "n"}),
+            t("d", {"@path": "d"}),
         ],
         {"rows": rows},
     )
@@ -205,8 +216,8 @@ class LayoutDiffTest(unittest.TestCase):
                 "children": {"componentId": "row", "path": "/rows"},
             },
             {"id": "row", "component": "Row", "children": ["n", "d"]},
-            t("n", {"path": "n"}),
-            t("d", {"path": "d"}),
+            t("n", {"@path": "n"}),
+            t("d", {"@path": "d"}),
         ],
         {"rows": rows},
     )
