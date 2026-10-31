@@ -1,216 +1,188 @@
-# Design Constitution Builder
+# A2UI Designer
 
-A web app for designers to author **design constitutions** — the direction a
-generative-UI engine (emitting [A2UI v0.9](https://a2ui.org)) follows when
-choosing components, layouts, and templates for arbitrary input data — and to
-test, review, and evolve them against large sets of synthetic and live-tool data
-across Web, Android Compose, Android RemoteCompose, and iOS SwiftUI.
+A2UI Designer is a web app for teaching a generative-UI model how to lay out
+[A2UI](https://a2ui.org) surfaces for *your* product. It does this by example:
+you point at what is right and wrong in generated cards, and the app turns
+that into a **design constitution**. It then tests that constitution against
+large sets of realistic data and packages the result as a design system that
+any A2UI agent and web renderer can use.
 
--   **Projects**: each project has a constitution revision
-    history, a revision chat, a **Design system** (`/p/:pid/design` — Tokens,
-    Components, Templates, Imagery & Icons), **Runs** & **Effect studies**,
-    **Review**, **Dos & Don'ts** (screenshots + markdown), an **Imports**
-    pipeline (`/p/:pid/imports`), a **Package** browser (`/p/:pid/package`), and
-    **Settings** (viewports, renderers, Gemini models, component strategy,
-    default data source). **New project** (`/wizard`) asks for a name,
-    scenario areas and an optional brief and starts a teaching session (or
-    opens a blank Studio / imports a `.md`).
--   **Teaching sessions** (`/p/:pid/teach/:sid`, also *Teach by example* on the
-    Constitution page and project cards): many
-    anchored observations per card (components, input-data paths,
-    data↔component relations, drawn regions) next to the card's input data,
-    distilled into candidate rules you confirm as you go, generalized to other
-    library scenarios (*Where else does this apply?* → *Try it* probe cards),
-    layout templates captured from examples (*when should it appear again?*),
-    **immersive mode** by default (just the card, pointing and voice — `./run.sh --https` for the microphone) with an **Expert mode** (`I`) that shows the input data and observation panes,
-    and Finish = constitution assembled from confirmed rules + Dos & Don'ts with
-    crops + Before vs. After effect study. Every rule/template is tracked in
-    the **Teachings** ledger (`/p/:pid/teachings`): phrasings, trials from the
-    judge / effect attribution / designer verdicts, and signals such as
-    *rephrased without gain*. Contract: `docs/TEACH.md`.
--   **Constitutions start empty.** Constitutions hold *decisions in context*
-    (which component or template for which data, hierarchy, density, disclosure,
-    ask/act/hand off, states) — never visual styling, which lives in theme
-    tokens (CSS), or component behavior, which belongs in the catalog. A **Scope
-    check** flags misplaced rules, and **Constitution effect studies**
-    (`/p/:pid/effects/:eid`) run no-constitution control vs. treatment (plus a
-    second control for temperature noise) and attribute layout changes to
-    numbered constitution rules (`R1..Rn`).
--   **Synthetic data** (`/data`): a global library across 26 built-in genres in
-    7 groups (Agentic, Personal assistant & coordination, Documents & editorial,
-    Apps & data, Communication & media, Care & health, Enterprise), spread
-    across size, state, urgency, participants, permissions, locale, and edge
-    cases. "Generate starter library" creates 3 per genre (78). Designers can
-    add custom categories / subcategories, or synthesize from a free-text brief
-    and let Gemini file samples into existing or new categories. Image
-    placeholders (`/img/<slug>/<w>x<h>`) are resolved to Wikimedia Commons
-    photos (`sim/images.py`, credits in `samples.meta.image_credits`;
-    `DCB_WEB_IMAGES=0` disables).
--   **Runs & multi-renderer review**: revision × samples × viewports × enabled
-    renderers (`web`, `android_compose`, `android_remote_compose`,
-    `ios_swiftui`). For each output, Gemini generates A2UI (validated against
-    the project catalog with one repair round; active templates and imagery/SVG
-    styles are included in the system prompt, and `/gen/img` + `/gen/svg` URLs
-    are materialized via Gemini image/SVG models), each enabled renderer draws
-    and screenshots it, and a multimodal LLM judge pre-scores it. Designers
-    review worst-first, compare renderers side by side (`All N Side-by-Side` +
-    `.rc` wire bytecode inspector), click components in Live View to inspect
-    A2UI JSON + live theme tokens or scope verdicts/chat to that component, save
-    Dos & Don'ts, and compare runs side by side. Runs with no explicit samples
-    use the project's **default data source** (`settings.data_source`: a sample
-    set, a selection, or a category). Each run snapshots its theme tokens
-    (`Tokens T#`); when project tokens change later the run shows **token
-    drift** and can be **re-themed** (re-rendered against current tokens on all
-    enabled renderers with 0 LLM calls).
--   **Connected apps** (`/apps`): register a server-side MCP server (Streamable
-    HTTP URL + headers), like a Gemini Connected App, or add the bundled demo
-    app (pharmacy, calendar, shop). Pick a tool, fill its arguments in an A2UI
-    form generated from the tool's input schema under your constitution, call
-    it, and import the result as a sample. Runs then render both stages of the
-    journey for those samples: the input form (`stage:"form"`) and the result
-    (`stage:"result"`).
--   **Imports** (`/p/:pid/imports`): bring in Figma files (browse your saved
-    files/projects/teams and pick pages/frames, or paste a URL with a personal
-    access token / `FIGMA_API_KEY` / `~/.figma_token`), Stitch projects (browse
-    your Stitch projects and pick screens, or paste a project URL with a Stitch
-    API key / `STITCH_API_KEY` / `~/.stitch_api_key`), or screenshots. Every
-    import runs `ingesting → analyzing → review → planning → plan_ready →
-    merged` with live step and crop progress: Gemini splits the material into
-    cropped **extractions** (`component`, `template`, `token_reference`,
-    `ignore`) and asks clarifying questions on uncertain items; once confirmed,
-    a selectable **merge plan** applies changes into theme tokens, custom
-    components (auto-activated when clean), reusable templates, project data
-    samples, and a constitution revision + chat summary. Figma frames and Stitch
-    screens also yield structured **project data** (screen text and content)
-    that becomes a project sample set and, optionally, the default run data
-    source. When imported material sets only some of the 22 color roles, the
-    rest are filled with contrast-safe Material 3 colors
-    (`core/material_color_utilities.py`, a stdlib port of Material Color
-    Utilities); typography tokens are backfilled from Figma/Stitch facts and any
-    `--a2ui-*` token the imported material reads is brought in as a custom
-    token. Contract: [docs/IMPORTS.md](docs/IMPORTS.md). Authoring guide:
-    [docs/DESIGN_REFERENCE_GUIDELINES.md](docs/DESIGN_REFERENCE_GUIDELINES.md).
--   **Design system** (`/p/:pid/design`): four layers — constitution rules
-    (`R1..Rn`) → templates → components → tokens (+ imagery styles) — with a
-    **dependency graph** (`core/dependencies.py`) that shows which rules use
-    which templates/components/tokens/styles (`Used in R#` badges), flags broken
-    cross-layer references, and records the design-system snapshot each
-    constitution revision was written against (`rev R# · Tokens T#`).
-    -   **Tokens**: 42 canonical tokens across 4 groups (22 color roles, 6
-        shape/elevation, 8 typography, 6 spacing/density — `card_padding`,
-        `surface_padding`, `card_margin`, and `item_margin` take 1–4 CSS box
-        values) plus `scheme`, custom `--a2ui-*` tokens, presets, and a two-way
-        synced CSS editor. Every token edit creates a **token revision**
-        (`T1..Tn`) with a diff, browsable and revertible in the Token History
-        drawer. Non-default Google Fonts are loaded on demand by every renderer
-        surface.
-    -   **Components**: Basic Catalog toggles plus custom A2UI components built
-        from Imports, Figma, Stitch, screenshots, or a text description, with
-        visual fidelity scoring and one-click **Fix with Gemini** repair. The
-        project **component strategy** (`settings.catalog.component_strategy`,
-        or per-component `definition.strategy`) picks how they are built:
-        `web_template` (web-native HTML template + scoped shadow-DOM CSS),
-        `basic_composition` (a parameterized Basic Catalog composition that is
-        lowered into Basic components so it renders on all 4 renderers, and can
-        be saved as a template), `native_targets` (generated Jetpack Compose,
-        RemoteCompose, and SwiftUI code plus a composition for previews), or
-        `auto` (decided per component: its **Basic fit** — how faithfully the
-        design maps onto Basic Catalog components, scored from Figma/Stitch
-        structure or estimated by Gemini — is compared with the project's
-        **Basic-fit threshold**, set with a slider in Design system →
-        Components: at or above it the component becomes a Basic catalog
-        composition, below it a custom web component; existing auto-built
-        components can be re-decided in one click, pinned ones keep their
-        choice). Figma nodes are compiled deterministically
-        (`refs/figma_compiler.py`).
-    -   **Templates**: reusable screen/section layouts composed from Basic and
-        custom components, injected into the generator prompt (`# Templates`).
-    -   **Imagery & Icons**: reusable style presets (with reference images) for
-        generated raster imagery (`/gen/img`, `Card.backgroundImage` with
-        scrims, custom `data-bg`) and vector SVG icons (`/gen/svg`, `Icon`
-        `{url}`/`{svg}`/`size`, custom inline `<svg>`).
--   **Package** (`/p/:pid/package`): a file-tree browser of the downloadable
-    design package `.zip` (every file opens in a viewer: HTML/CSS syntax
-    highlighting, JSON tree/source, images, and a live `index.html` gallery
-    preview). The package holds `constitution.md`, `catalog/catalog.json`,
-    `catalog/rules.txt`, `catalog/examples/`, `catalog/components/<Name>/`
-    (definition, `template.html`, `styles.css`, `composition.json`, `compose/`,
-    `remote_compose/`, `swiftui/`, previews) plus `CatalogRegistry.kt` /
-    `CatalogRegistry.swift`, `templates/<slug>/`, `imagery/{styles.json,refs/}`,
-    `tokens/{theme.json,tokens.css,design-tokens.json}`, and a static gallery
-    (`index.html`).
--   **Admins** (`/admin`) see all projects, download
-    constitutions/history/guidelines, triage an inbox of escalated or unfixable
-    Don'ts into **benchmark bundles** (`cases.jsonl` + screenshots +
-    constitution snapshots) for model/benchmark designers, and view **Bug
-    reports** (`?tab=bugs`).
--   **Report a bug**: top-bar **Report bug** button, user menu, Review toolbar,
-    and error-page/error-toast actions open a bug report dialog targeting
-    Buganizer component **AIR › On Device Intelligence › Gen UX** (`1629228`,
-    configurable via `--bug_component_id` / `DCB_BUG_COMPONENT_ID`). Every
-    context item (route/project/run/output IDs, redacted settings, constitution
-    markdown, output evaluation & judge verdict, A2UI JSON, sample data, output
-    screenshots, recent API/console/server errors, and pasted/uploaded/captured
-    screenshots) is an individually checkable row with an inline preview and a
-    full **Preview exact report** view before filing via the Buganizer CLI (or
-    via a pre-filled Buganizer link + context `.zip` bundle).
+- **Protocol:** A2UI **v1.0** (release candidate), on the unmodified upstream
+  [Basic catalog](seeds/a2ui/catalogs/basic/v1/catalog.json).
+- **Renderer:** the official, unmodified
+  [`@a2ui/web_core` + `@a2ui/lit`](https://github.com/a2ui-project/a2ui)
+  packages, vendored as one prebuilt ES module
+  ([web/vendor/a2ui.bundle.js](web/vendor/a2ui.bundle.js)).
+- **Runtime:** Python ≥ 3.10 standard library + SQLite. You also need
+  Chrome/Chromium for screenshots and a Gemini API key. There is no build step
+  and nothing to `pip install` or `npm install`.
 
-## Run
+## Quick start
 
 ```bash
-cd google3/experimental/users/dkaram/design_constitution_builder
-./run.sh                       # http://dkaram.c.googlers.com:8810/
-./run.sh --port 8811 --data_dir /tmp/dcb
+git clone https://github.com/posttool/a2ui-designer.git
+cd a2ui-designer
+export GEMINI_API_KEY=...        # https://aistudio.google.com/apikey
+./run.sh                         # http://localhost:8100
 ```
 
-Stdlib-only Python 3.13 (no pip), SQLite, vanilla JS ES modules (no build step).
-Data lives in `~/.design_constitution_builder/` (`app.db`, `screens/`,
-`thumbs/`, `guidelines/`, `bundles/`, `references/`, `components/`,
-`templates/`, `imagery/`, `gen/`, `imgcache/`, `secret.key`). Gemini key:
-`$GEMINI_API_KEY` or `~/.config/agent_os/gemini_api_key`. Screenshots and import
-region crops require `/usr/bin/google-chrome` (note: `--no_browser` disables the
-headless Chrome pool, skipping Web screenshots and import crops). Admins are
-listed in `admins.json`. Sign-in is dev-mode (type your LDAP); `--auth_mode iap`
-trusts IAP headers for Cloud Run deployment.
+Click **New project**, pick a few scenario areas, and you land in an
+**immersive teaching session**. The six starter cards are pre-generated (see
+[Starter examples](#starter-examples)), so you can start teaching right away.
 
-## Test
+| Option | Default | Notes |
+|---|---|---|
+| `--port` | `8100` | |
+| `--data_dir` | `~/.a2ui_designer` | SQLite DB, screenshots, generated assets |
+| `--auth_mode` | `local` | `local` = single user, no login. `password` = shared secret from `--password_file` or `$A2UID_PASSWORD`, for a hosted instance |
+| `--admins` | – | JSON list of usernames that are admins in `password` mode |
+| `--https` | off | Self-signed TLS (needs `openssl`) so browsers allow the microphone for voice teaching |
+| `--no_browser` | off | Disables headless Chrome (no screenshots, crops or render-based checks) |
+| `--model` | `gemini-3.8-flash` | Default generator model; also selectable per project |
+
+Environment variables:
+
+| Variable | Purpose |
+|---|---|
+| `GEMINI_API_KEY` | Gemini API key. Alternatively put it in `~/.config/a2ui_designer/gemini_api_key` |
+| `CHROME_BIN` | Chrome/Chromium binary. Otherwise the app looks for `google-chrome`, `google-chrome-stable`, `chromium`, `chromium-browser`, then the macOS app bundles |
+| `FIGMA_API_KEY` | Optional: Figma imports (users can also save their own token) |
+| `STITCH_API_KEY` | Optional: [Stitch](https://stitch.withgoogle.com) imports |
+| `A2UID_WEB_IMAGES=0` | Don't resolve sample image placeholders via Wikimedia Commons |
+| `A2UID_STARTER_CACHE=0` | Always generate starter cards live instead of using the shipped cache |
+
+### Hosting
+
+Run the server behind any reverse proxy with `--auth_mode password`. The whole
+app is one Python process plus a headless Chrome. Run it on a small VM or in a
+container that has Chromium installed.
+
+## What you can do
+
+- **Teach by example.** Each new project opens in immersive mode: just the
+  card. You point at components, regions or omitted data, by voice or by
+  typing. Gemini turns your observations into candidate rules, which you
+  confirm. **Expert mode** (`I`) adds the input data and observation panes for
+  the current session. **Finish** assembles the constitution from the confirmed
+  rules, writes Dos & Don'ts with crops, and runs a before/after effect study.
+- **Constitutions** hold *decisions in context*: which component or template
+  to use for which data, hierarchy, density, disclosure, and states. Visual
+  styling lives in design tokens, and component behavior lives in the catalog.
+  A scope check flags rules that are in the wrong place.
+- **Teachings ledger.** Every rule is tracked across phrasings and trials
+  (judge, effect attribution, designer verdicts). The ledger flags rules that
+  have been rephrased repeatedly without improving.
+- **Synthetic data library.** 26 built-in genres across agentic, personal
+  assistant, documents, apps, communication, care & health and enterprise.
+  You can also synthesize samples from a free-text brief, or add custom
+  categories.
+- **Runs, review and effect studies.** For each revision, sample and viewport,
+  Gemini generates an A2UI v1.0 payload. The payload is validated (with one
+  repair round), rendered by the official renderer, screenshotted, and
+  pre-scored by a multimodal judge. You review worst-first, click components
+  to inspect them, save Dos & Don'ts, and compare runs or constitution
+  revisions side by side.
+- **Design system.** Design tokens, plus **custom components** authored as
+  sanitized HTML/CSS templates or as compositions of Basic components. You can
+  create them by describing them, or import them from Figma, Stitch or
+  screenshots (analyzed, then confirmed before merging). Also: reusable layout
+  templates and imagery/icon styles for Gemini-generated images and SVGs.
+- **Connected apps.** MCP servers (Streamable HTTP) as live data sources. A
+  bundled demo server is included.
+- **Design package export.** A zip that works on its own in your project; see
+  below.
+
+## A2UI: what is upstream and what is ours
+
+| What | Where | Status |
+|---|---|---|
+| A2UI v1.0 spec JSON, Basic catalog v1, its 43 examples, protocol doc | [seeds/a2ui/](seeds/a2ui/) | **Verbatim** from `github.com/a2ui-project/a2ui` @ the commit in [UPSTREAM.json](seeds/a2ui/UPSTREAM.json); `tests/seeds_test.py` fails if any byte changes |
+| Web renderer | [web/vendor/a2ui.bundle.js](web/vendor/a2ui.bundle.js) | **Unmodified** published `@a2ui/web_core` + `@a2ui/lit` ([versions](web/vendor/A2UI_VERSIONS.json)), bundled by [tools/renderer/](tools/renderer/) |
+| Host layer: design tokens → CSS variables, inspect/boxes, custom-component wrappers, composition lowering | [web/renderer/](web/renderer/) | Ours. Uses only the libraries' public APIs (`MessageProcessor`, `Catalog`, `A2uiLitElement`, …) |
+| Extension catalog: `HeroCard` (full-bleed image + scrim) and `SvgIcon` (image/inline-SVG icon) | [seeds/a2ui_designer_catalog.json](seeds/a2ui_designer_catalog.json) | Ours. A separate catalog with its own id (`https://posttool.github.io/a2ui-designer/catalogs/extensions/v1/catalog.json`). **Off by default**; enable it per project in Design system |
+| Project catalogs (your custom components) | generated | Each project publishes its own v1.0 catalog. The default id is `https://posttool.github.io/a2ui-designer/catalogs/projects/<slug>/catalog.json`; set your own in Package settings |
+
+Payloads mix catalogs as A2UI v1.0 specifies: `createSurface.catalogId` is the
+Basic catalog, and components from the extension catalog or a project catalog
+carry their own `catalogId`.
+
+To re-pin to a newer upstream (for example, the final 1.0 release):
+
+```bash
+python3 tools/sync_a2ui.py --ref <tag-or-sha>               # refresh seeds/a2ui + UPSTREAM.json
+(cd tools/renderer && npm install @a2ui/web_core@X @a2ui/lit@X && node build.mjs)   # rebuild the bundle
+python3 tools/build_starter_cache.py                          # regenerate starter cards (needs GEMINI_API_KEY + Chrome)
+```
+
+## Design package
+
+**Package** in a project downloads `<project>-design-package.zip`:
+
+- `prompt/system_prompt.md`: the exact generator system prompt (role, output
+  contract, constitution, compact catalog, templates, imagery). Use it in your
+  agent.
+- `catalog/catalog.json`: a v1.0 catalog with the project's own id and
+  embedded `instructions`. `catalog/project_catalog.json` contains only the
+  custom components, and `catalog/components.json` has the full component
+  definitions.
+- `renderer/`: the same official bundle plus the host layer. `index.js`
+  exports `mountSurface` and `loadPackage()`.
+- `demo.html`: live-renders every example with your components and tokens.
+  It works from any static host, or opened directly from disk.
+- `tokens/` (CSS variables, `theme.json`, W3C DTCG `design-tokens.json`),
+  `templates/`, `imagery/`, `assets/`, `constitution.md`, and an `index.html`
+  gallery.
+
+```html
+<div id="ui"></div>
+<script type="module">
+  import {loadPackage, mountSurface} from './renderer/index.js';
+  const pkg = await loadPackage('.');
+  mountSurface(document.getElementById('ui'), messagesFromYourAgent, pkg);
+</script>
+```
+
+## Starter examples
+
+Every new project starts from the same seed samples
+([seeds/starter_samples.json](seeds/starter_samples.json)). Their baseline
+cards are generated **once** and shipped in
+[seeds/starter_examples/](seeds/starter_examples/): the A2UI payload, the
+screenshot, and component boxes for click-to-point. A new project copies them
+in instead of calling Gemini and Chrome. A cached card is only used when every
+input matches: seed, viewport, catalog, tokens, model, generator prompt,
+renderer fingerprint and an empty constitution. Anything else is generated
+live. `tests/starter_cache_test.py` fails when the shipped cache is stale.
+
+## Development
 
 ```bash
 python3 -B -W ignore::ResourceWarning -m unittest discover -s tests -p '*_test.py'
-node tests/renderer_check.mjs
-python3 -B tools/render_spec_examples.py   # contact sheet of the 43 spec examples
+python3 tests/renderer_check.py   # headless Chrome over all upstream examples + fixtures
 ```
 
-## Renderer gaps
-
-Known differences between the Web, Android Compose, RemoteCompose, and iOS
-SwiftUI renderers — and a log of renderer-specific work — live in
-[docs/RENDERER_GAPS.md](docs/RENDERER_GAPS.md). Update it whenever a renderer
-change lands or a new gap is found.
-
-## Layout
-
-<!-- disableFinding(LINE_OVER_80) -->
-
-<!-- mdformat off(reason: standard GFM table rendering in Critique and Code Search) -->
+Layout:
 
 | Path | What |
-| :--- | :--- |
-| `core/` | SQLite storage, service (projects, revisions, token revisions, chat, samples, guidelines), `settings.py` (42 tokens + `scheme`, box spacing, theme hash/diff, models, renderers, component strategies, data source), `material_color_utilities.py` (stdlib Material 3 color port), `dependencies.py` (4-layer dependency graph + design-system snapshots), `components.py`, `imagery.py`, `bugs.py` (Buganizer CLI filing, reviewable context collection, secret redaction, context `.zip` bundles), `diffs.py`, `layout_diff.py`, `a2ui/` (catalog, validator, prompt schema, normalize, `custom_web.py` sanitizer, `lowering.py` composition → Basic lowering) |
-| `llm/` | Stdlib Gemini REST client (text, structured JSON, multimodal & image generation), `ScriptedLlm` test double, `prompts/*.md` (`generate_ui`, `generate_form`, `generate_svg`, `judge`, `revise_constitution`, `scope_check`, `synthesize_samples`, `attribute_effect`, `analyze_import`, `plan_import_merge`, `analyze_design_reference`, `build_component`, `compare_component`, `teach_distill`, `teach_applications`, `teach_pattern`, `teach_voice_turn`) |
-| `sim/` | Taxonomy (26 built-in genres + custom categories), synthesizer, generator (A2UI + templates + imagery/SVG rules), `imagery_gen.py`, `images.py` (Wikimedia Commons resolver), judge, reviser, `runs.py` (incl. token drift + zero-LLM re-theme), `effects.py` (effect studies), `connected_apps.py`, `wizard.py` (scenario domains + starter samples), `teach.py` (teaching sessions), `teach_ledger.py` (teachings: phrasings, trials, rule bindings, signals) |
-| `mcp/` | Stdlib MCP client (Streamable HTTP + SSE), bundled demo MCP server (`/mcp/demo`), JSON Schema → A2UI form builder |
-| `refs/` | `figma.py` (REST client, file/project/team & frame discovery, component scan, frame contents), `figma_compiler.py` (deterministic Figma node → HTML/CSS and → Basic composition), `native_codegen.py` (Compose / RemoteCompose / SwiftUI code + catalog registries), `stitch.py` (Stitch MCP client, project & screen discovery, HTML facts), `references.py`, `imports.py` (Imports pipeline, extractions, crops, Q&A, merge plan, templates, project data), `components_import.py` (`ComponentBuilder`) |
-| `render/` | Stdlib CDP client, headless-Chrome `browser_pool.py`, `native_images.py`, Android Compose & RemoteCompose worker (`android/`, `android_worker.py`), iOS SwiftUI runner (`ios/`, `ios_runner.py`, `cloudsims_runner.py`), placeholder SVG images |
-| `server/` | HTTP/1.1 server + router with `{name:path}` params (`http.py`), routing table & handlers (`app.py`), auth (`auth.py`), CLI entrypoint (`main.py`) |
-| `exports/` | `bundles.py` (constitution.md, history.json, guidelines ZIP, admin benchmark bundle), `package.py` (`package_files()` is the single source of the design package contents; `package_zip()` zips them) |
-| `web/` | Vanilla ES module SPA (`index.html`, `app.css`, `app.js`, `views/` incl. `package.js`, `components/` incl. `code_highlight.js`), fresh A2UI v0.9 web renderer + shadow-DOM custom component runtime + on-demand Google Fonts loading (`renderer/`), `render.html` |
-| `seeds/` | Vendored A2UI v0.9 Basic Catalog + 43 spec examples (Apache 2.0, from `//third_party/a2ui`), starter samples (`starter_samples.json`), starter suggestions |
-| `docs/CONTRACT.md` | Shared backend, UI, and renderer API contract |
-| `docs/IMPORTS.md` | Imports pipeline (`ingesting → analyzing → review → planning → plan_ready → merged`), extraction, merge plan (incl. project data), & template shapes |
-| `docs/DESIGN_REFERENCE_GUIDELINES.md` | Designer guide for preparing Figma files, Stitch projects, and screenshots |
-| `docs/RENDERER_GAPS.md` | Known cross-renderer differences and completed renderer work log |
+|---|---|
+| `server/` | stdlib HTTP server, routing, auth |
+| `core/` | storage (SQLite), service layer, settings/tokens, A2UI catalog/validator/normalizer (`core/a2ui/`), layout diff, data links |
+| `sim/` | generator, judge, reviser, runs pipeline, teaching sessions + ledger, effect studies, synthesizer, imagery, starter cache |
+| `refs/` | Figma / Stitch / screenshot imports and the component builder |
+| `exports/` | design package + admin bundles |
+| `mcp/` | MCP client + demo server + form generation |
+| `render/` | headless Chrome (raw CDP) pool |
+| `llm/` | Gemini REST client + prompts |
+| `web/` | vanilla ES-module UI (no build step), `web/renderer/` host, `web/vendor/` official bundle |
+| `seeds/` | verbatim upstream A2UI, extension catalog, starter samples + cached starter examples |
+| `tools/` | renderer bundle build, upstream sync, starter-cache builder |
+| `docs/` | API/renderer contract, imports, teaching sessions, designer guide |
 
-<!-- mdformat on -->
+Report bugs and ideas at
+[github.com/posttool/a2ui-designer/issues](https://github.com/posttool/a2ui-designer/issues)
+(the in-app **Report an issue** link pre-fills version and context).
 
-<!-- enableFinding(LINE_OVER_80) -->
+## License
+
+Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). A2UI is © Google LLC,
+Apache-2.0.
