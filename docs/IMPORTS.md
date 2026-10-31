@@ -10,9 +10,7 @@ ingesting → analyzing → review → planning → plan_ready → merged
                 ↑__________| (re-analyze with answers)
 ```
 
-<!-- disableFinding(LINE_OVER_80) -->
 
-<!-- mdformat off(reason: standard GFM table rendering in Critique and Code Search) -->
 
 | Phase | What happens |
 | :--- | :--- |
@@ -25,9 +23,7 @@ ingesting → analyzing → review → planning → plan_ready → merged
 | `error` | Ingest, analysis, or planning failed (`error` has the message; `progress` shows which step failed). |
 | `legacy` | Old design references analyzed straight into a chat proposal (can be upgraded via "Analyze as import"). |
 
-<!-- mdformat on -->
 
-<!-- enableFinding(LINE_OVER_80) -->
 
 ## Extraction kinds
 
@@ -53,7 +49,7 @@ All JSON. `{iid}` is the import id (stored in `design_references`).
 ### Source discovery (Figma & Stitch pickers)
 
 *   `GET /api/figma/projects?refresh=0|1` → `{projects: [FigmaSource]}`: lists
-    known Figma files from DCB imports/components plus saved user sources
+    known Figma files from A2UI Designer imports/components plus saved user sources
     (`users.figma_sources_json`: files, `/v1/projects/{id}/files` folders, and
     `/v1/teams/{id}/projects` teams).
 *   `POST /api/figma/projects {url}` → `{source, projects}` (201): registers a
@@ -66,7 +62,7 @@ All JSON. `{iid}` is the import id (stored in `design_references`).
     preselect: [node_id]}`: inspects top-level pages, frames, and sections (`GET
     /v1/files/{key}?depth=2`) so the designer can pick up to 20 frames.
 *   `GET /api/stitch/projects` → `{projects: [{id, title, url, screen_count,
-    design_system, updated_at, source: "stitch"|"dcb"}]}`: lists owned and
+    design_system, updated_at, source: "stitch"|"a2uid"}]}`: lists owned and
     shared Stitch projects via MCP `list_projects` merged with previously
     imported Stitch projects.
 *   `POST /api/stitch/screens {url}` → `{project, screens, design_systems,
@@ -131,7 +127,6 @@ All JSON. `{iid}` is the import id (stored in `design_references`).
 
 ## Shapes
 
-<!-- disableFinding(SNIPPET_EM_DASH) -->
 
 ```json
 // Import
@@ -244,7 +239,7 @@ All JSON. `{iid}` is the import id (stored in `design_references`).
 ## Where things land
 
 *   **tokens**: `settings.theme` via `settings.apply_theme_changes` (creates a
-    token revision `T<n>`). Before planning, DCB deterministically:
+    token revision `T<n>`). Before planning, A2UI Designer deterministically:
     *   fills color roles the material does not set with contrast-safe Material
         3 colors (`settings.expand_complementary_color_tokens` +
         `core/material_color_utilities.py`; lines marked `complementary`, left
@@ -265,8 +260,7 @@ All JSON. `{iid}` is the import id (stored in `design_references`).
         and constitution rules match) and `source.auto_activate=True`
         (automatically transitioning to `status="active"` once drafted without
         validation issues). How it is built follows the project's
-        `component_strategy` (`web_template`, `basic_composition`,
-        `native_targets`; see `docs/CONTRACT.md`): Figma nodes compile
+        `component_strategy` (`web_template`, `basic_composition`; see `docs/CONTRACT.md`): Figma nodes compile
         deterministically via `refs/figma_compiler.py`. With `auto`, the plan
         line carries `detail.basic_fit` (computed at plan time from the Figma
         node — found by `node_id` or by resolving the region box on the frame —
@@ -275,7 +269,7 @@ All JSON. `{iid}` is the import id (stored in `design_references`).
         (`{strategy, auto, threshold, fit, reason}`), shown as a "Basic fit NN%
         → Basic/Custom" chip with a per-line **build as** picker; picks are sent
         as `POST /api/imports/{iid}/merge/apply {strategies: {<line_id>:
-        "web_template"|"basic_composition"|"native_targets"}}` (body-wide
+        "web_template"|"basic_composition"|}}` (body-wide
         `component_strategy` still applies to every line) and pin the strategy
         on the drafted component.
     *   `map_basic`: reserved for bare atomic Basic primitives; enables the
@@ -284,7 +278,7 @@ All JSON. `{iid}` is the import id (stored in `design_references`).
         component.
 *   **template**: an active row in `templates` (Design system → Templates,
     injected into the A2UI generator prompt under `# Templates`, and exported in
-    `package.zip` under `templates/<slug>/`).
+    `package.zip` under `assets/`).
 *   **constitution**: a new revision with `source = "import"`.
 *   **data**: one sample per selected line (`source = "figma"|"stitch"`,
     `meta.import_id`, `meta.extraction_ids`), grouped into a project sample set

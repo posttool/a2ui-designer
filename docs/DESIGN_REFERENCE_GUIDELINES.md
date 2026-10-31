@@ -1,14 +1,14 @@
 # Preparing design references (Figma, Stitch and screenshots)
 
 This guide explains how to prepare Figma files and screenshots so the Design
-Constitution Builder (DCB) can turn them into useful constitution rules, theme
+Constitution Builder (A2UI Designer) can turn them into useful constitution rules, theme
 tokens, and catalog changes. Following it gives you sharper rules and more
 `exact` token values, with less cleanup afterwards.
 
 ## 1. Purpose
 
 When you bring a Figma file, Stitch project, or set of screenshots into
-**Imports** (`Imports → New import`), DCB analyzes the material into
+**Imports** (`Imports → New import`), A2UI Designer analyzes the material into
 region-cropped **extractions** (`component`, `template`, `token_reference`, or
 `ignore`), asks clarifying questions where intent is ambiguous, and prepares a
 selectable **merge plan** before changing your project. Your designs only teach
@@ -102,7 +102,7 @@ handle, not one perfect hero screen.
 
 ### Frames and sizes
 
-Draw each screen as a **top-level frame** at one of the DCB viewport sizes. The
+Draw each screen as a **top-level frame** at one of the A2UI Designer viewport sizes. The
 analyzer works out the viewport from the frame width and height.
 
 Viewport      | Frame size (px) | Notes
@@ -203,13 +203,13 @@ in-app frame checklist or link directly to selected frames (`?node-id=`).
 
 ### Personal access token
 
-DCB reads Figma through the REST API with your personal access token:
+A2UI Designer reads Figma through the REST API with your personal access token:
 
 1.  Figma → **Settings → Security → Personal access tokens → Generate new
     token**.
 2.  Give it **read-only** access to **File content**. No other scopes are
     needed.
-3.  Paste it into DCB (profile → Figma token). The token is stored **on the DCB
+3.  Paste it into A2UI Designer (profile → Figma token). The token is stored **on the A2UI Designer
     server**. It's never sent back to the browser or included in prompts. Clear
     it at any time by saving an empty value.
 
@@ -226,7 +226,7 @@ with 403, make a new one.
 | Every token is `approx` | Hard-coded hex and px   | Apply color and text     |
 :                         : values, no styles or    : styles (or variables)    :
 :                         : variables               : and run it again.        :
-| Wrong viewport detected | Frame width isn't a DCB | Resize the frame to the  |
+| Wrong viewport detected | Frame width isn't a A2UI Designer | Resize the frame to the  |
 : / `unknown`             : viewport size           : sizes above, or name it  :
 :                         :                         : `@ Phone` etc.           :
 | Text missing from       | Text was outlined or    | Keep live text layers.   |
@@ -300,7 +300,7 @@ covers what is different.
 ### API key
 
 Create a key in Stitch → **Settings → API keys**, then paste it on the Stitch
-tab of the import drawer (it is stored on the DCB server and never shown again).
+tab of the import drawer (it is stored on the A2UI Designer server and never shown again).
 A key that stops working shows up as "Stitch rejected the API key" — create a
 new one.
 
@@ -412,10 +412,10 @@ through four stages before changing your project:
     can answer questions, reclassify extractions, merge duplicates, or drag on
     any source image to add a custom region.
 3.  **Merge plan**: once all questions are answered, click **Prepare merge
-    plan**. DCB groups the planned changes by destination (**Tokens**,
+    plan**. A2UI Designer groups the planned changes by destination (**Tokens**,
     **Components**, **Templates**, **Data**, and **Constitution** diff) so you
     can toggle individual lines or edit the proposed constitution text before
-    clicking **Apply**. If your material only defines some colors, DCB fills the
+    clicking **Apply**. If your material only defines some colors, A2UI Designer fills the
     remaining color roles with matching, contrast-safe Material 3 colors (marked
     as derived); typefaces and weights from Figma or Stitch are filled in too.
 4.  **Record & Chat summary**: applying the plan updates your project, records
@@ -461,7 +461,7 @@ Copy this into your file description or ticket:
 - [ ] XS (1 item) and XL (20+ items) variants where density matters
 - [ ] At least one non-phone viewport (if the product needs it)
 - [ ] At least one Don't, with a reason
-- [ ] Frames at exact DCB sizes; one screen per frame
+- [ ] Frames at exact A2UI Designer sizes; one screen per frame
 - [ ] Names follow `Flow / Screen / State @ Viewport`
 - [ ] Auto layout on stacks, rows, and lists; live (not outlined) text
 - [ ] Colors, text, and radii bound to styles or variables, named by role

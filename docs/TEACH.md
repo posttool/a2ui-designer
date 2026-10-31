@@ -19,7 +19,7 @@ Studio editor or via chat, so rephrasings outside sessions are tracked too.
 Backend: `sim/teach.py` (`TeachManager`), `sim/teach_ledger.py`
 (`TeachLedger`), `core/data_links.py`. Prompts:
 `llm/prompts/teach_{distill,applications,pattern,voice_turn}.md`.
-UI: `web/views/{teach,teach_immersive,teachings}.js` (the workspace opens in immersive mode; `I` switches to Expert mode with the data / card / teaching panes; the choice is remembered in `localStorage dcb.teach.mode`),
+UI: `web/views/{teach,teach_immersive,teachings}.js` (the workspace opens in immersive mode; `I` switches to Expert mode with the data / card / teaching panes; the choice is remembered in `localStorage a2uid.teach.mode`),
 `web/components/{datatree,region_select,before_after,pattern_capture,voice}.js`.
 
 ## Objects

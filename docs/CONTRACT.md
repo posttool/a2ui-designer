@@ -1,11 +1,11 @@
-# Design Constitution Builder — internal contract
+# A2UI Designer — internal contract
 
 Shared contract between the backend (`core/ llm/ sim/ mcp/ refs/ render/ server/
 exports/`), the web app (`web/`), and the A2UI renderer (`web/renderer/`). Keep
 it current.
 
-Package root: `google3/experimental/users/dkaram/design_constitution_builder/`.
-Run with cwd = package root: `./run.sh` (port 8810). Stdlib-only Python 3.13,
+Package root: `/usr/local/google/home/dkaram/a2ui_designer/`.
+Run with cwd = package root: `./run.sh` (port 8100). Stdlib-only Python 3.13,
 vanilla JS ES modules, no build step, no external CDNs except Google Fonts.
 
 ## Ownership
@@ -15,7 +15,7 @@ vanilla JS ES modules, no build step, no external CDNs except Google Fonts.
 | Backend + API + jobs + | main agent     | `core/ llm/ sim/ mcp/ refs/      |
 : LLM + exports          :                : render/ server/ exports/ seeds/  :
 :                        :                : tests/*.py`                      :
-| A2UI v0.9 renderer +   | renderer agent | `web/renderer/*`,                |
+| A2UI v1.0 renderer +   | renderer agent | `web/renderer/*`,                |
 : render page            :                : `web/render.html`,               :
 :                        :                : `tools/render_spec_examples.py`, :
 :                        :                : `tests/renderer_check.mjs`       :
@@ -66,10 +66,10 @@ vanilla JS ES modules, no build step, no external CDNs except Google Fonts.
 
 ```js
 import {mountSurface, themeToCssVars} from '/renderer/a2ui.js';
-const surface = mountSurface(containerEl, messages /* A2UI v0.9 message array */, {
+const surface = mountSurface(containerEl, messages /* A2UI v1.0 message array */, {
   theme: {...projectSettings.theme},   // optional, see Theme tokens
   customComponents: {Name: def},       // optional project custom components
-  onAction: (payload) => {},           // v0.9 client_to_server action payload
+  onAction: (payload) => {},           // v1.0 client_to_server action payload
   interactive: true,                    // false = inert (screenshots still fine)
 });
 surface.update(moreMessages);           // apply further messages
@@ -174,7 +174,7 @@ targets, and `var(--a2ui-...)` references across all 4 renderers.
     facts that the theme does not define yet and synthesizes custom tokens for
     them.
 -   **Token revisions** (`token_revisions` table: `id, project_id, number,
-    theme_hash, theme, diff, summary, source, author_ldap, created_at`): every
+    theme_hash, theme, diff, summary, source, author, created_at`): every
     theme change through `PUT /settings`, chat, imports, or revert creates
     `T<n>`. `compute_theme_hash` (12-char sha256 of the normalized theme) and
     `compute_theme_diff` (`{changes:[{token, css_var, before, after, is_custom,
@@ -200,7 +200,7 @@ badge, available, detail, ...}]}`. New projects default to `viewports:
 Models: `GET /api/models` → `{text_models:[{id, label, note}],
 image_models:[{id, label, note}], defaults:{generator, judge, image, svg}}`.
 
-## HTTP API (JSON; cookie session `dcb_session`)
+## HTTP API (JSON; cookie session `a2uid_session`)
 
 Errors: `{"error": "message"}` with 4xx/5xx. All `/api/*` require sign-in except
 `/api/login`, `/api/me`, `/api/models`, `/api/gen/*`, `/api/render_data/*`,
@@ -235,16 +235,16 @@ Timestamps ISO-8601 UTC strings.
     (`core/dependencies.py`; defaults to the current revision; issues also
     appear in `GET /api/projects/{pid}/package`)
 
-`Project = {id, owner_ldap, name, description, archived, created_at, updated_at,
+`Project = {id, owner, name, description, archived, created_at, updated_at,
 current_revision:{id, number, summary, created_at}, settings,
 design_sources:[{kind:"figma"|"stitch", key, name, url, references,
 components}], stats:{revisions, runs, dos, donts, components, templates,
 last_run_at}}`
 
-`settings = {catalog:{base:"a2ui-basic-v0.9",
-catalog_id:"https://dcb.local/catalogs/...", disabled_components:[],
+`settings = {catalog:{base:"a2ui-basic-v1.0",
+catalog_id:"https://a2ui.local/catalogs/...", disabled_components:[],
 custom_components:{Name: Definition},
-component_strategy:"auto"|"web_template"|"basic_composition"|"native_targets",
+component_strategy:"auto"|"web_template"|"basic_composition"|,
 basic_fit_threshold:0.7}, theme:{...}, viewports:["phone"], renderers:["web"],
 generator:{model:"gemini-3.8-flash", temperature:0.7, max_repairs:1,
 include_guidelines:false, framing:"card"}, judge:{enabled:true,
@@ -306,7 +306,7 @@ can run over existing runs (`EffectManager.create_from_runs`, control/treatment
 
 `Revision = {id, project_id, number, text_md?, summary,
 source:"seed|manual|chat|import|revert|wizard|teach", parent_id, chat_message_id,
-author_ldap, created_at, ds_snapshot}` Revision 0 is created with the project
+author, created_at, ds_snapshot}` Revision 0 is created with the project
 (`source:"seed"`, may be empty). `ds_snapshot` records the design system the
 revision was written against (`token_revision_id`, `token_revision_number`,
 `theme_hash`, `catalog_hash`, `templates_hash`, enabled Basic / active custom
@@ -336,7 +336,7 @@ theme_changes:[...], custom_css:str, catalog_changes:{enable, disable,
 proposed_components}, imagery_changes:[...]}, out_of_scope:[{rule, why,
 suggested_home:"theme|catalog|component"}],
 proposal_status:"none|pending|accepted|discarded", accepted_revision_id,
-author_ldap, created_at}`
+author, created_at}`
 
 ### Suggestions & scope check
 
@@ -368,7 +368,7 @@ author_ldap, created_at}`
     existing or new category/subcategory.
 -   `POST /api/samples/resolve_images {sample_ids?}` → `{job}` swaps `/img/`
     placeholders for Wikimedia Commons photos (synthesis does this
-    automatically; `DCB_WEB_IMAGES=0` disables)
+    automatically; `A2UID_WEB_IMAGES=0` disables)
 -   `POST /api/samples/starter_library` → `{job}` (3 per genre, creates group
     sets + "All genres")
 -   `GET /api/jobs/{id}` → `{job}`; `job = {id, kind,
@@ -377,11 +377,11 @@ author_ldap, created_at}`
 -   `GET /api/sample_sets` → `{sets:[SampleSet]}`; `POST {name, description?,
     sample_ids}`; `PATCH /api/sample_sets/{id}`; `DELETE`
 
-`Sample = {id, owner_ldap, group, genre, title, intent, context:{surface,
+`Sample = {id, owner, group, genre, title, intent, context:{surface,
 user_state, role, locale, time_of_day, urgency}, payload,
 size_class:"xs|s|m|l|xl", state:"content|loading|empty|error", edge_cases:[str],
 tags:[str], source:"synth|manual|import|mcp", created_at}` `SampleSet = {id,
-name, description, owner_ldap, sample_ids:[], count, created_at}`
+name, description, owner, sample_ids:[], count, created_at}`
 
 ### Runs & outputs
 
@@ -515,9 +515,9 @@ escalation_note, addressed_revision_id, created_by, created_at, updated_at}`
 ### Admin (is_admin only)
 
 -   `GET /api/admin/overview` → `{users:[...], projects:[Project &
-    {owner_ldap}], totals}`
+    {owner}], totals}`
 -   `GET /api/admin/inbox` → `{guidelines:[Guideline & {project_name,
-    owner_ldap}]}` (escalated or fixable=no, not packaged)
+    owner}]}` (escalated or fixable=no, not packaged)
 -   `POST /api/admin/bundles {kind:"guidelines|benchmark", guideline_ids?:[],
     project_ids?:[]}` → `{bundle}`
 -   `GET /api/admin/bundles` → `{bundles:[{id, kind, created_by, created_at,
@@ -527,8 +527,8 @@ escalation_note, addressed_revision_id, created_by, created_at, updated_at}`
 ### Connected apps (MCP data sources; `mcp/`, `sim/connected_apps.py`)
 
 Modeled on Gemini's Connected Apps platform: a user registers a server-side MCP
-server (Streamable HTTP), DCB snapshots its tools, the user picks a tool, fills
-its arguments in an A2UI form generated from the tool's `inputSchema`, DCB calls
+server (Streamable HTTP), A2UI Designer snapshots its tools, the user picks a tool, fills
+its arguments in an A2UI form generated from the tool's `inputSchema`, A2UI Designer calls
 the tool, and the result is imported as a Sample. Apps are per user and shared
 across that user's projects. A bundled demo app (`kind:"demo"`, served
 in-process at `POST /mcp/demo`) offers pharmacy, calendar and shop tools with
@@ -599,7 +599,7 @@ planning → plan_ready → merged` with live `progress` tracking (`steps`, `don
         {token}` (empty string clears the user token).
     -   `GET /api/figma/projects?refresh=0|1` → `{projects:[{key, name,
         kind:"file"|"project"|"team", url, last_modified, thumbnail_url,
-        files?:[...]}]}` (aggregates files from DCB imports/components plus
+        files?:[...]}]}` (aggregates files from A2UI Designer imports/components plus
         per-user `users.figma_sources_json`).
     -   `POST /api/figma/projects {url}` → `{source, projects}` (201); `DELETE
         /api/figma/projects/{key}` → `{projects}`.
@@ -613,7 +613,7 @@ planning → plan_ready → merged` with live `progress` tracking (`steps`, `don
         {key}` (empty string clears). Server fallback: `STITCH_API_KEY` or
         `~/.stitch_api_key`.
     -   `GET /api/stitch/projects` → `{projects:[{id, title, url, screen_count,
-        design_system, updated_at, source:"stitch"|"dcb"}]}` (calls MCP
+        design_system, updated_at, source:"stitch"|"a2uid"}]}` (calls MCP
         `list_projects` for owned + shared projects and merges with previously
         imported Stitch projects).
     -   `POST /api/stitch/screens {url}` → `{project:{id, title, url},
@@ -647,7 +647,7 @@ planning → plan_ready → merged` with live `progress` tracking (`steps`, `don
         the project's default run data source (`settings.data_source`).
 -   **Templates** (`templates` table; Design system → Templates, injected into
     `GenerationContext` under `# Templates` and exported under
-    `templates/<slug>/` in `package.zip`):
+    `assets/` in `package.zip`):
     -   `GET /api/projects/{pid}/templates` → `{templates:[Template]}`
     -   `GET /api/templates/{tid}` → `{template}`; `PATCH {name?, description?,
         when_to_use?, structure_md?, components?, status?:"active"|"archived"}`
@@ -664,7 +664,7 @@ Imagery & Icons), `/p/{pid}/design/components/{cid}`, and the top-level
 **Package** page `/p/{pid}/package` (`web/views/package.js`; the old
 `?tab=package` redirects there). Theme storage is in `settings.theme`;
 `settings.catalog` keeps `base`, `disabled_components`, `component_strategy`,
-and `catalog_id` (default `https://dcb.local/catalogs/<project-slug>`). Custom
+and `catalog_id` (default `https://a2ui.local/catalogs/<project-slug>`). Custom
 components live in the `custom_components` table; runs snapshot active ones into
 `run.config.catalog.custom_components = {Name: Definition}`. Components queued
 from an import merge (`source.kind:"import"` or `"figma"` with
@@ -684,7 +684,7 @@ component via `definition.strategy`):
     (`expand_composite_components`) lowers each instance into Basic components
     (`Card`, `Row`, `Column`, `Text`, `Image`, `Icon`, `Button`, `Divider`, …),
     so it renders on all 4 renderers; it can also be saved as a template.
--   `native_targets`: `definition.targets = {android_compose,
+-   ``: `definition.targets = {android_compose,
     android_remote_compose, ios_swiftui}` generated code for the package, plus a
     `composition` used for the simulator previews.
 -   `auto` (default): decided **per component** from its *Basic fit* and the
@@ -817,13 +817,13 @@ call it for instant errors).
 -   `POST /api/components/{cid}/apply_tokens` → `{component, applied:[…]}`
 -   `POST /api/components/{cid}/targets {definition?, targets?:[id], strategy?}`
     → `{component}` (generates `definition.targets` Compose / RemoteCompose /
-    SwiftUI code; strategy defaults to `native_targets`)
+    SwiftUI code; strategy defaults to ``)
 -   `POST /api/components/{cid}/to_template` → `{template, component}` (201;
     saves the component's Basic `composition` as a reusable template; 400 when
     it has none)
 -   `GET /api/render_component/{cid}?token=T&viewport=` → `{messages, theme,
     viewport, framing:"page", custom_components}`
--   `GET /api/projects/{pid}/catalog.json` → the emitted A2UI v0.9 catalog
+-   `GET /api/projects/{pid}/catalog.json` → the emitted A2UI v1.0 catalog
     (`$id == catalogId`)
 -   `GET /api/projects/{pid}/package` → `{catalog_id, counts:{basic_enabled,
     basic_disabled, custom_active, drafts}, issues:[{level:"error"|"warn",
@@ -834,14 +834,7 @@ call it for instant errors).
     Package page browser; relative links in `index.html` work). Both read
     `exports/package.py` `package_files()`, the same source `package.zip` zips.
 -   `GET /api/export/projects/{pid}/package.zip` → design package (`README.md`,
-    `constitution.md`, `catalog/{catalog.json, rules.txt, examples/<Name>.json,
-    components/<Name>/{definition.json, template.html, styles.css,
-    composition.json?, compose/<Name>.kt, remote_compose/<Name>Remote.kt,
-    swiftui/<Name>.swift, preview.png?, reference.png?},
-    components/CatalogRegistry.kt, components/CatalogRegistry.swift}`,
-    `templates/{index.json, <slug>/template.json, <slug>/reference.png?}`,
-    `imagery/{styles.json, refs/}`, `tokens/{theme.json, tokens.css,
-    design-tokens.json}`, `index.html`, `LICENSE-A2UI.txt`). `tokens.css`
+    `constitution.md`, `prompt/`, `catalog/{catalog,project_catalog,components}.json`, `renderer/`, `demo.html`, `assets/`, `LICENSE-A2UI.txt`). `tokens.css`
     `@import`s any non-default Google Fonts and uses category-aware font
     fallbacks.
 
@@ -857,30 +850,6 @@ call it for instant errors).
 -   `POST /api/projects/{pid}/imagery/{sid}/preview {prompt?}` → `{style,
     preview_url}`
 -   `GET /api/projects/{pid}/imagery/{sid}/refs/{idx}` → reference image file
-
-**Bug reports** (`bug_reports` table, `core/bugs.py`,
-`web/components/bug_report.js`, `web/components/diagnostics.js`):
-
--   `GET /api/bugs/config` → `{config: {component_id, component_path,
-    parent_component_id, component_url, child_component_create_url,
-    cli_available, snapshot_available, server_started_at, priorities, types}}`
--   `POST /api/bugs/context {project_id?, run_id?, output_id?, import_id?,
-    component_id?, session_id?, selected_component?}` → `{context:
-    {collected_at, reporter, server, project, constitution, run, output,
-    import_ref, custom_component, teach_session}}` (all secrets redacted)
--   `POST /api/bugs/snapshot {path, width?, height?}` → `{snapshot: {data_url,
-    width, height, size_bytes, filename}}`
--   `POST /api/bugs {title, description_md, priority?, type?, cc?,
-    component_id?, attachments?: [...], scope?, context_summary?, sync?: bool}`
-    → `{job}` (202; polls `/api/jobs/{jid}` → `result: {bug}`) or `{bug}`
-    (201/200 when `sync: true`)
--   `GET /api/bugs?all=0|1` → `{bugs: [BugReport]}` (`?all=1` requires admin)
--   `GET /api/bugs/{bid}` → `{bug}`
--   `GET /api/bugs/{bid}/bundle.zip` → saved report `description.md`,
-    `metadata.json`, and `attachments/*` as a `.zip`
--   `POST /api/bugs/bundle` → builds and downloads a context `.zip`
-    (`README.md`, `description.md`, `context.json`, `attachments/*`) directly
-    from the form
 
 ### Files
 
