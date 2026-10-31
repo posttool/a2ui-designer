@@ -678,6 +678,13 @@ class ComponentManager:
             "component_id": r["id"],
             "message": f"Example surface: {e['message']} ({e['path']})",
         })
+    if "posttool.github.io/a2ui-designer/catalogs/projects/" in cat.catalog_id:
+      issues.append({
+          "level": "warn",
+          "component": "catalogId",
+          "component_id": "catalogId",
+          "message": f"Using default catalog id `{cat.catalog_id}`. Set a real, stable catalog ID for your project before shipping.",
+      })
     dep_info = deps_mod.analyze_project_dependencies(
         self.store, self.svc, p, self.svc.current_revision(pid)
     )
@@ -702,8 +709,7 @@ class ComponentManager:
         },
         "issues": issues,
         "files": package_mod.file_list(
-            [r["name"] for r in active],
-            active,
+            self.store, self.svc, p
         ),
     }
 

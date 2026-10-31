@@ -325,7 +325,7 @@ class ComponentsHttpTest(unittest.TestCase):
     dtcg = json.loads(z.read(root + "tokens/design-tokens.json"))
     self.assertEqual(dtcg["color"]["primary"]["$type"], "color")
     self.assertIn(
-        "DESIGN-SYSTEM COMPONENTS", z.read(root + "catalog/rules.txt").decode()
+        "design-system components", z.read(root + "prompt/catalog_prompt.txt").decode()
     )
     # Package page: the file listing matches the zip, and each file is
     # served individually (nested paths included).

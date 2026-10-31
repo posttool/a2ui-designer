@@ -59,6 +59,17 @@ export async function render(root, params, ctx) {
   const viewerEl = h('section.pkg-viewer#package-viewer');
   const titleCount = h('span.count');
 
+  const useThisPkgEl = h(
+      'div.pkg-use',
+      h('h2', 'Use this package'),
+      h('p', '1. Use ', h('code', 'prompt/system_prompt.md'), ' as the generator system prompt.'),
+      h('p', '2. Serve this folder and import the renderer in your HTML:'),
+      h('pre', `import {loadPackage} from './renderer/index.js';
+const pkg = await loadPackage('./');
+const surface = pkg.mount(document.getElementById('surface'), messages);
+await surface.settled();`)
+  );
+
   root.appendChild(h(
       'div.page.page-package',
       h('div.page-head.page-head-tight',
@@ -69,7 +80,7 @@ export async function render(root, params, ctx) {
             onclick: () => download(`/api/export/projects/${pid}/package.zip`),
           },
             icon('download'), 'Download package .zip'))),
-      summaryEl, h('div.pkg-browser', treeEl, viewerEl)));
+      summaryEl, useThisPkgEl, h('div.pkg-browser', treeEl, viewerEl)));
 
   // ------------------------------------------------------------ summary
   async function loadSummary() {
@@ -85,7 +96,7 @@ export async function render(root, params, ctx) {
     const idIn = h('input.input.mono#catalog-id-input', {
       value: (settings && settings.catalog && settings.catalog.catalog_id) ||
           catalogId,
-      placeholder: catalogId || 'https://dcb.local/catalogs/<project>',
+      placeholder: catalogId || 'https://posttool.github.io/a2ui-designer/catalogs/projects/<project>/catalog.json',
       spellcheck: 'false',
     });
     const idSave =
@@ -352,14 +363,14 @@ export async function render(root, params, ctx) {
       } catch (_) { /* fall through to raw */
       }
     }
-    if (path === 'index.html') {
+    if (path === 'index.html' || path === 'demo.html') {
       modes.push({
         value: 'preview',
         label: 'Preview',
         render: () => h('iframe.pkg-preview', {
           src,
-          title: 'Package gallery preview',
-          sandbox: 'allow-same-origin',
+          title: `Package ${path} preview`,
+          sandbox: 'allow-same-origin allow-scripts',
         }),
       });
     }

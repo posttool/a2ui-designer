@@ -20,13 +20,15 @@ def _slug(text: str, n: int = 48) -> str:
 
 
 def constitution_md(
-    store: Store, project: dict[str, Any], rev: dict[str, Any]
+    store: Store, project: dict[str, Any], rev: dict[str, Any], header: bool = True
 ) -> str:
-  head = (
-      f"<!-- Design constitution: {project['name']} — revision "
-      f"{rev['number']} ({rev['created_at']}) by {rev['author_ldap']}. "
-      f"Summary: {rev['summary']} -->\n\n"
-  )
+  head = ""
+  if header:
+    head = (
+        f"<!-- Design constitution: {project['name']} — revision "
+        f"{rev['number']} ({rev['created_at']}) by {rev['author_ldap']}. "
+        f"Summary: {rev['summary']} -->\n\n"
+    )
   return head + (rev["text_md"] or "")
 
 
