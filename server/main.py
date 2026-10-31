@@ -1,4 +1,4 @@
-"""Design Constitution Builder server entrypoint.
+"""A2UI Designer server entrypoint.
 
 From the repository root:
 python3 -B -m server.main --port 8100 --host 0.0.0.0
@@ -198,7 +198,7 @@ def main(argv=None) -> None:
     if not args.render_base_url:
       app.runs.base_url = f"https://127.0.0.1:{args.port}"
   print(
-      f"Design Constitution Builder on {scheme}://{args.host}:{args.port}/ "
+      f"A2UI Designer on {scheme}://{args.host}:{args.port}/ "
       f"(data: {args.data_dir})",
       flush=True,
   )

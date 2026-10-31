@@ -23,7 +23,7 @@ const BUSY = new Set(
 // per session view and never sticky across sessions/projects: it comes from
 // `?mode=immersive|expert` (kept in the URL when toggled), and a session with
 // no observations yet always opens immersive.
-const LEGACY_MODE_KEY = 'dcb.teach.mode';
+const LEGACY_MODE_KEY = 'a2uid.teach.mode';
 function initialMode(state) {
   try {
     localStorage.removeItem(LEGACY_MODE_KEY);  // old sticky preference

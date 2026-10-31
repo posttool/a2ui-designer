@@ -65,7 +65,7 @@ export async function render(root, params, {url}) {
   root.appendChild(h(
       'div.login',
       h('div.login-card', h('div.login-mark', '\u00a7'),
-        h('h1.login-title', 'Design Constitution Builder'),
+        h('h1.login-title', 'A2UI Designer'),
         h('p.login-lede',
           'Write the decisions a UI generator should make in context \u2014 then test them against hundreds of real-feeling situations, review what comes back, and revise.'),
         form,

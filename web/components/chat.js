@@ -17,7 +17,7 @@ const HOME_LABEL = {
 // Views where the revision chat is relevant. Elsewhere the panel is hidden and
 // opening chat routes to the constitution.
 export const CHAT_VIEWS = new Set(['constitution', 'review', 'design']);
-const prefKey = (view) => `dcb.chatOpen.${view}`;
+const prefKey = (view) => `a2uid.chatOpen.${view}`;
 
 /**
  * Review ⇄ Chat switch shown at the top of the review panel and the chat panel

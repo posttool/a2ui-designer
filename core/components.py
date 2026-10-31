@@ -623,7 +623,7 @@ class ComponentManager:
         cat.catalog_id,
         title=f"{p['name']} — A2UI catalog",
         description=(p.get("description") or "")
-        or "Design-system catalog exported by Design Constitution Builder.",
+        or "Design-system catalog exported by A2UI Designer.",
     )
 
   def package_check(self, user, pid: str) -> dict[str, Any]:

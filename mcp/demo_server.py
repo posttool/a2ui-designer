@@ -550,7 +550,7 @@ def handle_message(msg: dict[str, Any]) -> dict[str, Any] | None:
             "capabilities": {"tools": {"listChanged": False}, "resources": {}},
             "serverInfo": SERVER_INFO,
             "instructions": (
-                "Demo connected app for the Design Constitution Builder."
+                "Demo connected app for the A2UI Designer."
             ),
         },
     )

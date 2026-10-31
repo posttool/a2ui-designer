@@ -54,7 +54,7 @@ export async function render(root, params, ctx) {
   let pairOf = new Map();  // output id → pair_id (from the list endpoint)
   let idx = 0;
   let cur = null;  // {output, sample}
-  let view = localStorage.getItem('dcb.reviewView') || 'screenshot';
+  let view = localStorage.getItem('a2uid.reviewView') || 'screenshot';
   // The web renderer is the only renderer.
   const RIDS = ['web'];
   const activeRenderer = 'web';
@@ -392,7 +392,7 @@ export async function render(root, params, ctx) {
 
   function setView(v) {
     view = v;
-    localStorage.setItem('dcb.reviewView', v);
+    localStorage.setItem('a2uid.reviewView', v);
     viewSeg.set(v);
     drawRendererBar();
     drawStage();

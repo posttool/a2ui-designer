@@ -1,5 +1,5 @@
 // Lightweight, zero-dependency HTML & CSS formatter and syntax highlighter
-// for Design Constitution Builder's warm editorial palette.
+// for A2UI Designer's warm editorial palette.
 
 const VOID_TAGS = new Set(['img', 'hr', 'br']);
 const INLINE_PHRASE_TAGS = new Set(['strong', 'em', 'small']);

@@ -149,7 +149,7 @@ class CatalogTest(unittest.TestCase):
 
   def cat(self, **cfg):
     return catalog_mod.build_catalog(
-        dict({"catalog_id": "https://dcb.local/catalogs/shop"}, **cfg),
+        dict({"catalog_id": "https://posttool.github.io/a2ui-designer/catalogs/projects/shop"}, **cfg),
         {"ProductTile": TILE},
     )
 
@@ -184,7 +184,7 @@ class CatalogTest(unittest.TestCase):
     cat = self.cat(disabled_components=["Slider"])
     cj = catalog_mod.to_a2ui_catalog_json(cat, cat.catalog_id, title="Shop")
     self.assertEqual(cj["$id"], cj["catalogId"])
-    self.assertEqual(cj["catalogId"], "https://dcb.local/catalogs/shop")
+    self.assertEqual(cj["catalogId"], "https://posttool.github.io/a2ui-designer/catalogs/projects/shop")
     self.assertNotIn("Slider", cj["components"])
     self.assertIn("Text", cj["components"])
     self.assertEqual(cj["protocolVersion"], "1.0")
@@ -210,7 +210,7 @@ class CatalogTest(unittest.TestCase):
     )
     self.assertEqual(
         msgs[1]["updateComponents"]["components"][0]["catalogId"],
-        "https://dcb.local/catalogs/shop",
+        "https://posttool.github.io/a2ui-designer/catalogs/projects/shop",
     )
     res = validator.validate(msgs, cat)
     self.assertTrue(res.ok, res.errors)

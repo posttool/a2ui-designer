@@ -19,16 +19,16 @@ class StitchClientTest(unittest.TestCase):
   @classmethod
   def setUpClass(cls):
     cls.fake = FakeStitch().start()
-    cls._env = os.environ.get("DCB_STITCH_MCP_URL")
-    os.environ["DCB_STITCH_MCP_URL"] = cls.fake.mcp_url
+    cls._env = os.environ.get("A2UID_STITCH_MCP_URL")
+    os.environ["A2UID_STITCH_MCP_URL"] = cls.fake.mcp_url
 
   @classmethod
   def tearDownClass(cls):
     cls.fake.stop()
     if cls._env is None:
-      os.environ.pop("DCB_STITCH_MCP_URL", None)
+      os.environ.pop("A2UID_STITCH_MCP_URL", None)
     else:
-      os.environ["DCB_STITCH_MCP_URL"] = cls._env
+      os.environ["A2UID_STITCH_MCP_URL"] = cls._env
 
   def test_parse_url(self):
     self.assertEqual(

@@ -60,7 +60,7 @@ class StitchDownloadBlocked(StitchError):
 
 
 def mcp_url() -> str:
-  return os.environ.get("DCB_STITCH_MCP_URL") or STITCH_MCP
+  return os.environ.get("A2UID_STITCH_MCP_URL") or STITCH_MCP
 
 
 def server_key() -> str | None:

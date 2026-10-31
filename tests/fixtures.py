@@ -15,7 +15,7 @@ import urllib.request
 import warnings
 
 # Tests never reach Wikimedia Commons for sample photos.
-os.environ["DCB_WEB_IMAGES"] = "0"
+os.environ["A2UID_WEB_IMAGES"] = "0"
 # Teaching baselines run through the (scripted) live pipeline in tests; the
 # shipped starter-example cache is exercised by tests/starter_cache_test.py.
 os.environ.setdefault("A2UID_STARTER_CACHE", "0")

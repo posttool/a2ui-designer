@@ -17,9 +17,9 @@ import urllib.error
 import urllib.request
 
 PROTOCOL_VERSION = "2025-06-18"
-CLIENT_INFO = {"name": "design-constitution-builder", "version": "0.1"}
+CLIENT_INFO = {"name": "a2ui-designer", "version": "0.1"}
 # Cloudflare-fronted servers reject Python's default "Python-urllib" agent (403).
-USER_AGENT = "design-constitution-builder/0.1 (MCP client)"
+USER_AGENT = "a2ui-designer/0.1 (MCP client)"
 MAX_RESPONSE_BYTES = 8 * 1024 * 1024
 
 

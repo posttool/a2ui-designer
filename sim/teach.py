@@ -805,7 +805,7 @@ class TeachManager:
           self.llm, brief, count, taxonomy.groups_api(self.store)
       )
       for it in items[:count]:
-        if os.environ.get("DCB_WEB_IMAGES") != "0":
+        if os.environ.get("A2UID_WEB_IMAGES") != "0":
           it = self.runs._with_web_images(it)  # pylint: disable=protected-access
         ids.append(self.svc.create_sample(user, it, source="synth")["id"])
     if not ids:

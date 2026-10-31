@@ -40,7 +40,7 @@ export async function render(root, params, ctx) {
   let kindFilter = null;
   // Difference outlines over the screenshots; persisted across visits. When
   // off, hovering a change still outlines just that change.
-  let outlines = localStorage.getItem('dcb.effectOutlines') !== '0';
+  let outlines = localStorage.getItem('a2uid.effectOutlines') !== '0';
 
   const head = h('div');
   const summaryEl = h('div');
@@ -311,7 +311,7 @@ export async function render(root, params, ctx) {
             label: 'Outlines',
             onChange: (on) => {
               outlines = on;
-              localStorage.setItem('dcb.effectOutlines', on ? '1' : '0');
+              localStorage.setItem('a2uid.effectOutlines', on ? '1' : '0');
               page.classList.toggle('outlines-off', !on);
             },
           }),

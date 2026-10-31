@@ -519,8 +519,8 @@ class ConnectedAppsHttpTest(unittest.TestCase):
     from fake_stitch import PROJECT_ID, FakeStitch  # pylint: disable=g-import-not-at-top
 
     fake = FakeStitch().start()
-    old = os.environ.get("DCB_STITCH_MCP_URL")
-    os.environ["DCB_STITCH_MCP_URL"] = fake.mcp_url
+    old = os.environ.get("A2UID_STITCH_MCP_URL")
+    os.environ["A2UID_STITCH_MCP_URL"] = fake.mcp_url
     try:
       url = f"https://stitch.withgoogle.com/projects/{PROJECT_ID}"
       st, body = self.s.call("POST", "/api/stitch/screens", {"url": url})
@@ -626,9 +626,9 @@ class ConnectedAppsHttpTest(unittest.TestCase):
     finally:
       fake.stop()
       if old is None:
-        os.environ.pop("DCB_STITCH_MCP_URL", None)
+        os.environ.pop("A2UID_STITCH_MCP_URL", None)
       else:
-        os.environ["DCB_STITCH_MCP_URL"] = old
+        os.environ["A2UID_STITCH_MCP_URL"] = old
 
   def test_docs_served(self):
     st, raw = self.s.call(

@@ -6,7 +6,7 @@ service can produce: raw bytes, a JSON `DownloadFileResponse` wrapper
 (`dataString`), and a redirect to a Google sign-in page.
 
   python3 -B tests/fake_stitch.py --port 8835        # any API key accepted
-  DCB_STITCH_MCP_URL=http://127.0.0.1:8835/mcp ./run.sh --port 8823 ...
+  A2UID_STITCH_MCP_URL=http://127.0.0.1:8835/mcp ./run.sh --port 8823 ...
 """
 
 from __future__ import annotations

@@ -389,7 +389,7 @@ export async function render(root, params, ctx) {
     let formRes = null;
     let surface = null;
 
-    const lastPid = localStorage.getItem('dcb.apps.project') || '';
+    const lastPid = localStorage.getItem('a2uid.apps.project') || '';
     const projSel = h(
         'select.input.input-sm#form-project',
         h('option', {value: ''}, 'No project (Basic catalog)'),
@@ -406,12 +406,12 @@ export async function render(root, params, ctx) {
                             v.width ? ` ${v.width}\u00d7${v.height}` : ''}`)));
     const simple = h('input#form-simple', {
       type: 'checkbox',
-      checked: localStorage.getItem('dcb.apps.simpleForm') === '1'
+      checked: localStorage.getItem('a2uid.apps.simpleForm') === '1'
     });
     simple.addEventListener(
         'change',
         () => localStorage.setItem(
-            'dcb.apps.simpleForm', simple.checked ? '1' : '0'));
+            'a2uid.apps.simpleForm', simple.checked ? '1' : '0'));
     const genBtn =
         h('button.btn.btn-primary.btn-sm#form-generate',
           {type: 'button', onclick: () => generate()}, icon('auto_awesome'),
@@ -469,7 +469,7 @@ export async function render(root, params, ctx) {
     }
 
     async function generate() {
-      localStorage.setItem('dcb.apps.project', projSel.value);
+      localStorage.setItem('a2uid.apps.project', projSel.value);
       genBtn.disabled = true;
       genBtn.classList.add('busy');
       mount(formMeta);

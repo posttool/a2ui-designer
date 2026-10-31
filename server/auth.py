@@ -15,7 +15,7 @@ import hashlib
 import hmac
 import time
 
-COOKIE = "dcb_session"
+COOKIE = "a2uid_session"
 TTL = 30 * 24 * 3600
 LOCAL_USER = "local"
 DEFAULT_PASSWORD_USER = "user"

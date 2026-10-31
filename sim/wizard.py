@@ -240,7 +240,7 @@ def pick_wizard_samples(
         )
         new_ids: list[str] = []
         for it in synth_items[:count]:
-          if runs is not None and os.environ.get("DCB_WEB_IMAGES") != "0":
+          if runs is not None and os.environ.get("A2UID_WEB_IMAGES") != "0":
             it = runs._with_web_images(it)  # pylint: disable=protected-access
           created = svc.create_sample(user, it, source="synth")
           new_ids.append(created["id"])

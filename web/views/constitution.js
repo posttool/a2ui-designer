@@ -20,7 +20,7 @@ export async function render(root, params, ctx) {
   const pid = params.pid;
   let project = ctx.project;
   let baseRev = null;  // {id, number, text_md, summary}
-  let mode = localStorage.getItem('dcb.editorMode') || 'split';
+  let mode = localStorage.getItem('a2uid.editorMode') || 'split';
   let pendingEdit = null;
   const disposers = [];
 
@@ -65,7 +65,7 @@ export async function render(root, params, ctx) {
       ],
       mode, (v) => {
         mode = v;
-        localStorage.setItem('dcb.editorMode', v);
+        localStorage.setItem('a2uid.editorMode', v);
         layout();
       });
   // Effect compares with/without the saved constitution: pointless if empty.
@@ -142,7 +142,7 @@ export async function render(root, params, ctx) {
   }));
 
   function draftKey() {
-    return `dcb.draft.${pid}`;
+    return `a2uid.draft.${pid}`;
   }
   function saveDraft() {
     if (isDirty() && !pendingEdit)

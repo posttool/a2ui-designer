@@ -275,7 +275,7 @@ export function mountThemeEditor(container, opts = {}) {
   const previewNote = h('p.help');
   let surface = null;
   let renderer = null;
-  let themeEditMode = localStorage.getItem('dcb.themeEditMode') || 'visual';
+  let themeEditMode = localStorage.getItem('a2uid.themeEditMode') || 'visual';
 
   const fieldElementsByKey = new Map();
   const customTokensListEl = h('div.custom-tokens-list#custom-tokens-list');
@@ -564,7 +564,7 @@ export function mountThemeEditor(container, opts = {}) {
 
   function setThemeEditMode(m) {
     themeEditMode = m;
-    localStorage.setItem('dcb.themeEditMode', m);
+    localStorage.setItem('a2uid.themeEditMode', m);
     visualTokensPane.hidden = m !== 'visual';
     cssEditorPane.hidden = m !== 'css';
     if (m === 'css') syncCssEditorFromTheme();

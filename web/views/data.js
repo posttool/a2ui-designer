@@ -42,7 +42,7 @@ export async function render(root, params, ctx) {
     }
     let last = pid || store.lastProjectId;
     try {
-      last = last || localStorage.getItem('dcb.lastProject');
+      last = last || localStorage.getItem('a2uid.lastProject');
     } catch {
     }
     const sel =

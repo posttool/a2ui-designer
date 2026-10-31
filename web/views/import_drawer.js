@@ -48,7 +48,7 @@ export function openImportDrawer(
     pid, {tab: initialTab, origin = 'imports'} = {}) {
   let tab = TABS.includes(initialTab) ?
       initialTab :
-      (localStorage.getItem('dcb.refs.tab') || 'figma');
+      (localStorage.getItem('a2uid.refs.tab') || 'figma');
   if (!TABS.includes(tab)) tab = 'figma';
   const images =
       [];  // [{data_url, name, caption, viewport_hint, width, height}]
@@ -964,7 +964,7 @@ export function openImportDrawer(
       ],
       tab, (v) => {
         tab = v;
-        localStorage.setItem('dcb.refs.tab', v);
+        localStorage.setItem('a2uid.refs.tab', v);
         syncTab();
       }, {id: 'ref-tabs'});
   function syncTab() {

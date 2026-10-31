@@ -202,7 +202,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
   app: Any = None  # set by make_server
 
   def log_message(self, fmt: str, *args: Any) -> None:  # quieter logs
-    if os.environ.get("DCB_ACCESS_LOG"):
+    if os.environ.get("A2UID_ACCESS_LOG"):
       super().log_message(fmt, *args)
 
   def _dispatch(self, method: str) -> None:

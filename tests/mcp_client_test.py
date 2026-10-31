@@ -99,7 +99,7 @@ class McpClientTest(unittest.TestCase):
     _Handler.seen_headers.clear()
     McpClient(self.base + "/mcp").list_tools()
     ua = _Handler.seen_headers[-1].get("User-Agent", "")
-    self.assertTrue(ua.startswith("design-constitution-builder/"), ua)
+    self.assertTrue(ua.startswith("a2ui-designer/"), ua)
 
   def test_rejects_non_http_urls(self):
     with self.assertRaises(McpError):

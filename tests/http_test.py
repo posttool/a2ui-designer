@@ -84,7 +84,7 @@ class HttpTest(unittest.TestCase):
     valid_tok = auth_mod.sign(self.s.app.secret, "carol")
     req = urllib.request.Request(
         self.s.url("/api/me"),
-        headers={"Cookie": f"dcb_session=stale.0.bad; dcb_session={valid_tok}"},
+        headers={"Cookie": f"a2uid_session=stale.0.bad; a2uid_session={valid_tok}"},
     )
     with urllib.request.urlopen(req, timeout=5) as resp:
       data = json.loads(resp.read().decode("utf-8"))

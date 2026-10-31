@@ -8,7 +8,7 @@ cached in the `image_cache` table; credits (title, author, license, page) are
 returned so callers can store them next to the sample. Any failure keeps the
 local placeholder, so synthesis never depends on the network.
 
-Set `DCB_WEB_IMAGES=0` to disable lookups (tests do).
+Set `A2UID_WEB_IMAGES=0` to disable lookups (tests do).
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ _TAG_RE = re.compile(r"<[^>]+>")
 
 
 def enabled() -> bool:
-  return os.environ.get("DCB_WEB_IMAGES", "1") != "0"
+  return os.environ.get("A2UID_WEB_IMAGES", "1") != "0"
 
 
 # Wikimedia rate-limits anonymous API clients per IP (HTTP 429 with

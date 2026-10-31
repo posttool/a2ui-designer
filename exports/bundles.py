@@ -184,7 +184,7 @@ def guidelines_zip(
 
 BENCHMARK_README = """# Design Constitution benchmark bundle
 
-Exported from the Design Constitution Builder. Each line of `cases.jsonl` is
+Exported from the A2UI Designer. Each line of `cases.jsonl` is
 one judged case: the synthetic input sample, the constitution revision that
 guided generation, the generated A2UI v1.0 output, its screenshot, the human
 verdict and (when present) the Do/Don't the designer catalogued.

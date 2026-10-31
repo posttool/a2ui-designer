@@ -136,7 +136,7 @@ async function ensureProject(pid) {
 function rememberProject(pid) {
   store.lastProjectId = pid;
   try {
-    localStorage.setItem('dcb.lastProject', pid);
+    localStorage.setItem('a2uid.lastProject', pid);
   } catch {
   }
 }
@@ -214,9 +214,9 @@ function renderTopbar(route) {
   mount(
       topbar,
       h('a.brand',
-        {href: '/', 'aria-label': 'Design Constitution Builder home'},
+        {href: '/', 'aria-label': 'A2UI Designer home'},
         h('span.brand-mark', '\u00a7'),
-        h('span.brand-text', 'Constitution Builder')),
+        h('span.brand-text', 'A2UI Designer')),
       h('span.topbar-sep', '/'), switcher, h('div.topbar-spacer'),
       h('nav.topnav',
         h('a.topnav-link#nav-projects',
