@@ -1,7 +1,7 @@
 // Shared theme-token metadata and editor controls, used by Settings (full
 // theme editor) and the Review live inspector (tokens related to the selected
 // component).
-import {coerceBoxPx, DEFAULT_THEME, parseBoxPx} from '../renderer/a2ui.js';
+import {coerceBoxPx, DEFAULT_THEME, parseBoxPx} from '../renderer/host.js';
 
 import {h} from './dom.js';
 
@@ -280,7 +280,7 @@ const HEADING_TEXT = [
 
 /**
  * Theme tokens each basic-catalog component reads in the web renderer
- * (mirrors the var(--a2ui-*) usage in renderer/a2ui.css). Functions receive
+ * (mirrors the token -> CSS variable mapping in renderer/tokens.js). Functions receive
  * the component JSON so variants can narrow the list.
  */
 const COMPONENT_TOKENS = {

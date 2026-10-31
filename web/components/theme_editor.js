@@ -1,7 +1,7 @@
 // Theme & design-token editor (visual token groups, custom tokens, presets,
 // two-way CSS editor, live preview, "Edit tokens via chat"). Used by the
 // Design system › Tokens tab. Storage is `settings.theme`.
-import {DEFAULT_THEME, ensureThemeFonts, parseCssToTheme, themeToCssText} from '../renderer/a2ui.js';
+import {DEFAULT_THEME, ensureThemeFonts, parseCssToTheme, themeToCssText} from '../renderer/host.js';
 
 import {get, put} from './api.js';
 import {enhanceCodeEditor} from './code_highlight.js';
@@ -142,15 +142,15 @@ export const THEME_PRESETS = [
 
 const PREVIEW_MESSAGES = [
   {
-    version: 'v0.9',
+    version: 'v1.0',
     createSurface: {
       surfaceId: 'preview',
       catalogId:
-          'https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json',
+          'https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json',
     },
   },
   {
-    version: 'v0.9',
+    version: 'v1.0',
     updateComponents: {
       surfaceId: 'preview',
       components: [
@@ -169,8 +169,7 @@ const PREVIEW_MESSAGES = [
         {
           id: 'title',
           component: 'Text',
-          text: 'Saturday at the harbor',
-          variant: 'h3',
+          text: '### Saturday at the harbor',
         },
         {
           id: 'body',
@@ -190,7 +189,7 @@ const PREVIEW_MESSAGES = [
             {label: 'Picnic', value: 'picnic'},
             {label: 'Caf\u00e9', value: 'cafe'},
           ],
-          value: {path: '/lunch'},
+          value: {'@path': '/lunch'},
         },
         {id: 'divider', component: 'Divider'},
         {
@@ -218,8 +217,8 @@ const PREVIEW_MESSAGES = [
     },
   },
   {
-    version: 'v0.9',
-    updateDataModel: {surfaceId: 'preview', value: {lunch: ['fish']}},
+    version: 'v1.0',
+    updateDataModel: {surfaceId: 'preview', path: '/', value: {lunch: ['fish']}},
   },
 ];
 
@@ -655,7 +654,7 @@ export function mountThemeEditor(container, opts = {}) {
     } catch (_) {
     }
     try {
-      if (!renderer) renderer = await import('/renderer/a2ui.js');
+      if (!renderer) renderer = await import('/renderer/host.js');
       if (surface) {
         try {
           surface.destroy();

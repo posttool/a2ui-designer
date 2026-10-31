@@ -1,0 +1,103 @@
+/* A2UI Designer renderer host styles (web/renderer/host.js).
+ *
+ * The official @a2ui/web_core basic catalog elements bring their own styles
+ * and read `--a2ui-*` variables, which tokens.js sets inline on the host
+ * element. This sheet only covers what the host adds: the root box (framing,
+ * typography defaults), inert mode, the unsupported-component placeholder and
+ * inspect-mode outlines. */
+
+.a2ui-host {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--a2ui-space, 8px) * 2);
+  min-width: 0;
+  background: var(--a2ui-surface, #fff);
+  color: var(--a2ui-on-surface, #1f1f1f);
+  font-family: var(--a2ui-host-font, var(--a2ui-font, system-ui, sans-serif));
+  font-size: var(--a2ui-font-size, 16px);
+  font-weight: var(--a2ui-body-weight, 400);
+  line-height: var(--a2ui-line-height, 1.5);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+}
+.a2ui-host *, .a2ui-host *::before, .a2ui-host *::after { box-sizing: border-box; }
+.a2ui-host [hidden] { display: none !important; }
+.a2ui-framing-card { padding: var(--a2ui-surface-padding, 16px); }
+.a2ui-framing-page { padding: 0; }
+.a2ui-scheme-dark { color-scheme: dark; }
+.a2ui-scheme-light { color-scheme: light; }
+.a2ui-host > a2ui-surface { display: block; min-width: 0; }
+
+/* Typography the basic catalog leaves to the host. */
+.a2ui-host .a2ui-text :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: var(--a2ui-heading-weight, 500);
+  letter-spacing: -0.005em;
+}
+.a2ui-host .a2ui-text strong { font-weight: 600; }
+.a2ui-host .a2ui-text code, .a2ui-host .a2ui-text pre {
+  font-family: var(--a2ui-font-mono, ui-monospace, monospace);
+  font-size: 0.92em;
+  background: var(--a2ui-surface-container-high, rgba(0, 0, 0, 0.06));
+  border-radius: 6px;
+}
+.a2ui-host .a2ui-text code { padding: 0.08em 0.35em; }
+.a2ui-host .a2ui-text pre { padding: 0.6em 0.8em; overflow-x: auto; }
+.a2ui-host .a2ui-text pre code { padding: 0; background: none; }
+.a2ui-host .a2ui-text p + p,
+.a2ui-host .a2ui-text p + ul, .a2ui-host .a2ui-text p + ol,
+.a2ui-host .a2ui-text :is(h1, h2, h3, h4, h5, h6) + p { margin-top: 0.4em; }
+.a2ui-host .a2ui-text ul, .a2ui-host .a2ui-text ol { padding-inline-start: 1.4em; }
+.a2ui-host .a2ui-text blockquote {
+  padding-inline-start: 0.8em;
+  border-inline-start: 3px solid var(--a2ui-outline-variant, #e0e3e1);
+  color: var(--a2ui-on-surface-variant, #444746);
+}
+.a2ui-host .a2ui-text a { text-decoration: underline; text-underline-offset: 2px; }
+.a2ui-host .a2ui-text.a2ui-text-caption em { font-style: normal; }
+.a2ui-host .a2ui-icon { flex: 0 0 auto; }
+.a2ui-host input, .a2ui-host textarea, .a2ui-host select { min-width: 0; max-width: 100%; }
+.a2ui-host .a2ui-button { font: inherit; font-weight: var(--a2ui-button-font-weight, 500); }
+.a2ui-host .a2ui-button-primary { --a2ui-icon-color: var(--a2ui-on-primary, #fff); }
+
+/* Inert (screenshot) mode: no pointer interaction with controls. */
+.a2ui-inert button, .a2ui-inert input, .a2ui-inert textarea, .a2ui-inert select,
+.a2ui-inert a, .a2ui-inert label, .a2ui-inert [role="button"] { pointer-events: none; }
+
+/* Unsupported component placeholder. */
+.a2uid-unsupported {
+  margin: var(--a2ui-item-margin, 4px);
+  padding: var(--a2ui-space, 8px);
+  border: 1.5px dashed color-mix(in srgb, var(--a2ui-on-surface, #1f1f1f) 40%, transparent);
+  border-radius: 12px;
+  min-height: 48px;
+  min-width: 0;
+  background: repeating-linear-gradient(135deg, transparent 0 8px,
+      color-mix(in srgb, var(--a2ui-on-surface, #1f1f1f) 3%, transparent) 8px 16px);
+  display: flex;
+  flex-direction: column;
+}
+.a2uid-unsupported-label {
+  display: inline-flex; align-items: center; gap: 6px; margin: 2px 4px 4px;
+  font-family: "Google Sans Code", "Roboto Mono", ui-monospace, monospace;
+  font-size: 12px; font-weight: 500; color: var(--a2ui-on-surface-variant, #444746);
+}
+.a2uid-unsupported-text { margin: 0 4px 4px; font-size: 0.875em; }
+.a2uid-unsupported-children { display: flex; flex-direction: column; min-width: 0; }
+.a2uid-symbol {
+  font-family: "Material Symbols Rounded";
+  font-weight: normal; font-style: normal; font-size: 16px; line-height: 1;
+  letter-spacing: normal; text-transform: none; white-space: nowrap; direction: ltr;
+  font-feature-settings: "liga"; display: inline-block; overflow: hidden; user-select: none;
+}
+
+/* Inspect mode (render.html?inspect=1). */
+.a2ui-inspect-hover { outline: 2px dashed #1a73e8 !important; outline-offset: -1px; cursor: pointer; }
+.a2ui-inspect-highlight,
+.a2ui-inspect-selected {
+  outline: 2px solid #e8710a !important;
+  outline-offset: -1px;
+  box-shadow: 0 0 0 3px rgba(232, 113, 10, 0.22) !important;
+}

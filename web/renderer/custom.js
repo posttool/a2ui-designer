@@ -729,7 +729,8 @@ export function evalExpr(expr, locals, hooks) {
 
 function isDynamic(v) {
   return !!v && typeof v === 'object' && !Array.isArray(v) &&
-      (typeof v.path === 'string' || typeof v.call === 'string');
+      (typeof v['@path'] === 'string' || typeof v['@call'] === 'string' ||
+       typeof v.path === 'string' || typeof v.call === 'string');
 }
 
 export function interpolate(parts, locals, hooks) {

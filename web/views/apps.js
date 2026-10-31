@@ -7,7 +7,7 @@ import {emptyState, fmtTime, h, icon, mount, relTime, spinner} from '../componen
 import {jsonTree} from '../components/jsontree.js';
 import {navigate} from '../components/store.js';
 import {confirmDialog, drawer, toast} from '../components/ui.js';
-import {mountSurface} from '../renderer/a2ui.js';
+import {mountSurface} from '../renderer/host.js';
 
 const KIND_LABEL = {
   demo: 'Demo',

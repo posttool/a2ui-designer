@@ -1,5 +1,8 @@
-// Tiny safe Markdown subset -> AST (DOM-free). The DOM builder in a2ui.js
-// only ever creates elements + text nodes from this AST (never innerHTML).
+// Tiny safe Markdown subset -> AST (DOM-free), plus renderMarkdownHtml(), an
+// escaping HTML serializer of that AST used as the official renderer's
+// markdown renderer (setMarkdownRenderer in host.js). Only a fixed set of tags
+// is ever produced; all text and attribute values are HTML-escaped, and link
+// hrefs pass safeLinkHref().
 //
 // Blocks: paragraph (single newlines -> line breaks), heading (#..######),
 // bullet list (-, *, +), ordered list (1.), blockquote (>), code fence.
@@ -192,4 +195,64 @@ export function inlineText(nodes) {
               n.t === 'br'                        ? '\n' :
                                                     inlineText(n.c || []))
       .join('');
+}
+
+const ESC = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'};
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ESC[c]);
+
+function inlineHtml(nodes) {
+  let out = '';
+  for (const n of nodes || []) {
+    switch (n.t) {
+      case 'text': out += esc(n.v); break;
+      case 'br': out += '<br>'; break;
+      case 'code': out += `<code>${esc(n.v)}</code>`; break;
+      case 'strong': case 'em': case 'del': case 'span':
+        out += `<${n.t}>${inlineHtml(n.c)}</${n.t}>`;
+        break;
+      case 'link': {
+        const href = safeLinkHref(n.href);
+        out += href ?
+            `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${
+                inlineHtml(n.c)}</a>` :
+            inlineHtml(n.c);
+        break;
+      }
+      default: break;
+    }
+  }
+  return out;
+}
+
+/**
+ * Markdown -> sanitized HTML string. A single paragraph renders as bare
+ * inline content (no <p>), so short labels don't pick up block margins.
+ */
+export function renderMarkdownHtml(text) {
+  const blocks = parseMarkdown(text);
+  if (!blocks.length) return '';
+  if (blocks.length === 1 && blocks[0].type === 'p') return inlineHtml(blocks[0].inlines);
+  let out = '';
+  for (const b of blocks) {
+    switch (b.type) {
+      case 'p': out += `<p>${inlineHtml(b.inlines)}</p>`; break;
+      case 'h': {
+        const lv = Math.min(6, Math.max(1, Number(b.level) || 1));
+        out += `<h${lv}>${inlineHtml(b.inlines)}</h${lv}>`;
+        break;
+      }
+      case 'ul': case 'ol': {
+        const start = b.type === 'ol' && b.start !== 1 && Number.isFinite(Number(b.start)) ?
+            ` start="${Number(b.start)}"` : '';
+        out += `<${b.type}${start}>${
+            (b.items || []).map((it) => `<li>${inlineHtml(it)}</li>`).join('')}</${b.type}>`;
+        break;
+      }
+      case 'quote': out += `<blockquote>${inlineHtml(b.inlines)}</blockquote>`; break;
+      case 'code': out += `<pre><code>${esc(b.text)}</code></pre>`; break;
+      case 'hr': out += '<hr>'; break;
+      default: break;
+    }
+  }
+  return out;
 }

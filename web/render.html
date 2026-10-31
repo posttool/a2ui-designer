@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
-<link rel="stylesheet" href="/renderer/a2ui.css">
+<link rel="stylesheet" href="/renderer/host.css">
 <style>
   html, body { margin: 0; padding: 0; }
   body { background: var(--a2ui-surface, #fff); overflow-x: hidden; }
@@ -31,7 +31,7 @@
 <body>
 <div id="surface"></div>
 <script type="module">
-import {applyTheme, ensureThemeFonts, mountSurface, themeToCssVars, resolveTheme, waitForThemeFonts} from '/renderer/a2ui.js';
+import {applyTheme, ensureThemeFonts, mountSurface, themeToCssVars, resolveTheme, waitForThemeFonts} from '/renderer/host.js';
 
 const VIEWPORTS = {
   phone: {id: 'phone', width: 412, height: 915},
@@ -96,8 +96,11 @@ function render(data) {
   el.replaceChildren();
   // Render data carries `custom_components`; live postMessage uses `components`.
   const customComponents = data.custom_components || data.components || {};
+  const catalogs = (data.catalogs && typeof data.catalogs === 'object') ? data.catalogs :
+      {projectCatalogId: data.catalog_id || data.catalogId || undefined};
   surface = mountSurface(el, data.messages || [], {
-    theme, framing, interactive, injectAssets: false,
+    theme, framing, interactive, injectAssets: false, catalogs,
+    inspect: q.get('inspect') === '1',
     customComponents: (customComponents && typeof customComponents === 'object' && !Array.isArray(customComponents)) ? customComponents : {},
     onAction: (payload) => {
       toast(`action: ${payload.action.name}`);
