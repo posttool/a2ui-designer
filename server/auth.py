@@ -1,7 +1,11 @@
-"""Dev-mode sign-in: LDAP typed by the user → HMAC-signed session cookie.
+"""Sign-in helpers.
 
-`--auth_mode iap` trusts the `X-Goog-Authenticated-User-Email` header set by
-Identity-Aware Proxy (for a later Cloud Run deployment).
+`--auth_mode local` (default): no sign-in; every request is the implicit admin
+user `local`.
+
+`--auth_mode password`: a shared secret (`--password_file` or
+`$A2UID_PASSWORD`) unlocks the app; the optional username is used as the
+display/owner name and stored in an HMAC-signed session cookie.
 """
 
 from __future__ import annotations
@@ -13,6 +17,8 @@ import time
 
 COOKIE = "dcb_session"
 TTL = 30 * 24 * 3600
+LOCAL_USER = "local"
+DEFAULT_PASSWORD_USER = "user"
 
 
 def _candidate_secrets(secret: bytes) -> list[bytes]:
@@ -55,10 +61,7 @@ def cookie_header(token: str, clear: bool = False) -> str:
   return f"{COOKIE}={token}; Path=/; Max-Age={TTL}; HttpOnly; SameSite=Lax"
 
 
-def iap_ldap(header_value: str | None) -> str | None:
-  if not header_value:
-    return None
-  email = header_value.split(":", 1)[-1]
-  if not email.endswith("@google.com"):
-    return None
-  return email.split("@", 1)[0].lower()
+def check_password(expected: str | None, given: str) -> bool:
+  if not expected:
+    return False
+  return hmac.compare_digest(expected.encode(), (given or "").encode())

@@ -53,7 +53,7 @@ export function renderInline(text) {
 function isTableSep(line) {
   return /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(line);
 }
-// g3doc multi-line tables continue a row with lines starting with ':', whose
+// Multi-line tables continue a row with lines starting with ':', whose
 // cells line up with the '|' columns of the separator row.
 function columnCuts(sepLine) {
   const cuts = [];

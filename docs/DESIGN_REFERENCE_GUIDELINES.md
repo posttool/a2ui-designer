@@ -339,8 +339,8 @@ one, colors and radii are read from each screen's HTML and mostly come back
 :                       :                         : your own copy              :
 | Frame says "rendered  | Stitch blocked the      | Nothing to do: the         |
 : from HTML"            : screenshot download     : screen's HTML was rendered :
-:                       : (known issue            : instead; it can differ     :
-:                       : b/571529127)            : slightly from Stitch's     :
+:                       : (known issue)           : instead; it can differ     :
+:                       :                         : slightly from Stitch's     :
 :                       :                         : preview                    :
 | Frame shows an error  | Both downloads were     | Re-import later, or export |
 : and no image          : blocked                 : the screen as PNG and add  :

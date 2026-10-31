@@ -19,7 +19,6 @@ from core.a2ui import validator  # noqa: E402
 from core.components import sample_messages  # noqa: E402
 from refs import figma  # noqa: E402
 from refs import figma_compiler  # noqa: E402
-from refs import native_codegen  # noqa: E402
 from refs import stitch  # noqa: E402
 
 DS = "common_types.json#/$defs/"
@@ -397,16 +396,10 @@ class CompilerLoweringAndNativeCodegenTest(unittest.TestCase):
         ),
         "web_template",
     )
-    # Without a fit estimate the renderer fallback still applies.
+    # Without a fit estimate the project falls back to a custom web component.
     self.assertEqual(
         settings_mod.resolve_component_strategy({"renderers": ["web"]}),
         "web_template",
-    )
-    self.assertEqual(
-        settings_mod.resolve_component_strategy(
-            {"renderers": ["web", "ios_swiftui"]}
-        ),
-        "basic_composition",
     )
     # Pinned (override) and project-wide strategies ignore the fit.
     pinned = settings_mod.component_strategy_decision(
@@ -415,10 +408,16 @@ class CompilerLoweringAndNativeCodegenTest(unittest.TestCase):
     self.assertEqual(pinned["strategy"], "web_template")
     self.assertFalse(pinned["auto"])
     proj = settings_mod.component_strategy_decision(
+        {"catalog": {"component_strategy": "basic_composition"}}, basic_fit=0.1
+    )
+    self.assertEqual(proj["strategy"], "basic_composition")
+    self.assertFalse(proj["auto"])
+    # The removed `native_targets` strategy falls back to auto.
+    legacy = settings_mod.component_strategy_decision(
         {"catalog": {"component_strategy": "native_targets"}}, basic_fit=0.1
     )
-    self.assertEqual(proj["strategy"], "native_targets")
-    self.assertFalse(proj["auto"])
+    self.assertEqual(legacy["strategy"], "web_template")
+    self.assertTrue(legacy["auto"])
     # Settings normalization clamps / defaults the threshold.
     self.assertEqual(
         settings_mod.merged({"catalog": {"basic_fit_threshold": "abc"}})[
@@ -476,7 +475,7 @@ class CompilerLoweringAndNativeCodegenTest(unittest.TestCase):
         "}",
     )
 
-  def test_lowering_and_native_codegen(self):
+  def test_lowering(self):
     defn = custom_web.normalize_definition({
         "name": "SummaryBanner",
         "description": "Compact summary banner.",
@@ -518,10 +517,9 @@ class CompilerLoweringAndNativeCodegenTest(unittest.TestCase):
     chk = custom_web.check_definition(defn, catalog_mod.basic_names())
     self.assertEqual(chk["issues"], [])
     self.assertTrue(lowering.should_lower_for_renderer(defn, "web"))
-    self.assertTrue(lowering.should_lower_for_renderer(defn, "android_compose"))
     msgs = sample_messages(defn, catalog_mod.BASIC_CATALOG_ID)
     lowered = lowering.expand_composite_components(
-        msgs, {"SummaryBanner": defn}, renderer="android_compose"
+        msgs, {"SummaryBanner": defn}
     )
     comps = lowered[1]["updateComponents"]["components"]
     by_id = {c["id"]: c for c in comps}
@@ -530,25 +528,13 @@ class CompilerLoweringAndNativeCodegenTest(unittest.TestCase):
     self.assertEqual(by_id["root__s_txt"]["text"], "2 items")
     basic_cat = catalog_mod.build_catalog({})
     self.assertTrue(validator.validate(lowered, basic_cat).ok)
-
-    targets = native_codegen.compile_native_targets(defn)
-    self.assertIn("@Composable", targets["android_compose"]["code"])
-    self.assertIn(
-        "fun SummaryBannerComponent(", targets["android_compose"]["code"]
+    # Native platform code is no longer part of a definition.
+    self.assertNotIn(
+        "targets",
+        custom_web.normalize_definition(
+            dict(defn, targets={"ios_swiftui": {"code": "x"}})
+        ),
     )
-    self.assertIn(
-        "object SummaryBannerRemoteBuilder",
-        targets["android_remote_compose"]["code"],
-    )
-    self.assertIn(
-        "public struct SummaryBannerView<ChildContent: View>: View",
-        targets["ios_swiftui"]["code"],
-    )
-    kt_reg = native_codegen.generate_compose_registry([defn])
-    sw_reg = native_codegen.generate_swiftui_registry([defn])
-    self.assertIn('"SummaryBanner" -> SummaryBannerComponent(', kt_reg)
-    self.assertIn('case "SummaryBanner":', sw_reg)
-
 
 if __name__ == "__main__":
   unittest.main()

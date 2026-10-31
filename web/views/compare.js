@@ -5,7 +5,7 @@ import {emptyState, h, icon, mount, spinner} from '../components/dom.js';
 import {navigate} from '../components/store.js';
 import {segmented} from '../components/ui.js';
 
-import {ALL_RENDERER_IDS, outputShotForRenderer, RENDERER_META} from './run_detail.js';
+import {outputShotForRenderer, RENDERER_META} from './run_detail.js';
 
 export async function render(root, params, ctx) {
   const pid = params.pid;
@@ -36,7 +36,7 @@ export async function render(root, params, ctx) {
   const s = cmp.summary || {};
   let sort = 'delta_asc';
   let onlyChanged = false;
-  let activeRenderer = ctx.url.searchParams.get('renderer') || 'web';
+  const activeRenderer = 'web';
 
   const delta = (p) =>
       (p.a && p.b && p.a.judge_score != null && p.b.judge_score != null ?
@@ -98,17 +98,6 @@ export async function render(root, params, ctx) {
           h('span.cs-num.c-bad', `${regressed}`))),
       h('div.filterbar',
         segmented(
-            ALL_RENDERER_IDS.map((rid) => ({
-                                   value: rid,
-                                   label: RENDERER_META[rid].short,
-                                   id: `cmp-ren-${rid}`,
-                                 })),
-            activeRenderer,
-            (v) => {
-              activeRenderer = v;
-              draw();
-            }),
-        segmented(
             [
               {
                 value: 'delta_asc',
@@ -143,7 +132,7 @@ export async function render(root, params, ctx) {
     return h(
         'a.cmp-side', {
           href:
-              `/p/${pid}/review/${run.id}?o=${o.id}&renderer=${activeRenderer}`
+              `/p/${pid}/review/${run.id}?o=${o.id}`
         },
         h('div.cmp-shot',
           shot.full || shot.thumb ?
@@ -155,9 +144,6 @@ export async function render(root, params, ctx) {
                       (RENDERER_META[activeRenderer] || {}).short ||
                       activeRenderer}`))),
         h('div.cmp-meta',
-          h('span.renderer-badge.renderer-badge-xs',
-            {dataset: {renderer: activeRenderer}},
-            (RENDERER_META[activeRenderer] || {}).badge || activeRenderer),
           h('span.muted',
             `rev ${run.revision_number} \u00b7 T${
                 run.rendered_token_revision_number ||

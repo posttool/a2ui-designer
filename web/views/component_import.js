@@ -38,13 +38,11 @@ export function openComponentImport(pid, {tab = 'describe'} = {}) {
   const strategySel = h(
       'select.input#comp-describe-strategy',
       h('option', {value: 'auto'},
-        'Auto (Web Template for HTML-only, Basic Composition for multi-renderer)'),
+        'Auto (decide by Basic fit)'),
       h('option', {value: 'web_template'},
         'Web HTML/CSS Template (deterministic HTML + CSS tokens)'),
       h('option', {value: 'basic_composition'},
-        'A2UI Basic Catalog Composition (renders on Web, Compose & SwiftUI)'),
-      h('option', {value: 'native_targets'},
-        'Multi-Target Native Code (HTML/CSS + Compose .kt + SwiftUI .swift)'));
+        'A2UI Basic Catalog Composition (any A2UI renderer)'));
   const submitBtn =
       h('button.btn.btn-primary#comp-import-submit',
         {type: 'button', onclick: submit}, icon('construction'),

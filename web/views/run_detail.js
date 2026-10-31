@@ -1,10 +1,10 @@
-// Run detail: live progress + output gallery with multi-renderer switcher.
+// Run detail: live progress + output gallery.
 import {cached, get, post, qs} from '../components/api.js';
 import {chip, genreChip, loadGenres, scoreBadge, statusChip, verdictMark} from '../components/badges.js';
 import {emptyState, fmtTime, h, icon, mount, relTime, spinner} from '../components/dom.js';
 import {openNewRunDialog} from '../components/newrun.js';
 import {navigate, store} from '../components/store.js';
-import {segmented, toast} from '../components/ui.js';
+import {toast} from '../components/ui.js';
 
 import {deleteRun, runProgress, verdictCounts} from './runs.js';
 
@@ -25,49 +25,17 @@ export const RENDERER_META = {
     badge: 'WEB',
     engine: 'Headless Chromium (CDP) + A2UI Web Renderer',
   },
-  android_compose: {
-    id: 'android_compose',
-    label: 'Android Jetpack Compose',
-    short: 'Compose',
-    badge: 'COMPOSE',
-    engine: 'AndroidX Compose M3 A2UI + Robolectric Skia (API 35)',
-  },
-  android_remote_compose: {
-    id: 'android_remote_compose',
-    label: 'Android RemoteCompose (.rc)',
-    short: 'RemoteCompose (.rc)',
-    badge: 'RC WIRE',
-    engine: 'RemoteComposeCreation (.rc wire) + RemoteComposePlayer + Skia',
-  },
-  ios_swiftui: {
-    id: 'ios_swiftui',
-    label: 'iOS SwiftUI',
-    short: 'iOS SwiftUI',
-    badge: 'SWIFTUI',
-    engine: 'Apple SwiftUI A2UI + iOS Simulator (IPHONE_13_PRO)',
-  },
 };
 
-export const ALL_RENDERER_IDS = [
-  'web',
-  'android_compose',
-  'android_remote_compose',
-  'ios_swiftui',
-];
+export const ALL_RENDERER_IDS = ['web'];
 
-/**
- * Renderers enabled in project settings (Web when unset), in canonical order.
- */
+/** Renderers in use: the web renderer is the only one. */
 export function enabledRendererIds(settings) {
-  const sel =
-      settings && Array.isArray(settings.renderers) ? settings.renderers : null;
-  const ids = sel && sel.length ?
-      ALL_RENDERER_IDS.filter((id) => sel.includes(id)) :
-      ['web'];
-  return ids.length ? ids : ['web'];
+  void settings;
+  return ['web'];
 }
 
-/** Human list of renderer labels: "Web, Android Compose and iOS SwiftUI". */
+/** Human list of renderer labels. */
 export function rendererList(ids, key = 'short') {
   const names = ids.map((id) => (RENDERER_META[id] || {})[key] || id);
   return names.length <= 1 ?
@@ -164,12 +132,7 @@ export function outputTile(
   const ready = o.status === 'done' && shot.thumb;
   const errCount =
       o.validation && !o.validation.ok ? (o.validation.errors || []).length : 0;
-  const renders = o.renders || {};
-  const renderedBadges = renderers.length <= 1 ?
-      [] :
-      renderers.filter(
-          (rid) => renders[rid] &&
-              (renders[rid].screenshot_url || renders[rid].thumb_url));
+  void renderers;
 
   return h(
       'a.tile', {
@@ -201,16 +164,6 @@ export function outputTile(
         h('div.tile-badges',
           o.judge_score != null ? scoreBadge(o.judge_score) : null,
           verdictMark(o.human_verdict)),
-        renderedBadges.length ?
-            h('div.tile-renderers',
-              renderedBadges.map(
-                  (rid) =>
-                      h('span.renderer-badge.renderer-badge-xs', {
-                        dataset: {renderer: rid},
-                        class: rid === activeRenderer ? 'active' : ''
-                      },
-                        (RENDERER_META[rid] || {}).badge || rid))) :
-            null,
         errCount ? h('span.tile-err', {
           title: (o.validation.errors || [])
                      .map((e) => `${e.path}: ${e.message}`)
@@ -297,21 +250,8 @@ export async function render(root, params, ctx) {
 
   function drawFilters() {
     const vps = run ? run.viewports || [] : [];
-    const renSeg = enabled.length <= 1 ?
-        null :
-        segmented(
-            enabled.map((id) => ({
-                          value: id,
-                          label: RENDERER_META[id].short,
-                          id: `run-ren-${id}`,
-                        })),
-            f.renderer, (v) => {
-              f.renderer = v;
-              syncUrl();
-              drawGallery();
-            });
     mount(
-        filterEl, renSeg,
+        filterEl,
         sel('run-filter-group', 'group',
             [['', 'All groups'], ...genres.groups.map((g) => [g.id, g.label])]),
         sel('run-filter-genre', 'genre',
@@ -344,8 +284,6 @@ export async function render(root, params, ctx) {
         ['interrupted', 'cancelled', 'failed'].includes(run.status) ||
         (run.status === 'done' && (run.counts || {}).error);
     const others = otherRuns.filter((r) => r.id !== rid);
-    const runRenderers =
-        (run.renderers || ['web']).filter((r) => enabled.includes(r));
     const tokNum =
         run.rendered_token_revision_number || run.token_revision_number || 1;
     const curTokNum = run.current_token_revision_number || tokNum;
@@ -364,11 +302,7 @@ export async function render(root, params, ctx) {
                         tokNum}; live project tokens are T${curTokNum}` :
                     `Rendered with Tokens T${tokNum}`,
               },
-                icon('palette'), `Tokens T${tokNum}`),
-              runRenderers.map(
-                  (r) =>
-                      h('span.renderer-badge', {dataset: {renderer: r}},
-                        (RENDERER_META[r] || {}).badge || r))),
+                icon('palette'), `Tokens T${tokNum}`)),
             h('p.lede.small',
               `rev ${run.revision_number} \u00b7 Tokens T${tokNum} \u00b7 ${
                   (run.viewports || []).join(', ')} \u00b7 started ${
@@ -404,21 +338,19 @@ export async function render(root, params, ctx) {
                         null,
             h('button.btn.btn-ghost#run-render-all', {
               type: 'button',
-              title: `Render all outputs on ${rendererList(enabled, 'label')}`,
+              title: 'Re-render all outputs (screenshots only, 0 LLM calls)',
               onclick: async (e) => {
                 e.currentTarget.disabled = true;
                 try {
                   await post(`/api/runs/${rid}/render`, {renderers: enabled});
-                  toast(`Rendering on ${rendererList(enabled)}\u2026`, 'good');
+                  toast('Rendering\u2026', 'good');
                   setTimeout(refresh, 1000);
                 } finally {
                   e.currentTarget.disabled = false;
                 }
               }
             },
-              icon('devices'),
-              enabled.length > 1 ? `Render on all ${enabled.length}` :
-                                   `Render on ${rendererList(enabled)}`),
+              icon('devices'), 'Re-render'),
             others.length ?
                 h('select.input.input-sm#compare-with', {
                   onchange: (e) => {
@@ -480,8 +412,7 @@ export async function render(root, params, ctx) {
                       if (r && r.run) run = r.run;
                       toast(
                           `Applied Tokens T${
-                              curTokNum} \u2014 re-rendering on ${
-                              rendererList(enabled)}\u2026`,
+                              curTokNum} \u2014 re-rendering\u2026`,
                           'good');
                       await refresh();
                     } finally {

@@ -43,7 +43,11 @@ import urllib.request
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 WEB = ROOT / 'web'
 EXAMPLES = ROOT / 'seeds' / 'spec_examples'
-CHROME = '/usr/bin/google-chrome'
+if str(ROOT) not in sys.path:
+  sys.path.insert(0, str(ROOT))
+from render import cdp as _cdp  # pylint: disable=g-import-not-at-top,wrong-import-position
+
+CHROME = _cdp.find_chrome()
 
 VIEWPORTS = {
     'phone': (412, 915),
@@ -258,6 +262,8 @@ class Browser:
   """Headless Chrome with one page target driven over CDP."""
 
   def __init__(self, width, height):
+    if not CHROME:
+      raise SystemExit(_cdp.CHROME_MISSING_MESSAGE)
     self.port = _free_port()
     self.profile = tempfile.mkdtemp(prefix='dcb_chrome_')
     args = [

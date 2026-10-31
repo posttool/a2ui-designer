@@ -16,6 +16,9 @@ import warnings
 
 # Tests never reach Wikimedia Commons for sample photos.
 os.environ["DCB_WEB_IMAGES"] = "0"
+# Teaching baselines run through the (scripted) live pipeline in tests; the
+# shipped starter-example cache is exercised by tests/starter_cache_test.py.
+os.environ.setdefault("A2UID_STARTER_CACHE", "0")
 
 # Worker threads keep thread-local sqlite connections until exit.
 warnings.filterwarnings("ignore", category=ResourceWarning)
@@ -221,91 +224,7 @@ class FakePool:
     pass
 
 
-class FakeAndroidWorker:
-
-  def __init__(self):
-    self.calls = []
-
-  def status(self):
-    return {"available": True, "warm": True, "port": 18811}
-
-  def render_job(
-      self,
-      *,
-      job_id,
-      renderer,
-      a2ui,
-      width,
-      height,
-      theme,
-      output_path,
-      thumb_path,
-  ):
-    del a2ui, theme
-    self.calls.append((job_id, renderer))
-    for p in (output_path, thumb_path):
-      os.makedirs(os.path.dirname(p), exist_ok=True)
-      with open(p, "wb") as fh:
-        fh.write(PNG)
-    meta = {
-        "renderer": renderer,
-        "engine": f"Fake {renderer}",
-        "width": width,
-        "height": height,
-        "latency_ms": 12,
-    }
-    if renderer == "android_remote_compose":
-      meta.update({
-          "rc_byte_size": 1024,
-          "rc_op_count": 18,
-          "rc_stats": ["TextData: 4", "DrawRoundRect: 3"],
-          "rc_hierarchy": "RootLayoutComponent\n  ColumnLayout\n",
-      })
-    return {
-        "id": job_id,
-        "renderer": renderer,
-        "ok": True,
-        "output_path": output_path,
-        "thumb_path": thumb_path,
-        "meta": meta,
-    }
-
-  def close(self):
-    pass
-
-
-class FakeIosRunner:
-
-  def __init__(self):
-    self.calls = []
-
-  def status(self):
-    return {"available": True, "running": False}
-
-  def render_batch(self, jobs):
-    out = {}
-    for j in jobs:
-      jid = str(j["id"])
-      self.calls.append(jid)
-      for p in (j["output_path"], j["thumb_path"]):
-        os.makedirs(os.path.dirname(p), exist_ok=True)
-        with open(p, "wb") as fh:
-          fh.write(PNG)
-      out[jid] = {
-          "id": jid,
-          "renderer": "ios_swiftui",
-          "ok": True,
-          "output_path": j["output_path"],
-          "thumb_path": j["thumb_path"],
-          "meta": {
-              "renderer": "ios_swiftui",
-              "engine": "Fake iOS SwiftUI",
-              "width": int(j.get("width") or 390) * 2,
-              "height": 600,
-              "latency_ms": 40,
-          },
-      }
-    return out
+TEST_PASSWORD = "test-password"
 
 
 class LiveServer:
@@ -315,18 +234,21 @@ class LiveServer:
       self,
       llm=None,
       pool=None,
-      android_worker=None,
-      ios_runner=None,
       admins=("admin1",),
+      auth_mode="password",
   ):
+    """`auth_mode="password"` (default) lets tests sign in as distinct users;
+    pass `auth_mode="local"` for the no-login single-user mode."""
     self.dir = tempfile.mkdtemp(prefix="dcb_test_")
-    admins_path = os.path.join(self.dir, "admins.json")
+    admins_path = os.path.join(self.dir, "admins_list.json")
     with open(admins_path, "w", encoding="utf-8") as fh:
       json.dump(list(admins), fh)
     self.llm = llm or make_llm()
     self.pool = pool or FakePool()
-    self.android_worker = android_worker or FakeAndroidWorker()
-    self.ios_runner = ios_runner or FakeIosRunner()
+    self.auth_mode = auth_mode
+    pw_path = os.path.join(self.dir, "password.txt")
+    with open(pw_path, "w", encoding="utf-8") as fh:
+      fh.write(TEST_PASSWORD + "\n")
     args = server_main.parse_args([
         "--port",
         "0",
@@ -336,13 +258,15 @@ class LiveServer:
         admins_path,
         "--workers",
         "4",
+        "--auth_mode",
+        auth_mode,
+        "--password_file",
+        pw_path,
     ])
     self.app, _ = server_main.build(
         args,
         llm=self.llm,
         pool=self.pool,
-        android_worker=self.android_worker,
-        ios_runner=self.ios_runner,
     )
     # Tests never reach Figma; tests that need components override these.
     self.app.builder.figma_scan = lambda token, url: {"components": []}
@@ -388,9 +312,12 @@ class LiveServer:
       except ValueError:
         return e.code, payload
 
-  def login(self, ldap):
+  def login(self, ldap, password=TEST_PASSWORD):
+    """Signs in as username `ldap` (password mode; no-op user in local mode)."""
     self.jar.clear()
-    return self.call("POST", "/api/login", {"ldap": ldap})
+    return self.call(
+        "POST", "/api/login", {"username": ldap, "password": password}
+    )
 
   def close(self):
     self.srv.shutdown()

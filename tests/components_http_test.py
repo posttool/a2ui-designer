@@ -623,13 +623,13 @@ class ComponentsHttpTest(unittest.TestCase):
     self.assertEqual(patched["component"]["status"], "active")
     self.assertEqual(patched["component"]["issues"], [])
 
-  def test_component_strategies_lowering_native_targets_and_to_template(self):
+  def test_component_strategies_lowering_and_to_template(self):
     basic_only_def = {
         "name": "MetricCallout",
         "description": (
             "Single KPI metric callout composed of Basic components."
         ),
-        "usage": "Use for top-level KPI metrics across Web, Android and iOS.",
+        "usage": "Use for top-level KPI metrics.",
         "strategy": "basic_composition",
         "props": {
             "type": "object",
@@ -698,21 +698,11 @@ class ComponentsHttpTest(unittest.TestCase):
         any(t["name"] == "MetricCallout" for t in tpls["templates"])
     )
 
-    # Sync native target implementations (Compose, RemoteCompose, SwiftUI).
-    st, tgt_res = self.s.call(
-        "POST",
-        f"/api/components/{cid}/targets",
-        {"strategy": "native_targets"},
-    )
-    self.assertEqual(st, 200, tgt_res)
-    updated = tgt_res["component"]
-    self.assertEqual(updated["strategy"], "native_targets")
-    self.assertCountEqual(
-        updated["targets"],
-        ["android_compose", "android_remote_compose", "ios_swiftui"],
-    )
+    # The native-targets endpoint is gone.
+    st, _ = self.s.call("POST", f"/api/components/{cid}/targets", {})
+    self.assertIn(st, (404, 405))
 
-    # Package check and zip export include composition.json, native targets, and registries.
+    # Package check and zip export include composition.json and no native code.
     wait(lambda: self.get(cid)["preview_url"])
     st, chk = self.s.call("GET", f"/api/projects/{self.pid}/package")
     self.assertEqual(st, 200, chk)
@@ -729,21 +719,9 @@ class ComponentsHttpTest(unittest.TestCase):
     self.assertIn(
         root + "catalog/components/MetricCallout/composition.json", names
     )
-    self.assertIn(
-        root + "catalog/components/MetricCallout/compose/MetricCallout.kt",
-        names,
+    self.assertFalse(
+        [n for n in names if n.endswith((".kt", ".swift"))], names
     )
-    self.assertIn(
-        root
-        + "catalog/components/MetricCallout/remote_compose/MetricCalloutRemote.kt",
-        names,
-    )
-    self.assertIn(
-        root + "catalog/components/MetricCallout/swiftui/MetricCallout.swift",
-        names,
-    )
-    self.assertIn(root + "catalog/components/CatalogRegistry.kt", names)
-    self.assertIn(root + "catalog/components/CatalogRegistry.swift", names)
 
   def test_basic_fit_threshold_decides_auto_strategy_and_restrategize(self):
     # A Figma node whose structure the Basic catalog cannot express well:

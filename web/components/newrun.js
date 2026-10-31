@@ -293,27 +293,6 @@ const FALLBACK_RENDERERS = [
     engine: 'Headless Chromium (CDP) + A2UI Web Renderer',
     badge: 'WEB',
   },
-  {
-    id: 'android_compose',
-    label: 'Android Jetpack Compose',
-    short_label: 'Android Compose',
-    engine: 'AndroidX Compose M3 A2UI + Robolectric Skia (API 35)',
-    badge: 'COMPOSE',
-  },
-  {
-    id: 'android_remote_compose',
-    label: 'Android RemoteCompose (.rc)',
-    short_label: 'RemoteCompose (.rc)',
-    engine: 'RemoteComposeCreation (.rc wire) + RemoteComposePlayer + Skia',
-    badge: 'RC WIRE',
-  },
-  {
-    id: 'ios_swiftui',
-    label: 'iOS SwiftUI',
-    short_label: 'iOS SwiftUI',
-    engine: 'Apple SwiftUI A2UI + iOS Simulator (IPHONE_13_PRO)',
-    badge: 'SWIFTUI',
-  },
 ];
 
 /**
@@ -655,29 +634,8 @@ export async function openNewRunDialog(opts) {
             h('span', v.label || v.id),
             h('span.muted', `${v.width}\u00d7${v.height}`)));
 
-  const defaultRenderers = opts.renderers ||
-      (effect ? ['web'] : (settings.renderers || DEFAULT_RENDERERS));
-  const rendererBoxes = renderersList.map((ren) => {
-    const st = ren.status || {};
-    const statusText = st.warm ?
-        'warm' :
-        (st.running ? 'running' :
-                      (st.available !== false ? 'ready' : 'offline'));
-    return h(
-        'label.check.vp-check.renderer-check', h('input', {
-          type: 'checkbox',
-          value: ren.id,
-          id: `run-ren-${ren.id}`,
-          checked: defaultRenderers.includes(ren.id)
-        }),
-        h('span.renderer-check-main',
-          h('span.renderer-check-title',
-            h('span.renderer-badge', {dataset: {renderer: ren.id}},
-              ren.badge || ren.id),
-            h('span', ren.label || ren.id)),
-          h('span.muted.small', ren.engine || '')),
-        h('span.tag.tag-sm', statusText));
-  });
+  // The web renderer is the only renderer.
+  void renderersList;
 
   const judge = h('input#run-judge', {
     type: 'checkbox',
@@ -732,8 +690,6 @@ export async function openNewRunDialog(opts) {
         source === 'library' ? libIds().length :
                                selIds.length;
     const nv = vpBoxes.filter((b) => b.querySelector('input').checked).length;
-    const nr =
-        rendererBoxes.filter((b) => b.querySelector('input').checked).length;
     const arms = effect ? (noise.checked ? 3 : 2) : 1;
     const nm = effect ? 0 : mcpCount();
     formsField.hidden = effect || nm === 0;
@@ -749,8 +705,7 @@ export async function openNewRunDialog(opts) {
         `${n} sample${n === 1 ? '' : 's'} \u00d7 ${nv} viewport${
             nv === 1 ? '' : 's'} = ${n * nv} surface${n * nv === 1 ? '' : 's'}${
             effect ? ` \u00d7 ${arms} arms (${n * nv * arms} generations)` :
-                     ''} \u00d7 ${nr} renderer${nr === 1 ? '' : 's'} (${
-            n * nv * nr * arms} platform renders)${
+                     ''}${
             extra ? ` + ${extra} input form${extra === 1 ? '' : 's'}` : ''}`;
   }
   noise.addEventListener('change', sync);
@@ -760,8 +715,6 @@ export async function openNewRunDialog(opts) {
   srcSel.addEventListener('change', sync);
   setSel.addEventListener('change', sync);
   vpBoxes.forEach(
-      (b) => b.querySelector('input').addEventListener('change', sync));
-  rendererBoxes.forEach(
       (b) => b.querySelector('input').addEventListener('change', sync));
 
   const readinessWrap = h('div.run-readiness-wrap#run-readiness-warning');
@@ -827,10 +780,6 @@ export async function openNewRunDialog(opts) {
           'Save as default data source for runs in this project')),
       h('div.field', h('span.field-label', 'Viewports'),
         h('div.vp-grid', vpBoxes)),
-      h('div.field',
-        h('span.field-label',
-          'Target Renderers (Web, Android Compose, RemoteCompose .rc, iOS SwiftUI)'),
-        h('div.renderer-grid', rendererBoxes)),
       effect ?
           h('div.field', h('span.field-label', 'Study'),
             h('label.check', noise,
@@ -840,8 +789,7 @@ export async function openNewRunDialog(opts) {
             h('label.field.indent',
               h('span.field-label', 'Generator temperature (all arms)'),
               tempSel),
-            h('p.help',
-              'Highlights on screenshots use the Web renderer; other renderers show the change list only.')) :
+            null) :
           null,
       effect ? null : formsField,
       h('label.check', judge, 'Judge outputs with the LLM judge'), estimate);
@@ -856,13 +804,7 @@ export async function openNewRunDialog(opts) {
       toast('Pick at least one viewport.', 'warn');
       return false;
     }
-    const renderers = rendererBoxes.map((b) => b.querySelector('input'))
-                          .filter((i) => i.checked)
-                          .map((i) => i.value);
-    if (!renderers.length) {
-      toast('Pick at least one target renderer.', 'warn');
-      return false;
-    }
+    const renderers = DEFAULT_RENDERERS;
     const req =
         {revision_id: revSel.value, viewports, renderers, judge: judge.checked};
     if (source === 'set') {

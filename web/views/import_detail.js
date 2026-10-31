@@ -82,7 +82,6 @@ const ACTION_LABEL = {
 const STRATEGY_SHORT = {
   web_template: 'custom web',
   basic_composition: 'Basic composition',
-  native_targets: 'native targets',
 };
 const COLOR_RE = /^(#[0-9a-f]{3,8}|rgba?\(|hsla?\()/i;
 
@@ -1523,12 +1522,7 @@ export async function render(root, params, ctx) {
                                         value: 'basic_composition',
                                         selected: chosen === 'basic_composition'
                                       },
-                                        'Basic catalog composition'),
-                                      h('option', {
-                                        value: 'native_targets',
-                                        selected: chosen === 'native_targets'
-                                      },
-                                        'Multi-target native')) :
+                                        'Basic catalog composition')) :
                                     null;
       body = h(
           'div.pl-rich',

@@ -23,7 +23,6 @@ from core.a2ui import lowering
 from core.a2ui import validator
 from core.service import ApiError
 from refs import figma_compiler
-from refs import native_codegen
 
 STATUSES = ("draft", "active", "archived")
 CLASSIFICATIONS = ("custom", "basic_equivalent", "skip")
@@ -153,7 +152,6 @@ class ComponentManager:
         "strategy": defn.get("strategy") or "",
         "basic_fit": (r.get("source") or {}).get("basic_fit"),
         "strategy_decision": (r.get("source") or {}).get("strategy_decision"),
-        "targets": list((defn.get("targets") or {}).keys()),
         "preview_url": (
             f"/files/components/{r['preview_file']}?v={v}"
             if r.get("preview_file")
@@ -817,8 +815,6 @@ class ComponentManager:
       return defn
     defn["strategy"] = strategy
     defn = self._ensure_composition(defn)
-    if strategy == "native_targets" and not defn.get("targets"):
-      defn["targets"] = native_codegen.compile_native_targets(defn)
     return defn
 
   @staticmethod
@@ -826,7 +822,7 @@ class ComponentManager:
     """How `r` renders today: its strategy, else web template, else composition."""
     defn = r.get("definition") or {}
     s = str(defn.get("strategy") or "").strip().lower()
-    if s in ("web_template", "basic_composition", "native_targets"):
+    if s in ("web_template", "basic_composition"):
       return s
     has_web = bool(((defn.get("web") or {}).get("template") or "").strip())
     return "web_template" if has_web else "basic_composition"
@@ -942,28 +938,6 @@ class ComponentManager:
         "template": tpl_rec,
         "component": self.fmt(self.store.get("custom_components", cid)),
     }
-
-  def sync_native_targets(
-      self, user, cid: str, body: dict[str, Any] | None = None
-  ) -> dict[str, Any]:
-    """Generates Kotlin Compose, RemoteCompose, and SwiftUI implementations."""
-    r = self.row(user, cid, write=True)
-    body = body or {}
-    defn = dict(body.get("definition") or r.get("definition") or {})
-    defn = self._ensure_composition(defn)
-    target_ids = (
-        body.get("targets") if isinstance(body.get("targets"), list) else None
-    )
-    defn["targets"] = native_codegen.compile_native_targets(
-        defn, target_ids=target_ids
-    )
-    if body.get("strategy"):
-      defn["strategy"] = str(body["strategy"])
-    elif not defn.get("strategy"):
-      defn["strategy"] = "native_targets"
-    r = self.apply_definition(cid, defn)
-    self.svc.touch(r["project_id"])
-    return self.fmt(self.store.get("custom_components", cid))
 
   def snapshot_rows(self, pid: str) -> list[dict[str, Any]]:
     return [

@@ -19,14 +19,19 @@ import {mountImmersive} from './teach_immersive.js';
 const CARD_W = 412;
 const BUSY = new Set(
     ['queued', 'generating', 'rendering', 'judging', 'running', 'pending']);
-// Preferred workspace mode: 'immersive' (default) or 'expert' (3 panes).
-const MODE_KEY = 'dcb.teach.mode';
-function preferredMode() {
+// Workspace mode: 'immersive' (default) or 'expert' (3 panes). The mode is
+// per session view and never sticky across sessions/projects: it comes from
+// `?mode=immersive|expert` (kept in the URL when toggled), and a session with
+// no observations yet always opens immersive.
+const LEGACY_MODE_KEY = 'dcb.teach.mode';
+function initialMode(state) {
   try {
-    return localStorage.getItem(MODE_KEY) === 'expert' ? 'expert' : 'immersive';
+    localStorage.removeItem(LEGACY_MODE_KEY);  // old sticky preference
   } catch {
-    return 'immersive';
   }
+  const q = new URLSearchParams(location.search).get('mode');
+  const hasObs = ((state && state.observations) || []).length > 0;
+  return q === 'expert' && hasObs ? 'expert' : 'immersive';
 }
 
 // Quick chips only insert text into the note; they carry no semantics.
@@ -370,6 +375,7 @@ async function renderWorkspace(root, params, ctx) {
   let afterOutputs = null;
   let afterFetchedFor = '';
   let imm = null;
+  let mode = 'immersive';  // this session view's mode (see initialMode)
   let hoverBoxes = [];
   const composerEl = h('div.composer#teach-composer');
   const pending = {polarity: 'bad', anchors: [], about: ''};
@@ -428,8 +434,8 @@ async function renderWorkspace(root, params, ctx) {
   initCard();
   drawAll();
   schedulePoll();
-  if (preferredMode() === 'immersive' && screen === 'work')
-    setImmersive(true, {persist: false});
+  mode = initialMode(state);
+  if (mode === 'immersive' && screen === 'work') setImmersive(true);
   return cleanup;
 
   // ------------------------------------------------------------ lifecycle
@@ -750,17 +756,18 @@ async function renderWorkspace(root, params, ctx) {
     else
       u.searchParams.delete('finish');
     history.replaceState(null, '', u.pathname + u.search);
-    if (s === 'finish' && imm) setImmersive(false, {persist: false});
+    if (s === 'finish' && imm) setImmersive(false, {remember: false});
     drawAll();
-    if (s === 'work' && !imm && preferredMode() === 'immersive')
-      setImmersive(true, {persist: false});
+    if (s === 'work' && !imm && mode === 'immersive') setImmersive(true);
   }
-  function setImmersive(on, {persist = true} = {}) {
-    if (persist) {
-      try {
-        localStorage.setItem(MODE_KEY, on ? 'immersive' : 'expert');
-      } catch {
-      }
+  // `remember`: record the choice as this session view's mode (URL ?mode=);
+  // nothing is persisted across sessions or projects.
+  function setImmersive(on, {remember = true} = {}) {
+    if (remember) {
+      mode = on ? 'immersive' : 'expert';
+      const u = new URL(location.href);
+      u.searchParams.set('mode', mode);
+      history.replaceState(null, '', u.pathname + u.search);
     }
     if (on && !imm && screen === 'work') {
       document.body.classList.add('teach-immersive');

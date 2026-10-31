@@ -13,7 +13,6 @@ export async function render(root, params, ctx) {
         {value: 'overview', label: 'Overview', id: 'admin-tab-overview'},
         {value: 'inbox', label: 'Inbox', id: 'admin-tab-inbox'},
         {value: 'bundles', label: 'Bundles', id: 'admin-tab-bundles'},
-        {value: 'bugs', label: 'Bug reports', id: 'admin-tab-bugs'},
       ],
       tab, (v) => {
         tab = v;
@@ -36,8 +35,6 @@ export async function render(root, params, ctx) {
       await overview();
     else if (tab === 'inbox')
       await inbox();
-    else if (tab === 'bugs')
-      await bugsTab();
     else
       await bundles();
   }
@@ -54,8 +51,7 @@ export async function render(root, params, ctx) {
           tot('projects', 'projects'), tot('revisions', 'revisions'),
           tot('runs', 'runs'), tot('outputs', 'outputs'),
           tot('samples', 'samples'), tot('dos', 'dos'),
-          tot('donts', 'don\u2019ts'), tot('escalated', 'escalated'),
-          tot('bugs', 'bugs')),
+          tot('donts', 'don\u2019ts'), tot('escalated', 'escalated')),
         h('section.admin-section', h('h2', 'Projects'),
           h('div.table-wrap',
             h('table.table#admin-projects',
@@ -271,66 +267,6 @@ export async function render(root, params, ctx) {
                                       download: ''
                                     },
                                     icon('download'), 'Download'))))))));
-  }
-
-  async function bugsTab() {
-    const res = await get('/api/bugs?all=1');
-    const list = res.bugs || [];
-    if (!list.length) {
-      mount(
-          body,
-          emptyState(
-              'No bug reports yet',
-              'Issues filed from the top-bar "Report bug" button show up here with their Buganizer links and context bundles.'));
-      return;
-    }
-    mount(
-        body,
-        h('div.table-wrap',
-          h('table.table#admin-bugs',
-            h('thead',
-              h('tr', h('th', 'Issue'), h('th', 'Title'), h('th', 'Reporter'),
-                h('th', 'Priority'), h('th', 'Attachments'), h('th', 'Filed'),
-                h('th', ''))),
-            h('tbody', list.map((b) => {
-              const atts = b.attachments || [];
-              return h(
-                  'tr', {dataset: {bugId: b.id}},
-                  h('td',
-                    b.issue_id ? h('a.mono.strong', {
-                      href: b.corp_url ||
-                          `https://b.corp.google.com/issues/${b.issue_id}`,
-                      target: '_blank',
-                      rel: 'noopener',
-                      dataset: {external: '1'},
-                    },
-                                   `b/${b.issue_id}`) :
-                                 chip(b.status || 'saved', 'chip-quiet')),
-                  h('td', h('strong', b.title || ''),
-                    b.error ? h('div.cell-sub.c-bad', b.error.slice(0, 120)) :
-                              null),
-                  h('td', b.reporter_ldap || ''),
-                  h('td', chip(b.priority || 'P2', 'chip-quiet')),
-                  h('td.muted', `${atts.length} file(s)`),
-                  h('td.muted', relTime(b.created_at)),
-                  h('td.cell-dl',
-                    h('a.dl', {
-                      href: b.bundle_url || `/api/bugs/${b.id}/bundle.zip`,
-                      download: '',
-                      title: 'Download context bundle (.zip)',
-                    },
-                      icon('folder_zip'), 'bundle.zip'),
-                    !b.issue_id && b.prefilled_url ?
-                        h('a.dl', {
-                          href: b.prefilled_url,
-                          target: '_blank',
-                          rel: 'noopener',
-                          dataset: {external: '1'},
-                          title: 'Open pre-filled Buganizer form',
-                        },
-                          icon('open_in_new'), 'file') :
-                        null));
-            })))));
   }
 
   await draw();

@@ -66,8 +66,10 @@ class HttpTest(unittest.TestCase):
     self.assertFalse(body["user"]["is_admin"])
     st, body = self.s.call("GET", "/api/me")
     self.assertEqual(body["user"]["ldap"], "alice")
-    st, body = self.s.call("POST", "/api/login", {"ldap": "bad name!"})
+    st, body = self.s.login("bad name!")
     self.assertEqual(st, 400)
+    st, body = self.s.login("alice", password="wrong")
+    self.assertEqual(st, 401)
 
   def test_multi_cookie_and_multi_secret_compat(self):
     from server import auth as auth_mod
@@ -512,17 +514,13 @@ class HttpTest(unittest.TestCase):
     )
     self.assertEqual(body["category"]["label"], "Baggage issues")
 
-  def test_multi_renderer_run_and_on_demand_render(self):
+  def test_web_only_renderer_run_and_on_demand_render(self):
     p = self._project()
     pid = p["id"]
     self._samples(1)
     st, body = self.s.call("GET", "/api/renderers")
     self.assertEqual(st, 200)
-    rids = [r["id"] for r in body["renderers"]]
-    self.assertEqual(
-        rids,
-        ["web", "android_compose", "android_remote_compose", "ios_swiftui"],
-    )
+    self.assertEqual([r["id"] for r in body["renderers"]], ["web"])
     sets = self.s.call("GET", "/api/sample_sets")[1]["sets"]
     st, body = self.s.call(
         "POST",
@@ -530,12 +528,8 @@ class HttpTest(unittest.TestCase):
         {
             "sample_ids": sets[0]["sample_ids"][:1],
             "viewports": ["phone"],
-            "renderers": [
-                "web",
-                "android_compose",
-                "android_remote_compose",
-                "ios_swiftui",
-            ],
+            # Unknown/removed renderers are ignored.
+            "renderers": ["web", "android_compose"],
         },
     )
     self.assertEqual(st, 201, body)
@@ -547,33 +541,19 @@ class HttpTest(unittest.TestCase):
     outs = self.s.call("GET", f"/api/runs/{run['id']}/outputs")[1]["outputs"]
     self.assertEqual(len(outs), 1)
     o = outs[0]
-    for rid in (
-        "web",
-        "android_compose",
-        "android_remote_compose",
-        "ios_swiftui",
-    ):
-      self.assertIn(rid, o["renders"])
-      self.assertEqual(o["renders"][rid]["status"], "done")
-      self.assertTrue(o["renders"][rid]["screenshot_url"])
-    rc_meta = o["renders"]["android_remote_compose"]["meta"]
-    self.assertEqual(rc_meta["rc_byte_size"], 1024)
-    self.assertEqual(rc_meta["rc_op_count"], 18)
+    self.assertEqual(list(o["renders"]), ["web"])
+    self.assertEqual(o["renders"]["web"]["status"], "done")
+    self.assertTrue(o["renders"]["web"]["screenshot_url"])
 
-    # Save guideline with renderer="all" copies all 4 platform screenshots
     st, body = self.s.call(
-        "POST",
-        f"/api/projects/{pid}/guidelines",
-        {
-            "kind": "do",
-            "title": "Cross-platform consistency",
-            "body_md": "Works on all 4",
-            "output_id": o["id"],
-            "renderer": "all",
-        },
+        "POST", f"/api/outputs/{o['id']}/render", {"renderers": ["web"]}
     )
-    self.assertEqual(st, 201)
-    self.assertEqual(len(body["guideline"]["screenshots"]), 4)
+    self.assertEqual(st, 200, body)
+    self.assertEqual(body["output"]["renders"]["web"]["status"], "done")
+    st, body = self.s.call(
+        "POST", f"/api/outputs/{o['id']}/render", {"renderer": "ios_swiftui"}
+    )
+    self.assertEqual(st, 400, body)
 
   def test_constitution_effect_study(self):
     p = self._project()

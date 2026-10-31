@@ -1,11 +1,11 @@
 // App shell: router (history API), top bar, project rail, chat panel.
 import {get, post, setUnauthorizedHandler} from './components/api.js';
 import {loadGenres} from './components/badges.js';
-import {openBugReport} from './components/bug_report.js';
 import {CHAT_VIEWS, ChatPanel} from './components/chat.js';
 import {designSourceChips} from './components/component_badges.js';
 import {installDiagnostics, recordClientError} from './components/diagnostics.js';
 import {h, icon, mount} from './components/dom.js';
+import {openReportIssue, reportIssueUrl} from './components/report_issue.js';
 import {emit, navigate, on, store} from './components/store.js';
 import {closeDrawer} from './components/ui.js';
 
@@ -179,17 +179,21 @@ function renderTopbar(route) {
                   'div.menu',
                   h('div.menu-head', h('div.strong', u.display_name || u.ldap),
                     h('div.muted', `${u.ldap}${u.is_admin ? ' · admin' : ''}`)),
-                  h('button.menu-item#user-report-bug', {
-                    type: 'button',
-                    onclick: () => {
+                  h('a.menu-item#user-report-issue', {
+                    href: reportIssueUrl(),
+                    target: '_blank',
+                    rel: 'noopener',
+                    onclick: (e) => {
+                      e.preventDefault();
                       if (openMenu) {
                         openMenu.el.remove();
                         openMenu = null;
                       }
-                      openBugReport();
+                      openReportIssue();
                     }
                   },
-                    icon('bug_report'), 'Report a bug'),
+                    icon('bug_report'), 'Report an issue'),
+                  store.authMode === 'local' ? null :
                   h('button.menu-item#logout', {
                     type: 'button',
                     onclick: async () => {
@@ -238,12 +242,17 @@ function renderTopbar(route) {
           },
             icon('forum'), 'Chat') :
           null,
-      h('button.btn.btn-ghost.btn-sm#report-bug-btn', {
-        type: 'button',
-        title: 'Report a bug (share reviewable context to AIR GenUX)',
-        onclick: () => openBugReport()
+      h('a.btn.btn-ghost.btn-sm#report-issue-btn', {
+        href: reportIssueUrl(),
+        target: '_blank',
+        rel: 'noopener',
+        title: 'Report an issue on GitHub (opens a prefilled form)',
+        onclick: (e) => {
+          e.preventDefault();
+          openReportIssue();
+        }
       },
-        icon('bug_report'), 'Report bug'),
+        icon('bug_report'), 'Report an issue'),
       userWrap);
 }
 
@@ -355,6 +364,8 @@ async function render() {
   if (!store.user && route.view !== 'login') {
     const me = await get('/api/me', {quiet: true}).catch(() => ({user: null}));
     store.user = me && me.user;
+    if (me && me.auth_mode) store.authMode = me.auth_mode;
+    if (me && me.version) store.appVersion = me.version;
     if (!store.user) {
       const next = url.pathname + url.search;
       history.replaceState(
@@ -444,15 +455,13 @@ async function render() {
           h('div.page-head', h('h1', 'Something went wrong'),
             h('button.btn.btn-primary#report-page-error', {
               type: 'button',
-              onclick: () => openBugReport({
-                prefill: {
-                  title: `Page error on ${location.pathname}: ${
-                      String(e && e.message || e).slice(0, 80)}`,
-                  what_happened: errText,
-                }
+              onclick: () => openReportIssue({
+                title: `Page error on ${location.pathname}: ${
+                    String(e && e.message || e).slice(0, 80)}`,
+                details: errText,
               })
             },
-              icon('bug_report'), 'Report this error')),
+              icon('bug_report'), 'Report this issue')),
           h('pre.error-pre', errText)));
   }
 }
@@ -466,6 +475,7 @@ function go(path, replace = false) {
 }
 
 on('navigate', ({path, replace}) => go(path, replace));
+on('report-issue', (opts) => openReportIssue(opts || {}));
 on('chat-toggled', () => {
   const b = document.getElementById('chat-toggle');
   if (b) b.setAttribute('aria-pressed', String(chat.isOpen()));
@@ -515,7 +525,7 @@ window.__dcb = {
   store,
   navigate,
   emit,
-  openBugReport,
+  openReportIssue,
 };
 
 render();

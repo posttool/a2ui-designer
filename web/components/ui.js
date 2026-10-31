@@ -20,14 +20,12 @@ export function toast(message, kind = 'info', ms = 4200, opts = {}) {
   const reportBtn = (kind === 'bad' && !opts.noReport) ?
       h('button.toast-report', {
         type: 'button',
-        title: 'Report a bug with this error',
+        title: 'Report an issue with this error on GitHub',
         onclick: () => {
           el.remove();
-          emit('open-bug-report', {
-            prefill: {
-              title: `Error: ${String(message || '').slice(0, 80)}`,
-              what_happened: String(message || ''),
-            },
+          emit('report-issue', {
+            title: `Error: ${String(message || '').slice(0, 80)}`,
+            details: String(message || ''),
           });
         },
       },

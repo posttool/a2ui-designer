@@ -26,7 +26,6 @@ from core.service import ApiError
 from llm.gemini import Image, LlmError
 from refs import figma
 from refs import figma_compiler
-from refs import native_codegen
 from refs import stitch
 from refs.references import decode_data_url
 from sim import common
@@ -1245,12 +1244,10 @@ class ComponentBuilder:
     defn = custom_web.normalize_definition(raw_defn)
     if (
         lowering.has_composition(defn)
-        or eff_strategy in ("basic_composition", "native_targets")
+        or eff_strategy == "basic_composition"
         or not ((defn.get("web") or {}).get("template") or "").strip()
     ):
       defn = self.comps._ensure_composition(defn)  # pylint: disable=protected-access
-    if eff_strategy == "native_targets" or cur.get("targets"):
-      defn["targets"] = native_codegen.compile_native_targets(defn)
     return custom_web.normalize_definition(defn)
 
   def _apply_draft(

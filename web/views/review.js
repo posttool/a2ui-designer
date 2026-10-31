@@ -1,10 +1,7 @@
 // Review: focus mode for one output at a time (screenshot ⇄ live ⇄ JSON),
-// renderer switcher limited to the renderers enabled in project settings
-// (plus "All N side-by-side" when N > 1), judge findings, human verdict, Save
-// as Do/Don't, send to chat.
+// judge findings, human verdict, Save as Do/Don't, send to chat.
 import {get, post, put, qs} from '../components/api.js';
 import {chip, genreChip, judgeVerdictChip, loadGenres, scoreBadge, statusChip} from '../components/badges.js';
-import {openBugReport} from '../components/bug_report.js';
 import {reviewChatTabs, sendOutputToChat} from '../components/chat.js';
 import {debounce, emptyState, h, icon, mount, relTime, spinner} from '../components/dom.js';
 import {jsonTree} from '../components/jsontree.js';
@@ -12,9 +9,9 @@ import {openPatternCapture} from '../components/pattern_capture.js';
 import {emit, navigate, on, store} from '../components/store.js';
 import {findComponent, relatedThemeFields, themeFieldControl, themeGroupFor} from '../components/theme_tokens.js';
 import {modal, segmented, toast} from '../components/ui.js';
-import {DEFAULT_THEME} from '../renderer/a2ui.js';
+import {DEFAULT_THEME} from '../renderer/host.js';
 
-import {enabledRendererIds, groupStagePairs, hasStages, outputShotForRenderer, RENDERER_META, rendererList, stageChip} from './run_detail.js';
+import {groupStagePairs, hasStages, outputShotForRenderer, RENDERER_META, stageChip} from './run_detail.js';
 
 const DONT_TEMPLATE = '**What**\n\n\n**Why it matters**\n\n\n**Instead**\n';
 const DO_TEMPLATE = '**What**\n\n\n**Why it works**\n\n\n**When to use it**\n';
@@ -58,17 +55,9 @@ export async function render(root, params, ctx) {
   let idx = 0;
   let cur = null;  // {output, sample}
   let view = localStorage.getItem('dcb.reviewView') || 'screenshot';
-  // Only renderers enabled in project settings are shown here.
-  const RIDS = enabledRendererIds(
-      await get(`/api/projects/${pid}/settings`, {quiet: true})
-          .then((r) => r.settings || {})
-          .catch(() => ({})));
-  const multi = RIDS.length > 1;
-  let activeRenderer =
-      sp.get('renderer') || localStorage.getItem('dcb.reviewRenderer') || 'all';
-  if (activeRenderer === 'all' ? !multi : !RIDS.includes(activeRenderer)) {
-    activeRenderer = multi ? 'all' : RIDS[0];
-  }
+  // The web renderer is the only renderer.
+  const RIDS = ['web'];
+  const activeRenderer = 'web';
   let alive = true;
   let tree = null;
   let iframe = null;
@@ -156,21 +145,6 @@ export async function render(root, params, ctx) {
       h('span.muted.small.review-sortlabel',
         filters.sort === 'worst' ? 'worst first' : `sorted: ${filters.sort}`),
       h('div.grow'), viewSeg,
-      h('button.btn.btn-quiet.btn-sm#review-report-bug', {
-        type: 'button',
-        title:
-            'Report a bug with this output (attaches screenshots, A2UI JSON & sample data)',
-        onclick: () => openBugReport({
-          fromReview: true,
-          scope: {
-            project_id: pid,
-            run_id: rid,
-            output_id: cur && cur.output ? cur.output.id : null,
-            selected_component: store.reviewSelection || null,
-          },
-        })
-      },
-        icon('bug_report'), 'Report bug'),
       h('button.icon-btn#review-keys', {
         type: 'button',
         title: 'Keyboard shortcuts',
@@ -277,10 +251,7 @@ export async function render(root, params, ctx) {
                       (runMeta.rendered_token_revision_number ||
                        runMeta.current_token_revision_number)) ||
           '';
-      toast(
-          `Applied Tokens T${curTok} \u2014 re-rendering on ${
-              rendererList(RIDS)}\u2026`,
-          'good');
+      toast(`Applied Tokens T${curTok} \u2014 re-rendering\u2026`, 'good');
       await refreshCurrent();
       drawRendererBar();
       drawStage();
@@ -329,31 +300,11 @@ export async function render(root, params, ctx) {
     navigate(`/p/${pid}/review/${rid}${qs({o: id})}`);
   }
 
-  function setRenderer(r) {
-    activeRenderer = r;
-    localStorage.setItem('dcb.reviewRenderer', r);
-    const u = new URL(location.href);
-    if (r && r !== 'web')
-      u.searchParams.set('renderer', r);
-    else
-      u.searchParams.delete('renderer');
-    history.replaceState(null, '', u.pathname + u.search);
-    drawRendererBar();
-    drawStage();
-  }
-
   async function triggerRender(o, targetRenderers) {
     try {
-      toast(
-          targetRenderers.length > 1 ?
-              'Rendering across selected platforms\u2026' :
-              `Rendering on ${
-                  (RENDERER_META[targetRenderers[0]] || {}).label ||
-                  targetRenderers[0]}\u2026`,
-          'info', 2500);
+      toast('Rendering\u2026', 'info', 2500);
       const res = await post(`/api/outputs/${o.id}/render`, {
         renderers: targetRenderers,
-        async: targetRenderers.includes('ios_swiftui'),
       });
       if (res && res.output && cur && cur.output.id === o.id) {
         cur.output = {...cur.output, ...res.output};
@@ -501,39 +452,9 @@ export async function render(root, params, ctx) {
     }
 
     const o = cur.output;
-    const items = [
-      ...RIDS.map((rid) => {
-        const shot = outputShotForRenderer(o, rid);
-        const dotClass = shot.full ?
-            'dot-done' :
-            (shot.status === 'rendering' || shot.status === 'queued' ?
-                 'dot-busy' :
-                 (shot.status === 'error' ? 'dot-err' : 'dot-missing'));
-        return h(
-            'button.renderer-tab', {
-              type: 'button',
-              id: `review-ren-${rid}`,
-              class: activeRenderer === rid ? 'on' : '',
-              onclick: () => setRenderer(rid)
-            },
-            h('span.renderer-dot', {class: dotClass}),
-            h('span.renderer-badge.renderer-badge-xs',
-              {dataset: {renderer: rid}}, RENDERER_META[rid].badge),
-            h('span', RENDERER_META[rid].short));
-      }),
-      multi ?
-          h('button.renderer-tab.renderer-tab-all', {
-            type: 'button',
-            id: 'review-ren-all',
-            class: activeRenderer === 'all' ? 'on' : '',
-            onclick: () => setRenderer('all')
-          },
-            icon('view_column'), h('span', `All ${RIDS.length} side-by-side`)) :
-          null,
-    ];
     const missing = RIDS.filter((rid) => !outputShotForRenderer(o, rid).full);
     mount(
-        rendererBarEl, h('div.renderer-tabs', items), h('div.grow'),
+        rendererBarEl, h('div.grow'),
         drifted ? h('div.token-drift-inline',
                     h('span.chip.chip-xs.token-drift-pill', icon('palette'),
                       `Tokens T${runTok} \u2192 T${curTok}`),
@@ -546,114 +467,10 @@ export async function render(root, params, ctx) {
                       icon('format_paint'), `Apply T${curTok} & re-render`)) :
                   null,
         missing.length && o.a2ui ?
-            h('button.btn.btn-sm.btn-ghost#render-missing-platforms',
+            h('button.btn.btn-sm.btn-ghost#render-missing',
               {type: 'button', onclick: () => triggerRender(o, missing)},
-              icon('bolt'), `Render missing (${missing.length})`) :
+              icon('bolt'), 'Render') :
             null);
-  }
-
-  function buildRcInspector(meta) {
-    if (!meta || (!meta.rc_byte_size && !meta.rc_hierarchy)) return null;
-    const stats = meta.rc_stats || [];
-    return h(
-        'details.rc-inspector#rc-wire-inspector', {open: true},
-        h('summary.rc-inspector-head',
-          h('span.renderer-badge',
-            {dataset: {renderer: 'android_remote_compose'}}, 'RC WIRE'),
-          h('strong', 'RemoteCompose (.rc) Wire Bytecode Inspector'),
-          h('span.chip.chip-quiet', `${meta.rc_byte_size || 0} bytes`),
-          h('span.chip.chip-quiet', `${meta.rc_op_count || 0} wire ops`)),
-        h('div.rc-inspector-body',
-          stats.length ?
-              h('div.rc-stats-col',
-                h('h4', 'Wire Operations Breakdown (CoreDocument.getStats)'),
-                h('div.rc-stats-pills',
-                  stats.slice(0, 14).map((st) => h('span.rc-stat-pill', st)))) :
-              null,
-          meta.rc_hierarchy ?
-              h('div.rc-tree-col',
-                h('h4', 'Decoded RemoteCompose CoreDocument Hierarchy'),
-                h('pre.code.rc-tree', meta.rc_hierarchy.trim())) :
-              null));
-  }
-
-  function drawAllSideBySide(o) {
-    const cols = RIDS.map((rid) => {
-      const m = RENDERER_META[rid];
-      const shot = outputShotForRenderer(o, rid);
-      const meta = shot.meta || {};
-      const dims = meta.width && meta.height ?
-          `${meta.width}\u00d7${meta.height}px` :
-          '';
-      const rcNote = rid === 'android_remote_compose' && meta.rc_byte_size ?
-          `${meta.rc_byte_size} B \u00b7 ${meta.rc_op_count || 0} ops` :
-          '';
-      return h(
-          'td.multi-render-col', {dataset: {renderer: rid}},
-          h('div.multi-render-col-head',
-            h('div.multi-render-title-row',
-              h('span.renderer-badge',
-                {dataset: {renderer: rid}, title: m.label}, m.badge),
-              h('div.grow'),
-              h('button.btn.btn-xs.btn-quiet', {
-                type: 'button',
-                title: `Open ${m.label} focus view`,
-                onclick: () => setRenderer(rid)
-              },
-                'Focus')),
-            h('div.multi-render-sub', {title: m.engine}, m.engine)),
-          h('div.multi-render-shot',
-            shot.full ?
-                h('img.multi-shot-img', {
-                  src: shot.full,
-                  alt: `${o.sample_title} on ${m.label}`,
-                  onclick: () => setRenderer(rid)
-                }) :
-                h('div.multi-shot-empty',
-                  shot.status === 'rendering' || shot.status === 'queued' ?
-                      [
-                        h('span.spinner'),
-                        h('p',
-                          rid === 'ios_swiftui' ?
-                              'Rendering on iOS Simulator (Forge-on-Mac)\u2026' :
-                              `Rendering ${m.short}\u2026`)
-                      ] :
-                      [
-                        shot.error ? h('p.c-bad.small', shot.error) :
-                                     h('p.muted.small',
-                                       `Not yet rendered on ${m.short}`),
-                        o.a2ui ? h('button.btn.btn-sm.btn-ghost', {
-                          type: 'button',
-                          onclick: () => triggerRender(o, [rid])
-                        },
-                                   icon('play_arrow'), `Render ${m.short}`) :
-                                 null
-                      ])),
-          h('div.multi-render-foot',
-            dims ? h('span.chip.chip-quiet', dims) : null,
-            meta.latency_ms ?
-                h('span.chip.chip-quiet', `${meta.latency_ms} ms`) :
-                null,
-            rcNote ? h('span.chip.chip-quiet', rcNote) : null));
-    });
-
-    return h(
-        'div.multi-render-wrap#review-multi-render',
-        h('div.multi-render-header',
-          h('div', h('h3.multi-render-heading', rendererList(RIDS)),
-            h('p.multi-render-caption',
-              `The same A2UI surface on the ${
-                  RIDS.length} renderers enabled in Settings: ${
-                  RIDS.map(
-                          (rid) => `${RENDERER_META[rid].short} (${
-                              RENDERER_META[rid].engine})`)
-                      .join('; ')}.`)),
-          o.a2ui ? h('button.btn.btn-sm.btn-ghost#re-render-all-btn',
-                     {type: 'button', onclick: () => triggerRender(o, RIDS)},
-                     icon('refresh'), `Re-render all ${RIDS.length}`) :
-                   null),
-        h('div.multi-render-scroll',
-          h('table.multi-render-table', h('tbody', h('tr', cols)))));
   }
 
   function drawStage() {
@@ -663,10 +480,6 @@ export async function render(root, params, ctx) {
     tree = null;
     stageEl.className = `review-stage view-${view} ren-${activeRenderer}`;
     if (view === 'screenshot') {
-      if (activeRenderer === 'all') {
-        mount(stageEl, drawAllSideBySide(o));
-        return;
-      }
       const m = RENDERER_META[activeRenderer] || RENDERER_META.web;
       const shot = outputShotForRenderer(o, activeRenderer);
       const meta = shot.meta || {};
@@ -694,10 +507,7 @@ export async function render(root, params, ctx) {
               h('img.shot#review-screenshot', {
                 src: shot.full,
                 alt: `Screenshot of ${o.sample_title} on ${m.label}`
-              }),
-              activeRenderer === 'android_remote_compose' ?
-                  buildRcInspector(meta) :
-                  null));
+              })));
       } else {
         mount(
             stageEl,
@@ -1196,16 +1006,9 @@ export async function render(root, params, ctx) {
                       j.unfixable_reason || '')) :
                   null,
               pnoteEntries.length ?
-                  h('div.judge-platform-notes',
-                    h('h4', 'Platform Renderer Notes'),
+                  h('div.judge-platform-notes', h('h4', 'Rendering notes'),
                     h('ul.plain',
-                      pnoteEntries.map(
-                          (rid) =>
-                              h('li',
-                                h('span.renderer-badge.renderer-badge-xs',
-                                  {dataset: {renderer: rid}},
-                                  RENDERER_META[rid].badge),
-                                ' ', pnotes[rid])))) :
+                      pnoteEntries.map((rid) => h('li', pnotes[rid])))) :
                   null,
               (j.findings || []).length ?
                   h('ul.findings',
@@ -1374,27 +1177,11 @@ export async function render(root, params, ctx) {
         `**What**\n${compIntro}\n\n**Why it matters**\n\n\n**Instead**\n`;
     const bodyMd =
         h('textarea.input.code-input#guideline-body', {rows: 9}, defaultBody);
-    let glRenderer = activeRenderer || RIDS[0];
-    const renSel =
-        h('select.input#guideline-renderer', {
-          onchange: (e) => {
-            glRenderer = e.target.value;
-            updatePreviewShot();
-          }
-        },
-          [
-            multi ? ['all', `All enabled renderers (${rendererList(RIDS)})`] :
-                    null,
-            ...RIDS.map((rid) => [rid, RENDERER_META[rid].label]),
-          ].filter(Boolean)
-              .map(
-                  ([v, l]) =>
-                      h('option', {value: v, selected: glRenderer === v}, l)));
+    const glRenderer = activeRenderer;
     const tags = h('input.input#guideline-tags', {
       placeholder: 'comma-separated, e.g. density, lists',
       value: [
-        o.genre, o.viewport, comp ? comp.component : null,
-        glRenderer !== 'all' ? glRenderer : null
+        o.genre, o.viewport, comp ? comp.component : null
       ].filter(Boolean)
                  .join(', ')
     });
@@ -1419,8 +1206,7 @@ export async function render(root, params, ctx) {
                   'Not sure'));
     const preview = h('div.gl-shot');
     function updatePreviewShot() {
-      const targetRid = glRenderer === 'all' ? 'web' : glRenderer;
-      const shot = outputShotForRenderer(o, targetRid);
+      const shot = outputShotForRenderer(o, glRenderer);
       const url = shot.thumb || shot.full || o.thumb_url || o.screenshot_url;
       mount(preview, url ? h('img', {src: url, alt: ''}) : null);
     }
@@ -1441,8 +1227,6 @@ export async function render(root, params, ctx) {
                          h('span.muted', ` #${comp.id}`)))) :
                    null,
             h('label.field', h('span.field-label', 'Title'), title),
-            h('label.field', h('span.field-label', 'Platform renderer'),
-              renSel),
             h('label.field', h('span.field-label', 'Description (markdown)'),
               bodyMd),
             h('label.field', h('span.field-label', 'Tags'), tags),

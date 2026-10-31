@@ -1,6 +1,6 @@
 """Stdlib Gemini REST client (generativelanguage.googleapis.com).
 
-- Key: $GEMINI_API_KEY, then ~/.config/agent_os/gemini_api_key.
+- Key: $GEMINI_API_KEY, then ~/.config/a2ui_designer/gemini_api_key.
 - Retries 429/500/503 with jittered backoff, then falls back to other models.
 - Thought parts are dropped; `thinkingLevel` is set for 3.x models.
 - Parts: str (text) or Image(bytes, mime_type) (inline data).
@@ -29,7 +29,7 @@ DEFAULT_IMAGE_FALLBACKS = (
     "gemini-3.1-flash-image-preview",
     "gemini-2.5-flash-image",
 )
-KEY_PATHS = ("~/.config/agent_os/gemini_api_key",)
+KEY_PATHS = ("~/.config/a2ui_designer/gemini_api_key",)
 
 
 class LlmError(RuntimeError):
@@ -101,7 +101,7 @@ def load_api_key() -> str:
         return k
   raise LlmError(
       "No Gemini API key: set GEMINI_API_KEY or write "
-      "~/.config/agent_os/gemini_api_key"
+      "~/.config/a2ui_designer/gemini_api_key"
   )
 
 

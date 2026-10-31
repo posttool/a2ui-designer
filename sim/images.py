@@ -30,7 +30,7 @@ from core import util
 
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 USER_AGENT = (
-    "DesignConstitutionBuilder/0.1 (experimental prototype; google.com)"
+    "A2UIDesigner/0.1 (+https://github.com/posttool/a2ui-designer)"
 )
 PLACEHOLDER_RE = re.compile(
     r"/img/([A-Za-z0-9][A-Za-z0-9_\-]{0,120})/(\d{2,4})x(\d{2,4})(?:\.(?:svg|png|jpe?g))?"

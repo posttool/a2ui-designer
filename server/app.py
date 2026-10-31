@@ -8,7 +8,7 @@ import os
 from typing import Any
 
 from core import util
-from core.bugs import BugReporter
+from core.version import APP_VERSION
 from core.components import ComponentManager
 from core.service import ApiError, Service
 from exports import bundles as bundles_mod
@@ -48,10 +48,9 @@ class App:
       svc: Service,
       runs: RunManager,
       secret: bytes,
-      auth_mode: str = "dev",
+      auth_mode: str = "local",
       *,
-      bug_component_id: int | None = None,
-      issues_cli: str | None = None,
+      password: str | None = None,
   ):
     self.svc = svc
     self.runs = runs
@@ -65,16 +64,14 @@ class App:
     )
     self.ledger = TeachLedger(svc)
     self.teach = TeachManager(svc, runs, self.imports, self.effects)
-    self.bugs = BugReporter(
-        svc,
-        runs,
-        secret,
-        component_id=bug_component_id,
-        issues_cli=issues_cli,
-    )
     self.store = svc.store
     self.secret = secret
+    if auth_mode not in ("local", "password"):
+      raise ValueError(f"unknown auth_mode {auth_mode!r}")
+    if auth_mode == "password" and not password:
+      raise ValueError("auth_mode 'password' needs a password")
     self.auth_mode = auth_mode
+    self.password = password
     self.router = Router()
     self._routes()
 
@@ -104,12 +101,12 @@ class App:
     return self._static(req)
 
   def _current_user(self, req: Request) -> dict[str, Any] | None:
-    if self.auth_mode == "iap":
-      ldap = auth.iap_ldap(req.headers.get("X-Goog-Authenticated-User-Email"))
-      if ldap:
-        if not self.store.get("users", ldap):
-          self.svc.login(ldap)
-        return self.svc.user(ldap)
+    if self.auth_mode == "local":
+      # No sign-in: a single implicit admin user.
+      u = self.svc.user(auth.LOCAL_USER)
+      if not u or not u["is_admin"]:
+        u = self.svc.login(auth.LOCAL_USER, admin=True)
+      return u
     for tok in req.cookies(auth.COOKIE):
       ldap = auth.verify(self.secret, tok)
       if ldap:
@@ -373,7 +370,6 @@ class App:
     r("POST", "/api/components/{cid}/sample", self.component_sample)
     r("POST", "/api/components/{cid}/recheck", self.component_recheck)
     r("POST", "/api/components/{cid}/apply_tokens", self.component_apply_tokens)
-    r("POST", "/api/components/{cid}/targets", self.component_sync_targets)
     r("POST", "/api/components/{cid}/to_template", self.component_to_template)
     r(
         "GET",
@@ -444,15 +440,6 @@ class App:
     r("GET", "/api/admin/bundles", self.admin_bundles)
     r("POST", "/api/admin/bundles", self.admin_bundle_create)
     r("GET", "/api/admin/bundles/{bid}", self.admin_bundle_download)
-    # bug reports
-    r("GET", "/api/bugs/config", self.bugs_config)
-    r("POST", "/api/bugs/context", self.bugs_context)
-    r("POST", "/api/bugs/snapshot", self.bugs_snapshot)
-    r("POST", "/api/bugs/bundle", self.bugs_bundle_build)
-    r("GET", "/api/bugs", self.bugs_list)
-    r("POST", "/api/bugs", self.bugs_create)
-    r("GET", "/api/bugs/{bid}", self.bugs_get)
-    r("GET", "/api/bugs/{bid}/bundle.zip", self.bugs_bundle_saved)
 
   # ---------------------------------------------------- teaching sessions
   def teach_list(self, req: Request) -> Response:
@@ -959,13 +946,6 @@ class App:
         self.components.apply_tokens(req.user, req.params["cid"])
     )
 
-  def component_sync_targets(self, req: Request) -> Response:
-    return json_response({
-        "component": self.components.sync_native_targets(
-            req.user, req.params["cid"], req.body() or {}
-        )
-    })
-
   def component_to_template(self, req: Request) -> Response:
     req.body()
     return json_response(
@@ -1022,9 +1002,13 @@ class App:
 
   # ---------------------------------------------------------------- auth
   def login(self, req: Request) -> Response:
-    if self.auth_mode == "iap":
-      raise ApiError(400, "Sign-in is handled by IAP")
-    user = self.svc.login((req.body() or {}).get("ldap", ""))
+    if self.auth_mode == "local":
+      return json_response({"user": self._current_user(req)})
+    body = req.body() or {}
+    if not auth.check_password(self.password, str(body.get("password") or "")):
+      raise ApiError(401, "Wrong password")
+    name = str(body.get("username") or body.get("ldap") or "").strip()
+    user = self.svc.login(name or auth.DEFAULT_PASSWORD_USER)
     return json_response(
         {"user": user},
         headers={
@@ -1041,7 +1025,11 @@ class App:
     )
 
   def me(self, req: Request) -> Response:
-    return json_response({"user": req.user, "auth_mode": self.auth_mode})
+    return json_response({
+        "user": req.user,
+        "auth_mode": self.auth_mode,
+        "version": APP_VERSION,
+    })
 
   def renderers_list(self, req: Request) -> Response:
     del req
@@ -1512,7 +1500,6 @@ class App:
             req.params["oid"],
             renderer=b.get("renderer"),
             renderers=b.get("renderers"),
-            async_mode=bool(b.get("async")),
         )
     )
 
@@ -1700,7 +1687,6 @@ class App:
             "SELECT COUNT(*) FROM guidelines WHERE status='escalated'"
         ),
         "samples": q("SELECT COUNT(*) FROM samples"),
-        "bugs": q("SELECT COUNT(*) FROM bug_reports"),
     }
     for u in users:
       u["is_admin"] = bool(u["is_admin"]) or u["ldap"] in self.svc.admins
@@ -1823,52 +1809,6 @@ class App:
   def wizard_domains(self, req: Request) -> Response:
     del req
     return json_response({"domains": wizard_mod.WIZARD_DOMAINS})
-
-  # ------------------------------------------------------------ bug reports
-  def bugs_config(self, req: Request) -> Response:
-    del req
-    return json_response({"config": self.bugs.config()})
-
-  def bugs_context(self, req: Request) -> Response:
-    return json_response(
-        {"context": self.bugs.gather_context(req.user, req.body() or {})}
-    )
-
-  def bugs_snapshot(self, req: Request) -> Response:
-    return json_response(
-        {"snapshot": self.bugs.page_snapshot(req.user, req.body() or {})}
-    )
-
-  def bugs_list(self, req: Request) -> Response:
-    all_users = req.query.get("all") == "1"
-    return json_response(
-        {"bugs": self.bugs.list_bugs(req.user, all_users=all_users)}
-    )
-
-  def bugs_create(self, req: Request) -> Response:
-    body = req.body() or {}
-    if body.get("sync"):
-      bug = self.bugs.file_report(req.user, body)
-      return json_response(
-          {"bug": bug}, 201 if bug["status"] == "filed" else 200
-      )
-    return json_response({"job": self.bugs.start_file_job(req.user, body)}, 202)
-
-  def bugs_get(self, req: Request) -> Response:
-    return json_response(
-        {"bug": self.bugs.get_bug(req.user, req.params["bid"])}
-    )
-
-  def bugs_bundle_saved(self, req: Request) -> Response:
-    bid = req.params["bid"]
-    data = self.bugs.saved_bundle_zip(req.user, bid)
-    return download(data, f"dcb_bug_{bid}.zip", "application/zip")
-
-  def bugs_bundle_build(self, req: Request) -> Response:
-    body = req.body() or {}
-    slug = bundles_mod._slug(str(body.get("title") or "dcb_bug"))  # pylint: disable=protected-access
-    data = self.bugs.build_bundle_zip(req.user, body)
-    return download(data, f"{slug}_context.zip", "application/zip")
 
 
 def demo_server_path() -> str:

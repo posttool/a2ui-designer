@@ -36,13 +36,25 @@ export async function render(root) {
           h('p.lede',
             'Each project holds one design constitution, its revision history, runs, and the Dos & Don\u2019ts you collect along the way.')),
         h('div.page-actions', allToggle, archivedToggle,
-          h('button.btn.btn-ghost#new-blank-project',
-            {type: 'button', onclick: () => newProjectDialog()},
-            'Blank project'),
+          advancedCreate('new-blank-project'),
           h('button.btn.btn-primary#new-project',
             {type: 'button', onclick: () => navigate('/wizard')},
             icon('school'), 'New project'))),
       grid));
+
+  // "New project" (teaching session, immersive) is the only primary path; a
+  // blank project without teaching stays reachable under "Advanced".
+  function advancedCreate(id) {
+    return h(
+        'details.adv-create', {id: `${id}-adv`},
+        h('summary.btn.btn-ghost.btn-sm', 'Advanced'),
+        h('div.adv-create-menu',
+          h(`button.btn.btn-ghost.btn-sm#${id}`,
+            {type: 'button', onclick: () => newProjectDialog()}, icon('add'),
+            'Blank project'),
+          h('span.muted.small',
+            'Skips the teaching session; start from an empty studio.')));
+  }
 
   async function load() {
     mount(grid, spinner('Loading projects\u2026'));
@@ -58,9 +70,7 @@ export async function render(root) {
               h('button.btn.btn-primary#new-project-empty',
                 {type: 'button', onclick: () => navigate('/wizard')},
                 icon('school'), 'New project'),
-              h('button.btn.btn-ghost#new-blank-project-empty',
-                {type: 'button', onclick: () => newProjectDialog()},
-                icon('add'), 'Blank project')));
+              advancedCreate('new-blank-project-empty')));
       grid.classList.add('is-empty');
       return;
     }

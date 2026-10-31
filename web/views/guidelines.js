@@ -7,7 +7,6 @@ import {renderMarkdown} from '../components/markdown.js';
 import {navigate, on, store} from '../components/store.js';
 import {confirmDialog, drawer, modal, promptDialog, segmented, toast} from '../components/ui.js';
 
-import {RENDERER_META} from './run_detail.js';
 
 export async function render(root, params, ctx) {
   const pid = params.pid;
@@ -141,10 +140,6 @@ export async function render(root, params, ctx) {
 
   function card(g) {
     const shot = g.screenshots && g.screenshots[0];
-    const ren = g.renderer || (shot && shot.renderer) || 'web';
-    const renBadge = ren === 'all' ?
-        'ALL 4' :
-        ((RENDERER_META[ren] || {}).badge || ren.toUpperCase());
     return h(
         'button.gl-card', {
           type: 'button',
@@ -160,8 +155,6 @@ export async function render(root, params, ctx) {
               null),
         h('div.gl-card-body', h('div.gl-card-title', g.title),
           h('div.chip-row',
-            h('span.renderer-badge.renderer-badge-xs',
-              {dataset: {renderer: ren}}, renBadge),
             g.kind === 'dont' ? fixableChip(g.fixable) : null,
             g.status !== 'open' ? statusChip(g.status) : null,
             (g.tags || []).slice(0, 2).map((t) => chip(t, 'chip-quiet')))));
@@ -190,12 +183,6 @@ export async function render(root, params, ctx) {
           d.body,
           h('div.gl-detail',
             h('div.chip-row', kindChip(g.kind),
-              h('span.renderer-badge',
-                {dataset: {renderer: g.renderer || 'web'}},
-                g.renderer === 'all' ?
-                    'ALL 4 PLATFORMS' :
-                    ((RENDERER_META[g.renderer || 'web'] || {}).badge ||
-                     (g.renderer || 'web').toUpperCase())),
               g.kind === 'dont' ? fixableChip(g.fixable) : null,
               statusChip(g.status),
               (g.tags || []).map((t) => chip(t, 'chip-quiet'))),
@@ -209,13 +196,6 @@ export async function render(root, params, ctx) {
                               {href: s.url, target: '_blank', rel: 'noopener'},
                               h('img', {src: s.url, alt: ''})),
                             h('figcaption',
-                              s.renderer ?
-                                  h('span.renderer-badge.renderer-badge-xs',
-                                    {dataset: {renderer: s.renderer}},
-                                    (RENDERER_META[s.renderer] || {}).badge ||
-                                        s.renderer) :
-                                  null,
-                              ' ',
                               s.output_id ? h('a', {
                                 href: `/p/${pid}/review?o=${s.output_id}`,
                                 onclick: (e) => {

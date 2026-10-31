@@ -256,10 +256,10 @@ class DependenciesAndTokenRevisionsHttpTest(unittest.TestCase):
     t1 = revs[0]
     self.assertEqual(t1["number"], 1)
 
-    # Updating non-theme settings (e.g. renderers) should NOT create T2.
+    # Updating non-theme settings (e.g. viewports) should NOT create T2.
     st, sbody = self.s.call("GET", f"/api/projects/{pid}/settings")
     settings = sbody["settings"]
-    settings["renderers"] = ["web", "android_compose"]
+    settings["viewports"] = ["phone", "tablet"]
     st, ubody = self.s.call(
         "PUT", f"/api/projects/{pid}/settings", {"settings": settings}
     )

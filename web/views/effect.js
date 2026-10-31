@@ -7,7 +7,7 @@ import {emptyState, h, icon, mount, relTime, spinner} from '../components/dom.js
 import {navigate} from '../components/store.js';
 import {segmented, toast, toggle} from '../components/ui.js';
 
-import {ALL_RENDERER_IDS, outputShotForRenderer, RENDERER_META} from './run_detail.js';
+import {outputShotForRenderer, RENDERER_META} from './run_detail.js';
 import {runProgress} from './runs.js';
 
 const VERDICTS = {
@@ -33,7 +33,7 @@ export async function render(root, params, ctx) {
   let data = null;
   let alive = true;
   let timer = null;
-  let renderer = ctx.url.searchParams.get('renderer') || 'web';
+  const renderer = 'web';
   let verdictFilter = ctx.url.searchParams.get('show') || 'changed';
   let sort = 'magnitude';
   let ruleFilter = null;
@@ -276,17 +276,6 @@ export async function render(root, params, ctx) {
         filterEl,
         h('div.filterbar',
           segmented(
-              ALL_RENDERER_IDS.map((rid) => ({
-                                     value: rid,
-                                     label: RENDERER_META[rid].short,
-                                     id: `eff-ren-${rid}`,
-                                   })),
-              renderer,
-              (v) => {
-                renderer = v;
-                drawPairs();
-              }),
-          segmented(
               [
                 {value: 'changed', label: 'Changed', id: 'eff-show-changed'},
                 {
@@ -344,11 +333,7 @@ export async function render(root, params, ctx) {
             }
           },
                          kindLabel(kindFilter), icon('close')) :
-                       null,
-          renderer !== 'web' ?
-              h('span.muted.small',
-                'Outlines need the Web render; the change list still applies.') :
-              null));
+                       null));
   }
 
   // ---------------------------------------------------------------- pairs
@@ -546,11 +531,10 @@ export async function render(root, params, ctx) {
               null,
           h('span.grow'),
           h('a.link-btn.small', {
-            href: `/p/${pid}/review/${o.run_id}?o=${o.id}&renderer=${renderer}`,
+            href: `/p/${pid}/review/${o.run_id}?o=${o.id}`,
             onclick: (e) => {
               e.preventDefault();
-              navigate(`/p/${pid}/review/${o.run_id}?o=${o.id}&renderer=${
-                  renderer}`);
+              navigate(`/p/${pid}/review/${o.run_id}?o=${o.id}`);
             }
           },
             'Review')),

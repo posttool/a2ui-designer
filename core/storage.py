@@ -171,13 +171,6 @@ CREATE TABLE IF NOT EXISTS rule_bindings (
   revision_id TEXT, rule_id TEXT, teaching_id TEXT, version INTEGER,
   text TEXT, section TEXT, how TEXT,
   PRIMARY KEY (revision_id, rule_id));
-CREATE TABLE IF NOT EXISTS bug_reports (
-  id TEXT PRIMARY KEY, issue_id TEXT, issue_url TEXT, component_id INTEGER,
-  title TEXT, priority TEXT, type TEXT, description_md TEXT,
-  reporter_ldap TEXT, cc TEXT, project_id TEXT, run_id TEXT, output_id TEXT,
-  status TEXT, error TEXT, prefilled_url TEXT,
-  context_json TEXT, attachments_json TEXT, created_at TEXT);
-CREATE INDEX IF NOT EXISTS bugs_created ON bug_reports(created_at DESC);
 """
 
 
@@ -261,7 +254,6 @@ JSON_COLS = {
         "extra",
     ],
     "teaching_trials": ["evidence"],
-    "bug_reports": ["context", "attachments"],
 }
 
 
@@ -282,7 +274,6 @@ class Store:
         "components",
         "templates",
         "teach",
-        "bugs",
     ):
       os.makedirs(os.path.join(data_dir, sub), exist_ok=True)
     self.path = os.path.join(data_dir, "app.db")

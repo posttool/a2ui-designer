@@ -7,9 +7,8 @@ module deterministically compiles Figma REST API nodes (or DCB's condensed
    and `{{prop}}` bindings that pass `core.a2ui.custom_web` validation.
 2. Parameterized A2UI Basic Catalog compositions
    (`compile_node_to_basic_skeleton`) using only standard Basic components
-   (`Card`, `Row`, `Column`, `Text`, `Image`, `Icon`, `Button`, `Divider`) for
-   cross-platform rendering (`web`, `android_compose`, `android_remote_compose`,
-   `ios_swiftui`).
+   (`Card`, `Row`, `Column`, `Text`, `Image`, `Icon`, `Button`, `Divider`) that
+   any Basic-catalog A2UI renderer can display.
 """
 
 from __future__ import annotations

@@ -25,24 +25,11 @@ from core.a2ui import custom_web
 from core.a2ui import lowering
 from core.service import ApiError, Service
 from llm.gemini import LlmError
-from render.android_worker import AndroidRenderWorker
 from render.browser_pool import BrowserPool, make_thumb
-from render.ios_runner import IosSimulatorRunner
-from render.native_images import NativeImageInliner
 from sim import generator, imagery_gen, images, judge as judge_mod, synthesizer, taxonomy
+from sim import starter_cache
 
 ACTIVE = ("queued", "generating", "rendering", "judging")
-
-
-# Native renderers get web images inlined as data URIs (see
-# render/native_images.py). Commons serves 330/500/960px thumbnails.
-ANDROID_IMAGE_WIDTH = 500
-# iOS batches ride in one CloudSims launch argument (≤120K chars after
-# deflate+base64, see render/cloudsims_runner.py), so iOS images are re-encoded
-# as small JPEGs and capped per surface.
-IOS_IMAGE_WIDTH = 400
-IOS_IMAGE_QUALITY = 0.55
-IOS_IMAGE_BUDGET_BYTES = 80_000
 
 
 class RunManager:
@@ -54,17 +41,11 @@ class RunManager:
       base_url: str,
       secret: bytes,
       workers: int = 8,
-      android_worker: AndroidRenderWorker | None = None,
-      ios_runner: IosSimulatorRunner | None = None,
   ):
     self.svc = svc
     self.store = svc.store
     self.llm = svc.llm
     self.pool = pool
-    self.android_worker = android_worker
-    self.ios_runner = ios_runner
-    # Native renderers can't reach the web; images are inlined as data URIs.
-    self.native_images = NativeImageInliner(self.store.file_path("imgcache"))
     self.base_url = base_url.rstrip("/")
     self.secret = secret
     self.executor = concurrent.futures.ThreadPoolExecutor(
@@ -75,11 +56,6 @@ class RunManager:
     )
     self._cancelled: set[str] = set()
     self._lock = threading.Lock()
-    self._ios_cond = threading.Condition()
-    self._ios_pending: list[
-        tuple[str, dict[str, Any], concurrent.futures.Future]
-    ] = []
-    self._ios_flushing = False
     svc.runs = self
 
   # -------------------------------------------------------------- tokens
@@ -104,26 +80,12 @@ class RunManager:
 
   def renderer_statuses(self) -> list[dict[str, Any]]:
     web_ok = self.pool is not None
-    android_st = (
-        self.android_worker.status()
-        if self.android_worker
-        else {"available": False, "warm": False}
-    )
-    ios_st = (
-        self.ios_runner.status()
-        if self.ios_runner
-        else {"available": False, "running": False}
-    )
     out = []
     for r in settings_mod.RENDERERS:
       rid = r["id"]
       item = dict(r)
       if rid == "web":
         item["status"] = {"available": web_ok, "warm": web_ok}
-      elif rid in ("android_compose", "android_remote_compose"):
-        item["status"] = android_st
-      elif rid == "ios_swiftui":
-        item["status"] = ios_st
       out.append(item)
     return out
 
@@ -560,8 +522,13 @@ class RunManager:
             "finished_at": None,
         },
     )
+    # Teaching baselines: outputs found in the shipped starter-example cache
+    # are written as done right away; misses use the live pipeline.
+    oids = starter_cache.apply(self, run_id, oids)
     for oid in oids:
       self.executor.submit(self._safe_process, run_id, oid)
+    if not oids:
+      self._maybe_finish(run_id)
 
   def list_runs(self, user: dict[str, Any], pid: str) -> list[dict[str, Any]]:
     self.svc._project_row(pid, user)  # pylint: disable=protected-access
@@ -972,7 +939,6 @@ class RunManager:
     run = self.store.get("runs", o["run_id"]) or {}
     project = self.store.get("projects", o["project_id"]) or {}
     s = settings_mod.merged(project.get("settings"))
-    theme = self.theme_for_run(run, project, theme_mode="run")
     target_renderers = (
         renderers
         or run.get("renderers")
@@ -983,10 +949,6 @@ class RunManager:
     for rid in target_renderers:
       if rid == "web":
         self._render_web(oid)
-      elif rid in ("android_compose", "android_remote_compose"):
-        self._render_android(oid, rid, theme)
-      elif rid == "ios_swiftui":
-        self._render_ios(oid, theme)
 
   def _render_web(self, oid: str) -> None:
     o = self.store.get("outputs", oid)
@@ -1025,197 +987,6 @@ class RunManager:
           "web",
           {"status": "error", "meta": {"errors": [err]}, "error": err},
       )
-
-  def _render_android(
-      self, oid: str, renderer: str, theme: dict[str, Any]
-  ) -> None:
-    o = self.store.get("outputs", oid)
-    vp = generator.VIEWPORTS[o["viewport"]]
-    if self.android_worker is None:
-      self._update_render_entry(
-          oid,
-          renderer,
-          {"status": "skipped", "meta": {"skipped": "no android worker"}},
-      )
-      return
-    self._update_render_entry(oid, renderer, {"status": "rendering"})
-    shot = self.store.file_path("screens", f"{oid}_{renderer}.png")
-    thumb = self.store.file_path("thumbs", f"{oid}_{renderer}.png")
-    run = self.store.get("runs", o["run_id"]) or {}
-    custom_defs = {
-        **self.svc.custom_defs(o["project_id"]),
-        **self.custom_components_for_run(run),
-    }
-    try:
-      lowered_a2ui = lowering.expand_composite_components(
-          o.get("a2ui") or [], custom_defs, renderer=renderer
-      )
-      a2ui, img_stats = self.native_images.inline(
-          lowered_a2ui, width=ANDROID_IMAGE_WIDTH
-      )
-      res = self.android_worker.render_job(
-          job_id=f"{oid}_{renderer}",
-          renderer=renderer,
-          a2ui=a2ui,
-          width=vp["width"],
-          height=vp["height"],
-          theme=theme,
-          output_path=shot,
-          thumb_path=thumb,
-      )
-      self._update_render_entry(
-          oid,
-          renderer,
-          {
-              "status": "done",
-              "screenshot_path": shot,
-              "thumb_path": thumb,
-              "meta": {**(res.get("meta") or {}), "images": img_stats},
-              "error": None,
-          },
-      )
-    except Exception as e:  # pylint: disable=broad-except
-      err = f"{renderer} failed: {e}"
-      self._update_render_entry(
-          oid, renderer, {"status": "error", "meta": {}, "error": err[:600]}
-      )
-
-  def _render_ios(self, oid: str, theme: dict[str, Any]) -> None:
-    o = self.store.get("outputs", oid)
-    vp = generator.VIEWPORTS[o["viewport"]]
-    if self.ios_runner is None:
-      self._update_render_entry(
-          oid,
-          "ios_swiftui",
-          {"status": "skipped", "meta": {"skipped": "no ios runner"}},
-      )
-      return
-    self._update_render_entry(oid, "ios_swiftui", {"status": "rendering"})
-    shot = self.store.file_path("screens", f"{oid}_ios_swiftui.png")
-    thumb = self.store.file_path("thumbs", f"{oid}_ios_swiftui.png")
-    img_stats: dict[str, Any] = {}
-    run = self.store.get("runs", o["run_id"]) or {}
-    custom_defs = {
-        **self.svc.custom_defs(o["project_id"]),
-        **self.custom_components_for_run(run),
-    }
-    a2ui = lowering.expand_composite_components(
-        o.get("a2ui") or [], custom_defs, renderer="ios_swiftui"
-    )
-    try:
-      a2ui, img_stats = self.native_images.inline(
-          a2ui,
-          width=IOS_IMAGE_WIDTH,
-          budget_bytes=IOS_IMAGE_BUDGET_BYTES,
-          compact_quality=IOS_IMAGE_QUALITY,
-      )
-    except Exception:  # pylint: disable=broad-except
-      traceback.print_exc()
-    job = {
-        "id": f"{oid}_ios_swiftui",
-        "oid": oid,
-        "run_id": o["run_id"],
-        "a2ui": a2ui,
-        "width": vp["width"],
-        "height": vp["height"],
-        "theme": theme,
-        "output_path": shot,
-        "thumb_path": thumb,
-    }
-    try:
-      res = self._coalesce_ios_job(o["run_id"], job)
-      if res.get("ok"):
-        self._update_render_entry(
-            oid,
-            "ios_swiftui",
-            {
-                "status": "done",
-                "screenshot_path": shot,
-                "thumb_path": thumb,
-                "meta": {**(res.get("meta") or {}), "images": img_stats},
-                "error": None,
-            },
-        )
-      else:
-        err = res.get("error") or "iOS Simulator render failed"
-        self._update_render_entry(
-            oid,
-            "ios_swiftui",
-            {"status": "error", "meta": {}, "error": err[:600]},
-        )
-    except Exception as e:  # pylint: disable=broad-except
-      err = f"ios_swiftui failed: {e}"
-      self._update_render_entry(
-          oid,
-          "ios_swiftui",
-          {"status": "error", "meta": {}, "error": err[:600]},
-      )
-
-  def _coalesce_ios_job(
-      self, run_id: str, job: dict[str, Any]
-  ) -> dict[str, Any]:
-    """Coalesces concurrent iOS jobs from the same run into one Simulator batch."""
-    fut: concurrent.futures.Future = concurrent.futures.Future()
-    should_drive = False
-    with self._ios_cond:
-      self._ios_pending.append((run_id, job, fut))
-      if not self._ios_flushing:
-        self._ios_flushing = True
-        should_drive = True
-      else:
-        self._ios_cond.notify_all()
-
-    if should_drive:
-      try:
-        while True:
-          deadline = time.time() + 1.5
-          while time.time() < deadline:
-            if not run_id or run_id in self._cancelled:
-              break
-            generating_count = self.store.scalar(
-                "SELECT COUNT(*) FROM outputs WHERE run_id=? AND status IN"
-                " ('queued','generating')",
-                [run_id],
-            )
-            if not generating_count:
-              # Linger briefly so concurrently-dispatched outputs join the same launch.
-              with self._ios_cond:
-                self._ios_cond.wait(timeout=0.6)
-              break
-            with self._ios_cond:
-              self._ios_cond.wait(timeout=0.1)
-
-          with self._ios_cond:
-            if not self._ios_pending:
-              self._ios_flushing = False
-              break
-            batch = list(self._ios_pending)
-            self._ios_pending.clear()
-
-          jobs_payload = [b[1] for b in batch]
-          try:
-            assert self.ios_runner is not None
-            results_by_id = self.ios_runner.render_batch(jobs_payload)
-            for _, jb, f in batch:
-              if not f.done():
-                f.set_result(
-                    results_by_id.get(jb["id"])
-                    or {"ok": False, "error": "missing from batch output"}
-                )
-          except Exception as e:  # pylint: disable=broad-except
-            for _, _, f in batch:
-              if not f.done():
-                f.set_exception(e)
-
-          with self._ios_cond:
-            if not self._ios_pending:
-              self._ios_flushing = False
-              break
-      finally:
-        with self._ios_cond:
-          self._ios_flushing = False
-
-    return fut.result(timeout=660.0)
 
   # ------------------------------------------------------------- outputs
   def _output_row(self, user: dict[str, Any], oid: str) -> dict[str, Any]:
@@ -1356,7 +1127,6 @@ class RunManager:
       oid: str,
       renderer: str | None = None,
       renderers: list[str] | None = None,
-      async_mode: bool = False,
   ) -> dict[str, Any]:
     o = self._output_row(user, oid)
     if not o.get("a2ui"):
@@ -1372,10 +1142,7 @@ class RunManager:
       raise ApiError(400, "Specify at least one valid renderer")
     for rid in targets:
       self._update_render_entry(oid, rid, {"status": "queued"})
-    if async_mode:
-      self.executor.submit(self.render, oid, targets)
-    else:
-      self.render(oid, targets)
+    self.render(oid, targets)
     return self.get_output(user, oid)
 
   def render_run(

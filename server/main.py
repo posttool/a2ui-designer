@@ -1,7 +1,7 @@
 """Design Constitution Builder server entrypoint.
 
-cd google3/experimental/users/dkaram/design_constitution_builder
-python3 -B -m server.main --port 8810 --host 0.0.0.0
+From the repository root:
+python3 -B -m server.main --port 8100 --host 0.0.0.0
 """
 
 from __future__ import annotations
@@ -23,10 +23,7 @@ if PKG not in sys.path:
 from core.service import Service, load_admins  # pylint: disable=g-import-not-at-top,wrong-import-position
 from core.storage import Store  # pylint: disable=g-import-not-at-top,wrong-import-position
 from llm.gemini import GeminiClient  # pylint: disable=g-import-not-at-top,wrong-import-position
-from render.android_worker import AndroidRenderWorker  # pylint: disable=g-import-not-at-top,wrong-import-position
 from render.browser_pool import BrowserPool  # pylint: disable=g-import-not-at-top,wrong-import-position
-from render.cloudsims_runner import CloudSimsIosRunner  # pylint: disable=g-import-not-at-top,wrong-import-position
-from render.ios_runner import IosSimulatorRunner  # pylint: disable=g-import-not-at-top,wrong-import-position
 from server.app import App  # pylint: disable=g-import-not-at-top,wrong-import-position
 from server.http import make_server  # pylint: disable=g-import-not-at-top,wrong-import-position
 from sim.runs import RunManager  # pylint: disable=g-import-not-at-top,wrong-import-position
@@ -43,29 +40,31 @@ def load_secret(data_dir: str) -> bytes:
     return fh.read().strip().encode()
 
 
+def load_password(password_file: str | None) -> str:
+  """Shared secret for --auth_mode password: env A2UID_PASSWORD or a file."""
+  pw = os.environ.get("A2UID_PASSWORD", "")
+  if password_file:
+    with open(os.path.expanduser(password_file), encoding="utf-8") as fh:
+      pw = fh.read().strip()
+  if not pw:
+    raise ValueError(
+        "--auth_mode password needs --password_file or $A2UID_PASSWORD"
+    )
+  return pw
+
+
 def build(
     args: argparse.Namespace,
     llm=None,
     pool=None,
-    android_worker=None,
-    ios_runner=None,
 ):
   store = Store(args.data_dir)
   secret = load_secret(args.data_dir)
   llm = llm or GeminiClient(default_model=args.model)
-  svc = Service(store, llm, load_admins(args.admins))
+  auth_mode = getattr(args, "auth_mode", "local")
+  svc = Service(store, llm, load_admins(getattr(args, "admins", None)))
   if pool is None and not args.no_browser:
     pool = BrowserPool(tabs=args.tabs)
-    if android_worker is None:
-      android_worker = AndroidRenderWorker()
-      android_worker.warm_up_async()
-    if ios_runner is None:
-      cold = IosSimulatorRunner()
-      if getattr(args, "ios_mode", "cloudsims") == "cloudsims":
-        ios_runner = CloudSimsIosRunner(args.data_dir, fallback=cold)
-        ios_runner.warm_up_async()
-      else:
-        ios_runner = cold
   base = args.render_base_url or f"http://127.0.0.1:{args.port}"
   runs = RunManager(
       svc,
@@ -73,8 +72,6 @@ def build(
       base,
       secret,
       workers=args.workers,
-      android_worker=android_worker,
-      ios_runner=ios_runner,
   )
   runs.recover()
   return (
@@ -82,9 +79,10 @@ def build(
           svc,
           runs,
           secret,
-          auth_mode=args.auth_mode,
-          bug_component_id=getattr(args, "bug_component_id", None),
-          issues_cli=getattr(args, "issues_cli", None),
+          auth_mode=auth_mode,
+          password=load_password(getattr(args, "password_file", None))
+          if auth_mode == "password"
+          else None,
       ),
       pool,
   )
@@ -92,20 +90,40 @@ def build(
 
 def parse_args(argv=None) -> argparse.Namespace:
   ap = argparse.ArgumentParser(description=__doc__)
-  ap.add_argument("--port", type=int, default=8810)
+  ap.add_argument("--port", type=int, default=8100)
   ap.add_argument("--host", default="0.0.0.0")
   ap.add_argument(
-      "--data_dir", default=os.path.expanduser("~/.design_constitution_builder")
+      "--data_dir", default=os.path.expanduser("~/.a2ui_designer")
   )
-  ap.add_argument("--admins", default=os.path.join(PKG, "admins.json"))
-  ap.add_argument("--auth_mode", choices=["dev", "iap"], default="dev")
+  ap.add_argument(
+      "--admins",
+      default=None,
+      help=(
+          "Optional path to a JSON list of admin usernames (password mode)."
+          " In local mode the implicit user is always an admin."
+      ),
+  )
+  ap.add_argument(
+      "--auth_mode",
+      choices=["local", "password"],
+      default="local",
+      help=(
+          "local: no login, a single implicit admin user 'local'. password:"
+          " shared-secret login (--password_file or $A2UID_PASSWORD)."
+      ),
+  )
+  ap.add_argument(
+      "--password_file",
+      default=None,
+      help="File holding the shared password for --auth_mode password.",
+  )
   ap.add_argument("--model", default="gemini-3.8-flash")
   ap.add_argument("--workers", type=int, default=8)
   ap.add_argument("--tabs", type=int, default=3)
   ap.add_argument(
       "--no_browser",
       action="store_true",
-      help="Skip screenshots (no headless Chrome / Android / iOS renderers).",
+      help="Skip screenshots (no headless Chrome).",
   )
   ap.add_argument(
       "--render_base_url",
@@ -121,30 +139,13 @@ def parse_args(argv=None) -> argparse.Namespace:
           " teaching sessions) on https:// or localhost."
       ),
   )
-  ap.add_argument(
-      "--ios_mode",
-      choices=["cloudsims", "blaze"],
-      default="cloudsims",
-      help=(
-          "iOS SwiftUI renderer: warm CloudSims simulator (falls back to blaze)"
-          " or cold per-batch Forge-on-Mac blaze test."
-      ),
-  )
-  ap.add_argument(
-      "--bug_component_id",
-      type=int,
-      default=None,
-      help=(
-          "Buganizer component ID for 'Report a bug' (defaults to"
-          " DCB_BUG_COMPONENT_ID or 1629228 AIR > Gen UX)."
-      ),
-  )
-  ap.add_argument(
-      "--issues_cli",
-      default=None,
-      help="Path to the Buganizer issues CLI binary.",
-  )
-  return ap.parse_args(argv)
+  args = ap.parse_args(argv)
+  if args.auth_mode == "password":
+    try:
+      load_password(args.password_file)
+    except ValueError as e:
+      ap.error(str(e))
+  return args
 
 
 def ensure_tls_cert(data_dir: str) -> tuple[str, str]:
@@ -213,10 +214,6 @@ def main(argv=None) -> None:
   finally:
     if pool:
       pool.close()
-    if app.runs.android_worker:
-      app.runs.android_worker.close()
-    if hasattr(app.runs.ios_runner, "close"):
-      app.runs.ios_runner.close()
 
 
 if __name__ == "__main__":

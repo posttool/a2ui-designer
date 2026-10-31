@@ -42,15 +42,6 @@ JUDGE_SCHEMA = obj({
     "issues": arr(str_schema()),
     "platform_notes": obj({
         "web": str_schema("Rendering note for Web (HTML/CSS), if rendered."),
-        "android_compose": str_schema(
-            "Rendering note for Android Jetpack Compose, if rendered."
-        ),
-        "android_remote_compose": str_schema(
-            "Rendering note for Android RemoteCompose (.rc wire), if rendered."
-        ),
-        "ios_swiftui": str_schema(
-            "Rendering note for iOS SwiftUI, if rendered."
-        ),
     }),
     "suggested_constitution_changes": arr(str_schema()),
     "likely_unfixable_by_constitution": {"type": "boolean"},

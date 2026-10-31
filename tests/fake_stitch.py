@@ -3,7 +3,7 @@
 Implements the Stitch MCP tools DCB uses (get_project, list_screens,
 list_design_systems) plus download URLs that exercise every outcome the real
 service can produce: raw bytes, a JSON `DownloadFileResponse` wrapper
-(`dataString`), and a redirect to a Google sign-in page (b/571529127).
+(`dataString`), and a redirect to a Google sign-in page.
 
   python3 -B tests/fake_stitch.py --port 8835        # any API key accepted
   DCB_STITCH_MCP_URL=http://127.0.0.1:8835/mcp ./run.sh --port 8823 ...

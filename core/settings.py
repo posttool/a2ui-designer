@@ -19,33 +19,6 @@ RENDERERS: list[dict[str, Any]] = [
         "platform": "web",
         "badge": "WEB",
     },
-    {
-        "id": "android_compose",
-        "label": "Android Jetpack Compose",
-        "short_label": "Android Compose",
-        "engine": "AndroidX Compose M3 A2UI + Robolectric Skia (API 35)",
-        "platform": "android",
-        "badge": "COMPOSE",
-    },
-    {
-        "id": "android_remote_compose",
-        "label": "Android RemoteCompose (.rc)",
-        "short_label": "RemoteCompose (.rc)",
-        "engine": (
-            "RemoteComposeCreation (.rc wire format) + RemoteComposePlayer +"
-            " Skia (API 35)"
-        ),
-        "platform": "android",
-        "badge": "RC WIRE",
-    },
-    {
-        "id": "ios_swiftui",
-        "label": "iOS SwiftUI",
-        "short_label": "iOS SwiftUI",
-        "engine": "Apple SwiftUI A2UI + iOS Simulator (IPHONE_13_PRO)",
-        "platform": "ios",
-        "badge": "SWIFTUI",
-    },
 ]
 
 RENDERER_IDS: list[str] = [r["id"] for r in RENDERERS]
@@ -643,7 +616,6 @@ COMPONENT_STRATEGIES: tuple[str, ...] = (
     "auto",
     "web_template",
     "basic_composition",
-    "native_targets",
 )
 # `auto` components whose *Basic fit* (0–1: how faithfully the design can be
 # rebuilt from Basic Catalog components only; see
@@ -655,7 +627,9 @@ BASIC_FIT_THRESHOLD_DEFAULT = 0.7
 
 DEFAULT_SETTINGS: dict[str, Any] = {
     "catalog": {
-        "base": "a2ui-basic-v0.9",
+        "base": "a2ui-basic-v1",
+        # Opt-in extension catalogs ("a2ui-designer" = HeroCard, SvgIcon).
+        "extensions": [],
         "disabled_components": [],
         "custom_components": {},
         "proposed_components": [],
@@ -747,7 +721,7 @@ def component_strategy_decision(
 
   Returns `{strategy, auto, threshold, fit, reason}`. `auto` is True when the
   strategy was decided by the project's `auto` rule (Basic fit vs. threshold,
-  or the renderer fallback when no fit estimate exists) rather than pinned by
+  or the custom-web fallback when no fit estimate exists) rather than pinned by
   the designer (`override`) or by an explicit project-wide strategy.
   """
   ov = str(override or "").strip().lower()
@@ -765,11 +739,11 @@ def component_strategy_decision(
   except (TypeError, ValueError):
     fit = None
   base = {"threshold": threshold, "fit": fit}
-  if ov in ("web_template", "basic_composition", "native_targets"):
+  if ov in ("web_template", "basic_composition"):
     return dict(base, strategy=ov, auto=False, reason="pinned on the component")
   raw = str((s.get("catalog") or {}).get("component_strategy") or "auto")
   raw = raw.strip().lower()
-  if raw in ("web_template", "basic_composition", "native_targets"):
+  if raw in ("web_template", "basic_composition"):
     return dict(base, strategy=raw, auto=False, reason="project-wide strategy")
   if fit is not None:
     pct, tpct = round(fit * 100), round(threshold * 100)
@@ -789,22 +763,11 @@ def component_strategy_decision(
         auto=True,
         reason=f"Basic fit {pct}% < {tpct}% threshold → custom web component",
     )
-  renderers = list(s.get("renderers") or DEFAULT_RENDERERS)
-  if renderers == ["web"]:
-    return dict(
-        base,
-        strategy="web_template",
-        auto=True,
-        reason="no Basic-fit estimate; project renders Web only → custom web",
-    )
   return dict(
       base,
-      strategy="basic_composition",
+      strategy="web_template",
       auto=True,
-      reason=(
-          "no Basic-fit estimate; native renderers enabled → Basic catalog"
-          " composition"
-      ),
+      reason="no Basic-fit estimate → custom web component",
   )
 
 
@@ -813,11 +776,11 @@ def resolve_component_strategy(
     override: str | None = None,
     basic_fit: float | None = None,
 ) -> str:
-  """Resolves the active component construction strategy (`web_template`, `basic_composition`, or `native_targets`).
+  """Resolves the active component construction strategy (`web_template` or `basic_composition`).
 
   With `component_strategy: "auto"`, a known `basic_fit` (0–1) is compared with
   `settings.catalog.basic_fit_threshold`; without one the project falls back to
-  `web_template` when Web is the only renderer, else `basic_composition`.
+  `web_template`.
   """
   return component_strategy_decision(
       settings, override=override, basic_fit=basic_fit

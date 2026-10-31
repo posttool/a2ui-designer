@@ -30,11 +30,38 @@ from typing import Any, Callable, Optional
 import urllib.parse
 import urllib.request
 
-CHROME = (
-    os.environ.get("CHROME_BIN")
-    or shutil.which("google-chrome")
-    or "/usr/bin/google-chrome"
+CHROME_CANDIDATES = (
+    "google-chrome",
+    "google-chrome-stable",
+    "chromium",
+    "chromium-browser",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
 )
+
+
+def find_chrome() -> str | None:
+  """Locates Chrome/Chromium: $CHROME_BIN, then common names and app paths."""
+  env = os.environ.get("CHROME_BIN", "").strip()
+  if env:
+    return shutil.which(env) or (env if os.path.exists(env) else None)
+  for cand in CHROME_CANDIDATES:
+    found = shutil.which(cand) or (
+        cand if os.path.isabs(cand) and os.path.exists(cand) else None
+    )
+    if found:
+      return found
+  return None
+
+
+CHROME_MISSING_MESSAGE = (
+    "Chrome/Chromium not found. Install Google Chrome or Chromium, or set"
+    " CHROME_BIN to the browser executable (tried: $CHROME_BIN, "
+    + ", ".join(CHROME_CANDIDATES)
+    + "). Use --no_browser to run without screenshots."
+)
+
+CHROME = find_chrome() or ""
 
 
 class CdpError(RuntimeError):
@@ -477,6 +504,9 @@ class Browser:
       chrome: str = CHROME,
       extra_args: tuple = (),
   ):
+    chrome = chrome or find_chrome() or ""
+    if not chrome:
+      raise CdpError(CHROME_MISSING_MESSAGE)
     self.width, self.height = width, height
     self.port = port or _free_port()
     self.profile = tempfile.mkdtemp(prefix="dcb_chrome_")
@@ -496,7 +526,7 @@ class Browser:
         "--disable-background-timer-throttling",
         "--disable-renderer-backgrounding",
         "--force-color-profile=srgb",
-        # Mirrors chromedp defaults (gbrowser): on cloudtops the out-of-process
+        # Mirrors chromedp defaults: on some Linux VMs the out-of-process
         # network service otherwise hangs on http:// navigations.
         "--no-sandbox",
         "--disable-dev-shm-usage",

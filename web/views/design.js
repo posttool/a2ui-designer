@@ -10,7 +10,7 @@ import {jsonTree} from '../components/jsontree.js';
 import {emit, navigate, on, store} from '../components/store.js';
 import {mountThemeEditor, saveThemeToProject} from '../components/theme_editor.js';
 import {confirmDialog, drawer, segmented, toast} from '../components/ui.js';
-import {ensureThemeFonts} from '../renderer/a2ui.js';
+import {ensureThemeFonts} from '../renderer/host.js';
 
 import {createImageryTab} from './imagery_editor.js';
 import {openImportDrawer} from './import_drawer.js';
@@ -373,7 +373,7 @@ export async function render(root, params, ctx) {
     // ------------------------------------------------ construction panel
     // Project-wide rule for how imported / described components are built:
     // settings.catalog.component_strategy (auto | web_template |
-    // basic_composition | native_targets) and, for `auto`, the Basic-fit
+    // basic_composition) and, for `auto`, the Basic-fit
     // threshold deciding between a Basic catalog composition (template) and a
     // custom web component.
     function catalogCfg() {
@@ -513,10 +513,7 @@ export async function render(root, params, ctx) {
             value: 'basic_composition',
             selected: strategy === 'basic_composition'
           },
-            'Always Basic catalog compositions (templates)'),
-          h('option',
-            {value: 'native_targets', selected: strategy === 'native_targets'},
-            'Always multi-target native code (Compose + SwiftUI + Web)'));
+            'Always Basic catalog compositions (templates)'));
       const slider = h('input.construct-slider#basic-fit-threshold', {
         type: 'range',
         min: '0',
@@ -558,7 +555,7 @@ export async function render(root, params, ctx) {
           h('div.design-section-head',
             h('h2', 'How custom components are built'),
             h('p.help',
-              'Imported Figma / Stitch / screenshot components and described ones can become either a custom web component (your own HTML + CSS, Web-native) or a template composed from the A2UI Basic catalog (Card, Row, Column, Text, Image, Icon, Button, Divider \u2014 renders natively on every renderer). Each candidate gets a Basic fit score: how faithfully its structure maps onto Basic components.')),
+              'Imported Figma / Stitch / screenshot components and described ones can become either a custom web component (your own HTML + CSS) or a template composed from the A2UI Basic catalog (Card, Row, Column, Text, Image, Icon, Button, Divider \u2014 renders on any A2UI renderer). Each candidate gets a Basic fit score: how faithfully its structure maps onto Basic components.')),
           h('div.construct-card',
             h('label.field.construct-field',
               h('span.field-label', 'Strategy for new components'),
@@ -579,13 +576,11 @@ export async function render(root, params, ctx) {
                   h('p.help.construct-rule',
                     'A component whose Basic fit is at least ',
                     h('strong.construct-rule-pct', `${Math.round(th * 100)}%`),
-                    ' becomes a Basic catalog composition (a template, also usable on Android Compose, RemoteCompose and iOS); below that it becomes a custom web component. Figma and Stitch imports score the real layer structure; screenshots and descriptions use Gemini\u2019s estimate. You can still pin a strategy on any component.')) :
+                    ' becomes a Basic catalog composition (a template, usable by any A2UI renderer); below that it becomes a custom web component. Figma and Stitch imports score the real layer structure; screenshots and descriptions use Gemini\u2019s estimate. You can still pin a strategy on any component.')) :
                 h('p.help',
                   strategy === 'web_template' ?
-                      'Every new component is drafted as a custom web component (HTML + CSS). Native renderers fall back to a derived Basic composition.' :
-                      strategy === 'basic_composition' ?
-                      'Every new component is composed from the Basic catalog and can be saved as a template.' :
-                      'Every new component ships Kotlin Compose, RemoteCompose and SwiftUI code next to its web template.'),
+                      'Every new component is drafted as a custom web component (HTML + CSS).' :
+                      'Every new component is composed from the Basic catalog and can be saved as a template.'),
             h('div.construct-foot', liveEl, h('span.grow'), applyBtn)));
       drawLive();
       // Keep the rule sentence in sync while dragging.
@@ -1219,7 +1214,7 @@ export async function render(root, params, ctx) {
       mount(
           panes.tokens,
           h('p.help.tokens-lede',
-            'Visual styling lives here \u2014 never in the constitution. Tokens map to Web CSS custom properties (--a2ui-*), Android Jetpack Compose MaterialTheme, RemoteCompose (.rc) and iOS SwiftUI. Custom component CSS reads the same variables; ',
+            'Visual styling lives here \u2014 never in the constitution. Tokens map to CSS custom properties (--a2ui-*). Custom component CSS reads the same variables; ',
             icon('widgets'),
             ' marks tokens used by a custom component or referenced in the constitution.'),
           staleEl);

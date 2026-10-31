@@ -152,40 +152,10 @@ export async function render(root, params) {
         },
           'Update name & description')));
 
-  // ---------- Viewports & Renderers ----------
-  const renderersList =
-      (renRes && renRes.renderers && renRes.renderers.length) ?
-      renRes.renderers :
-      [
-        {
-          id: 'web',
-          label: 'Web (HTML/CSS)',
-          engine: 'Headless Chromium (CDP) + A2UI Web Renderer',
-          badge: 'WEB',
-        },
-        {
-          id: 'android_compose',
-          label: 'Android Jetpack Compose',
-          engine: 'AndroidX Compose M3 A2UI + Robolectric Skia (API 35)',
-          badge: 'COMPOSE',
-        },
-        {
-          id: 'android_remote_compose',
-          label: 'Android RemoteCompose (.rc)',
-          engine:
-              'RemoteComposeCreation (.rc wire) + RemoteComposePlayer + Skia',
-          badge: 'RC WIRE',
-        },
-        {
-          id: 'ios_swiftui',
-          label: 'iOS SwiftUI',
-          engine: 'Apple SwiftUI A2UI + iOS Simulator (IPHONE_13_PRO)',
-          badge: 'SWIFTUI',
-        },
-      ];
+  // ---------- Viewports ----------
   const vpSection = section(
-      'viewports', 'Default viewports & target renderers',
-      'Used for new runs (you can change them per run). Native Android Compose / RemoteCompose (.rc) and iOS SwiftUI renderers run headless alongside Web.',
+      'viewports', 'Default viewports',
+      'Used for new runs (you can change them per run). Every output is rendered with the A2UI web renderer in headless Chrome.',
       h('div.field', h('span.field-label', 'Viewports'),
         h('div.vp-grid#settings-viewports',
           viewports.map(
@@ -203,27 +173,6 @@ export async function render(root, params) {
                     }),
                     h('span', v.label || v.id),
                     h('span.muted', `${v.width}\u00d7${v.height}`))))),
-      h('div.field', h('span.field-label', 'Default Target Renderers'),
-        h('div.renderer-grid#settings-renderers',
-          renderersList.map(
-              (ren) =>
-                  h('label.check.vp-check.renderer-check', h('input', {
-                      type: 'checkbox',
-                      id: `settings-ren-${ren.id}`,
-                      checked: settings.renderers.includes(ren.id),
-                      onchange: (e) => {
-                        settings.renderers = e.target.checked ?
-                            [...new Set([...settings.renderers, ren.id])] :
-                            settings.renderers.filter((x) => x !== ren.id);
-                        markDirty();
-                      },
-                    }),
-                    h('span.renderer-check-main',
-                      h('span.renderer-check-title',
-                        h('span.renderer-badge', {dataset: {renderer: ren.id}},
-                          ren.badge || ren.id),
-                        h('span', ren.label || ren.id)),
-                      h('span.muted.small', ren.engine || '')))))),
       h('label.field', h('span.field-label', 'Default Data Source for Runs'),
         h('select.input#settings-data-source', {
           onchange: (e) => {

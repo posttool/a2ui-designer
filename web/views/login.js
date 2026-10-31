@@ -1,16 +1,33 @@
-// Login: dev-mode LDAP sign-in.
-import {post} from '../components/api.js';
+// Login: shared-password sign-in (`--auth_mode password`). In the default
+// `--auth_mode local` there is no sign-in and this view redirects home.
+import {get, post} from '../components/api.js';
 import {h} from '../components/dom.js';
 import {navigate, store} from '../components/store.js';
 
 export async function render(root, params, {url}) {
   const next = url.searchParams.get('next') || '/';
+  const safeNext =
+      next.startsWith('/') && !next.startsWith('/login') ? next : '/';
+  const me = await get('/api/me', {quiet: true, allow401: true})
+                 .catch(() => ({user: null}));
+  if (me && me.auth_mode) store.authMode = me.auth_mode;
+  if (me && me.user) {
+    store.user = me.user;
+    navigate(safeNext, {replace: true});
+    return;
+  }
   const err = h('p.login-error', {role: 'alert'});
-  const input = h('input.input.input-lg#login-ldap', {
-    name: 'ldap',
-    autocomplete: 'username',
-    placeholder: 'ldap',
+  const pwInput = h('input.input.input-lg#login-password', {
+    name: 'password',
+    type: 'password',
+    autocomplete: 'current-password',
+    placeholder: 'password',
     autofocus: true,
+  });
+  const input = h('input.input.input-lg#login-username', {
+    name: 'username',
+    autocomplete: 'username',
+    placeholder: 'optional',
     spellcheck: 'false'
   });
   const btn =
@@ -20,28 +37,30 @@ export async function render(root, params, {url}) {
       h('form.login-form', {
         onsubmit: async (e) => {
           e.preventDefault();
-          const ldap = input.value.trim().replace(/@.*$/, '');
-          if (!ldap) {
-            err.textContent = 'Enter your LDAP.';
-            input.focus();
+          const password = pwInput.value;
+          const username = input.value.trim();
+          if (!password) {
+            err.textContent = 'Enter the password.';
+            pwInput.focus();
             return;
           }
           btn.disabled = true;
           err.textContent = '';
           try {
-            const {user} =
-                await post('/api/login', {ldap}, {quiet: true, allow401: true});
+            const {user} = await post(
+                '/api/login', {password, username},
+                {quiet: true, allow401: true});
             store.user = user;
-            navigate(
-                next.startsWith('/') && !next.startsWith('/login') ? next : '/',
-                {replace: true});
+            navigate(safeNext, {replace: true});
           } catch (ex) {
             err.textContent = ex.message || 'Sign-in failed.';
             btn.disabled = false;
           }
         }
       },
-        h('label.field', h('span.field-label', 'LDAP'), input), btn, err);
+        h('label.field', h('span.field-label', 'Password'), pwInput),
+        h('label.field', h('span.field-label', 'Username (optional)'), input),
+        btn, err);
 
   root.appendChild(h(
       'div.login',
@@ -51,7 +70,7 @@ export async function render(root, params, {url}) {
           'Write the decisions a UI generator should make in context \u2014 then test them against hundreds of real-feeling situations, review what comes back, and revise.'),
         form,
         h('p.login-foot',
-          'Development sign-in. Your LDAP identifies your projects.')),
+          'This server is protected by a shared password. Your username, if you give one, labels your projects.')),
       h('div.login-aside',
         h('ol.login-steps',
           h('li', h('strong', 'Write'),
@@ -66,5 +85,5 @@ export async function render(root, params, {url}) {
           h('li', h('strong', 'Revise'),
             h('span',
               'with chat. Each accepted change becomes a new revision you can compare.'))))));
-  setTimeout(() => input.focus(), 0);
+  setTimeout(() => pwInput.focus(), 0);
 }

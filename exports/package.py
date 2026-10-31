@@ -23,7 +23,6 @@ from core import util
 from core.a2ui import catalog as catalog_mod
 from core.a2ui import custom_web
 from core.a2ui import lowering
-from refs import native_codegen
 
 PKG = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SEEDS = os.path.join(PKG, "seeds")
@@ -80,18 +79,10 @@ def file_list(
         f"catalog/components/{n}/definition.json",
         f"catalog/components/{n}/template.html",
         f"catalog/components/{n}/styles.css",
-        f"catalog/components/{n}/compose/{n}.kt",
-        f"catalog/components/{n}/remote_compose/{n}Remote.kt",
-        f"catalog/components/{n}/swiftui/{n}.swift",
         f"catalog/components/{n}/preview.png",
     ]
     if lowering.has_composition(by_name.get(n) or {}):
       files.append(f"catalog/components/{n}/composition.json")
-  if component_names:
-    files += [
-        "catalog/components/CatalogRegistry.kt",
-        "catalog/components/CatalogRegistry.swift",
-    ]
   return files
 
 
@@ -402,8 +393,8 @@ template:
 | `data-icon="{{{{prop}}}}"` | Material Symbols Rounded icon |
 
 `styles.css` is scoped to the component (shadow root) and uses the theme
-tokens from `tokens/tokens.css`. Native platforms (Compose, SwiftUI) should
-implement each component natively from `definition.json` + the previews.
+tokens from `tokens/tokens.css`. Other A2UI renderers can implement each
+component from `definition.json` + the previews.
 
 The Basic catalog schema is © the A2UI authors, Apache 2.0
 (`LICENSE-A2UI.txt`).
@@ -585,23 +576,6 @@ def package_files(
     put(f"catalog/components/{name}/styles.css", chk["css"] + "\n")
     if lowering.has_composition(d):
       put(f"catalog/components/{name}/composition.json", d["composition"])
-    targets = d.get("targets") if isinstance(d.get("targets"), dict) else {}
-    compiled_targets = native_codegen.compile_native_targets(d)
-    compose_code = (targets.get("android_compose") or {}).get(
-        "code"
-    ) or compiled_targets["android_compose"]["code"]
-    rc_code = (targets.get("android_remote_compose") or {}).get(
-        "code"
-    ) or compiled_targets["android_remote_compose"]["code"]
-    swift_code = (targets.get("ios_swiftui") or {}).get(
-        "code"
-    ) or compiled_targets["ios_swiftui"]["code"]
-    put(f"catalog/components/{name}/compose/{name}.kt", compose_code)
-    put(
-        f"catalog/components/{name}/remote_compose/{name}Remote.kt",
-        rc_code,
-    )
-    put(f"catalog/components/{name}/swiftui/{name}.swift", swift_code)
     if r.get("preview_file"):
       put_file(
           f"catalog/components/{name}/preview.png",
@@ -612,16 +586,6 @@ def package_files(
           f"catalog/components/{name}/reference.png",
           store.file_path("components", r["reference_file"]),
       )
-  if comps:
-    comp_defs = [r.get("definition") or {"name": r["name"]} for r in comps]
-    put(
-        "catalog/components/CatalogRegistry.kt",
-        native_codegen.generate_compose_registry(comp_defs),
-    )
-    put(
-        "catalog/components/CatalogRegistry.swift",
-        native_codegen.generate_swiftui_registry(comp_defs),
-    )
   templates = store.query(
       "SELECT * FROM templates WHERE project_id=? AND status='active'"
       " ORDER BY name",

@@ -35,7 +35,10 @@ PKG = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def load_admins(path: str | None = None) -> set[str]:
-  p = path or os.path.join(PKG, "admins.json")
+  """Optional JSON list of admin usernames (`--admins`)."""
+  if not path:
+    return set()
+  p = os.path.expanduser(path)
   try:
     with open(p, encoding="utf-8") as fh:
       return {str(x).strip().lower() for x in json.load(fh)}
@@ -55,17 +58,21 @@ class Service:
     self._chat_locks: dict[str, threading.Lock] = {}
 
   # ------------------------------------------------------------- users
-  def login(self, ldap: str) -> dict[str, Any]:
-    ldap = (ldap or "").strip().lower().removesuffix("@google.com")
+  def login(self, ldap: str, admin: bool = False) -> dict[str, Any]:
+    """Signs `ldap` (the username; column name kept) in, creating the row.
+
+    `admin=True` forces the admin bit (local mode's implicit user).
+    """
+    ldap = (ldap or "").strip().lower()
     if (
         not ldap
         or not ldap.replace("-", "").replace("_", "").replace(".", "").isalnum()
         or len(ldap) > 64
     ):
-      raise ApiError(400, "Enter a valid LDAP username")
+      raise ApiError(400, "Enter a valid username")
     now = util.now_iso()
     u = self.store.get("users", ldap)
-    is_admin = 1 if ldap in self.admins else 0
+    is_admin = 1 if admin or ldap in self.admins else 0
     if u is None:
       self.store.insert(
           "users",
@@ -535,7 +542,7 @@ class Service:
   def default_catalog_id(project_row: dict[str, Any]) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", (project_row.get("name") or "").lower())
     slug = slug.strip("-")[:48] or str(project_row.get("id") or "project")
-    return f"https://dcb.local/catalogs/{slug}"
+    return catalog_mod.project_catalog_id(slug)
 
   def catalog_id_for(self, project_row: dict[str, Any]) -> str:
     s = settings_mod.merged(project_row.get("settings"))

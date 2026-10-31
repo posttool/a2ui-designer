@@ -45,10 +45,7 @@ export async function render(root, params) {
         h('div.wiz-header-left',
           h('span.wiz-badge', icon('school'), 'New project'),
           h('span.wiz-proj-title', draftName.trim() || 'Teaching session')),
-        h('div.wiz-header-right',
-          h('button.btn.btn-ghost.btn-sm#wizard-skip-top',
-            {type: 'button', onclick: () => skipToStudio()},
-            'Skip to a blank studio', icon('arrow_forward'))));
+        h('div.wiz-header-right'));
   }
 
   function drawSetup() {
@@ -168,12 +165,18 @@ export async function render(root, params) {
                                icon('arrow_forward')
                              ]),
               h('div.wiz-setup-secondary',
-                h('button.btn.btn-ghost#wizard-skip-btn',
-                  {type: 'button', onclick: () => skipToStudio()},
-                  'Open a blank studio instead'),
                 h('label.file-pick.btn-sm', icon('upload_file'),
                   h('span', 'Import .md'), fileInput),
-                fileInfo)))));
+                fileInfo)),
+             // Starting without a teaching session is an expert path.
+             h('details.adv-create.wiz-advanced#wizard-advanced',
+               h('summary.btn.btn-ghost.btn-sm', 'Advanced'),
+               h('div.adv-create-menu',
+                 h('button.btn.btn-ghost.btn-sm#wizard-skip-btn',
+                   {type: 'button', onclick: () => skipToStudio()},
+                   'Skip to a blank studio', icon('arrow_forward')),
+                 h('span.muted.small',
+                   'Creates the project without a teaching session.'))))));
   }
 
   function defaultName() {
@@ -203,7 +206,7 @@ export async function render(root, params) {
         groups: Array.from(selectedGroups),
         count: 6,
       });
-      navigate(`/p/${pid}/teach/${st.session.id}`);
+      navigate(`/p/${pid}/teach/${st.session.id}?mode=immersive`);
     } catch (e) {
       toast(e.message || 'Could not start the teaching session', 'bad');
       isStarting = false;

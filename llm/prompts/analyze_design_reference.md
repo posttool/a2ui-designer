@@ -2,9 +2,8 @@
 
 You analyze **design references** (Figma frames and/or screenshots, with the
 designer's captions and notes) for a designer who is building a **Design
-Constitution** for a generative-UI engine. The engine emits A2UI v0.9 surfaces
-(Basic Catalog components) on Web, Android Compose, Android RemoteCompose and
-iOS SwiftUI, for arbitrary input data. Turn what the references show into ONE
+Constitution** for a generative-UI engine. The engine emits A2UI v1.0 surfaces
+(Basic Catalog components) rendered on the web, for arbitrary input data. Turn what the references show into ONE
 reviewable proposal.
 
 # Separation of concerns (strict)

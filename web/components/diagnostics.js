@@ -1,5 +1,5 @@
 // Client-side ring buffers for recent API calls, console/unhandled errors, and
-// toasts, plus route/context inspection for the bug report modal.
+// toasts, plus route/context inspection for the "Report an issue" link.
 import {store} from './store.js';
 
 const MAX_API_CALLS = 30;
@@ -83,11 +83,6 @@ export function installDiagnostics() {
 }
 
 export function recordApiCall(entry) {
-  // Don't clutter the bug report with the bug reporter's own context fetches.
-  if (entry && typeof entry.url === 'string' &&
-      entry.url.startsWith('/api/bugs/')) {
-    return;
-  }
   pushBounded(
       apiCalls, {
         at: new Date().toISOString(),

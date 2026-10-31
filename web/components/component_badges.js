@@ -79,31 +79,22 @@ export function designSourceChips(sources, {compact = false} = {}) {
 export function webOnlyChip(c = null) {
   const def = (c && c.definition) || {};
   const strategy = (c && c.strategy) || def.strategy || '';
-  const targets = (c && c.targets) || Object.keys((def && def.targets) || {});
   const hasComp = Boolean(
       (c && c.has_composition) ||
       (def.composition && def.composition.root &&
        (def.composition.components || []).length));
-  if (strategy === 'native_targets' || (targets && targets.length)) {
-    return h(
-        'span.chip.chip-quiet.web-only-chip', {
-          title:
-              'Ships dedicated Web HTML/CSS + Kotlin Jetpack Compose + RemoteCompose + iOS SwiftUI target implementations.'
-        },
-        icon('devices'), 'Multi-target Native');
-  }
   if (strategy === 'basic_composition' || (hasComp && !(c && c.has_web))) {
     return h(
         'span.chip.chip-quiet.web-only-chip', {
           title:
-              'Composed of A2UI Basic Catalog components — renders natively across Web, Android Compose, RemoteCompose, and iOS SwiftUI.'
+              'Composed of A2UI Basic Catalog components — renders on any A2UI renderer that implements the Basic catalog.'
         },
         icon('dashboard_customize'), 'All renderers (Basic)');
   }
   return h(
       'span.chip.chip-quiet.web-only-chip', {
         title:
-            'Custom components render natively on Web only unless composed of Basic components or exported with Native target code.'
+            'Custom web components need this project\u2019s catalog (template + CSS) in the renderer unless composed of Basic components.'
       },
       icon('language'), 'Web only');
 }
@@ -119,7 +110,6 @@ export function statusChipFor(c) {
 export const STRATEGY_LABELS = {
   web_template: 'Custom web',
   basic_composition: 'Basic composition',
-  native_targets: 'Native targets',
 };
 
 /** Short label of a construction strategy ('' → 'Auto'). */
@@ -148,9 +138,7 @@ export function basicFitChip(c, {threshold = null, compact = false} = {}) {
   if (!to && th != null) {
     to = score >= th ? 'basic_composition' : 'web_template';
   }
-  const cls = to === 'basic_composition' ? 'fit-basic' :
-      to === 'native_targets'            ? 'fit-native' :
-                                           'fit-custom';
+  const cls = to === 'basic_composition' ? 'fit-basic' : 'fit-custom';
   const srcText = fit.source === 'gemini' ?
       'Gemini estimate' :
       `from ${fit.source || 'design'} structure` +
@@ -166,9 +154,7 @@ export function basicFitChip(c, {threshold = null, compact = false} = {}) {
       icon('dashboard_customize'), compact ? `${pct}%` : `Basic fit ${pct}%`,
       to ? h('span.fit-arrow',
              ` \u2192 ${pinned ? 'pinned ' : ''}${
-                 to === 'basic_composition'  ? 'Basic' :
-                     to === 'native_targets' ? 'Native' :
-                                               'Custom'}`) :
+                 to === 'basic_composition' ? 'Basic' : 'Custom'}`) :
            null);
 }
 
@@ -317,8 +303,7 @@ export function normalizeComponentDef(d) {
   def.composition.components = Array.isArray(def.composition.components) ?
       def.composition.components :
       [];
-  def.targets =
-      def.targets && typeof def.targets === 'object' ? def.targets : {};
+  delete def.targets;
   return def;
 }
 

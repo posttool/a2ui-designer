@@ -4,7 +4,7 @@ Uses the generic Streamable HTTP MCP client with the user's Stitch API key in
 `X-Goog-Api-Key`. Screens carry a screenshot and HTML (`File.download_url`);
 downloads may return raw bytes, a JSON `DownloadFileResponse` wrapper
 (`dataString`: raw HTML, or base64 for images), or — for private projects
-while b/571529127 is open — a redirect to Google sign-in, which raises
+a redirect to Google sign-in, which raises
 `StitchDownloadBlocked` so callers can fall back (e.g. render the HTML).
 """
 
@@ -426,7 +426,7 @@ class StitchClient:
         )
     ):
       raise StitchDownloadBlocked(
-          "Stitch download redirected to Google sign-in (b/571529127)"
+          "Stitch download redirected to Google sign-in"
       )
     if len(data) > MAX_DOWNLOAD:
       raise StitchError("Stitch file is too large")

@@ -139,7 +139,7 @@ export async function render(root, params) {
 
   // Optional client-side compiler from the renderer (may not exist yet).
   let compileFn = null;
-  import('/renderer/a2ui.js').then((m) => {if (typeof m.compileCustomComponent === 'function') {
+  import('/renderer/host.js').then((m) => {if (typeof m.compileCustomComponent === 'function') {
           compileFn = m.compileCustomComponent;
           drawCompile();
                              }}).catch(() => {});
@@ -286,10 +286,7 @@ export async function render(root, params) {
         value: 'basic_composition',
         selected: def.strategy === 'basic_composition'
       },
-        'A2UI Basic Composition (all renderers)'),
-      h('option',
-        {value: 'native_targets', selected: def.strategy === 'native_targets'},
-        'Multi-Target Native Code (Compose + SwiftUI + Web)'));
+        'A2UI Basic Composition (any A2UI renderer)'));
   function syncStrategySelect() {
     autoOption.textContent = autoOptionLabel();
     strategySel.value = strategyIsAuto() ? '' : def.strategy;
@@ -335,66 +332,10 @@ export async function render(root, params) {
         },
       },
         icon('dashboard_customize'), 'Save as Basic Template');
-  const syncTargetsBtn =
-      h('button.btn.btn-ghost.btn-sm#comp-sync-targets', {
-        type: 'button',
-        onclick: async () => {
-          syncTargetsBtn.disabled = true;
-          syncTargetsBtn.classList.add('busy');
-          try {
-            const {component} = await post(
-                `/api/components/${cid}/targets`,
-                {definition: def, strategy: def.strategy || 'native_targets'});
-            dirty = false;
-            dirtyEl.hidden = true;
-            saveBtn.disabled = true;
-            updateFromServer(component, {keepDef: false});
-            toast(
-                'Generated Kotlin Compose, RemoteCompose & SwiftUI targets',
-                'good');
-          } finally {
-            syncTargetsBtn.disabled = false;
-            syncTargetsBtn.classList.remove('busy');
-          }
-        },
-      },
-        icon('devices'), 'Sync Native Targets');
-  let activeTargetTab = 'android_compose';
-  const targetTa = h('textarea.input.code-input.code-editor#comp-target-code', {
-    rows: 12,
-    spellcheck: 'false',
-    oninput: () => {
-      def.targets = def.targets || {};
-      def.targets[activeTargetTab] = {
-        ...(def.targets[activeTargetTab] || {}),
-        code: targetTa.value,
-      };
-      changed(false);
-    },
-  });
-  codeKeys(targetTa, () => targetTa.dispatchEvent(new Event('input')));
-  const targetSeg = segmented(
-      [
-        {value: 'android_compose', label: 'Compose (.kt)', id: 'tgt-compose'},
-        {
-          value: 'android_remote_compose',
-          label: 'RemoteCompose (.kt)',
-          id: 'tgt-rc'
-        },
-        {value: 'ios_swiftui', label: 'SwiftUI (.swift)', id: 'tgt-swiftui'},
-      ],
-      activeTargetTab, (v) => {
-        activeTargetTab = v;
-        syncTargetEditor();
-      });
   function syncCompositionEditor() {
     compositionTa.value =
         JSON.stringify(def.composition || {root: '', components: []}, null, 2);
     compositionErr.textContent = '';
-  }
-  function syncTargetEditor() {
-    const t = (def.targets && def.targets[activeTargetTab]) || {};
-    targetTa.value = t.code || '';
   }
 
   let propsMode = 'table';
@@ -1197,7 +1138,6 @@ export async function render(root, params) {
       propsJson.value = JSON.stringify(def.props, null, 2);
     drawPropsTable();
     syncCompositionEditor();
-    syncTargetEditor();
     syncSampleEditor();
     drawHead();
     drawCompile();
@@ -1359,20 +1299,11 @@ export async function render(root, params) {
             {open: def.strategy === 'basic_composition'},
             h('summary.field-head',
               h('span.field-label',
-                'A2UI Basic Catalog Composition (Cross-Platform Lowering)'),
+                'A2UI Basic Catalog Composition (lowering)'),
               h('span.grow'), toTemplateBtn),
             compositionTa, compositionErr,
             h('span.help',
-              'Lowers this component into A2UI Basic Catalog nodes (Card, Row, Column, Text, Image, Icon, Button, Divider) on Android Compose, RemoteCompose, and iOS SwiftUI.')),
-          h('details.field#comp-targets-details',
-            {open: def.strategy === 'native_targets'},
-            h('summary.field-head',
-              h('span.field-label',
-                'Multi-Target Native Code (Compose / RemoteCompose / SwiftUI)'),
-              h('span.grow'), syncTargetsBtn),
-            h('div.field-head', targetSeg), targetTa,
-            h('span.help',
-              'Exported into catalog/components/<Name>/{compose,remote_compose,swiftui}/ and registered in CatalogRegistry.{kt,swift}.')),
+              'Lowers this component into A2UI Basic Catalog nodes (Card, Row, Column, Text, Image, Icon, Button, Divider) so any A2UI renderer that implements the Basic catalog can display it.')),
           compileEl, issuesEl),
         h('section.comp-ed-col.comp-ed-preview',
           h('div.comp-ed-col-title', 'Preview'),
@@ -1393,7 +1324,6 @@ export async function render(root, params) {
 
   drawPropsTable();
   syncCompositionEditor();
-  syncTargetEditor();
   syncSampleEditor();
   drawHead();
   drawIssues();
