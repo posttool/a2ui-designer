@@ -197,6 +197,10 @@ class ValidatorTest(unittest.TestCase):
       r = validator.validate(ex["messages"], self.cat)
       self.assertTrue(r.ok, f"{ex['file']}: {r.summary()}")
 
+  @unittest.skipUnless(
+      os.path.isdir(CASES_DIR) and os.path.isfile(TESTING_CATALOG),
+      "upstream schema test cases not present (run `python3 tools/sync_a2ui.py --ref <sha>` to fetch)",
+  )
   def test_upstream_schema_cases(self):
     with open(TESTING_CATALOG, encoding="utf-8") as fh:
       testing = catalog.catalog_from_json(json.load(fh))

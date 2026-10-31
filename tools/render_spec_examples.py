@@ -42,7 +42,14 @@ import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 WEB = ROOT / 'web'
-EXAMPLES = ROOT / 'seeds' / 'a2ui' / 'catalogs' / 'basic' / 'v1' / 'examples'
+_NPM_EXAMPLES = (
+    ROOT / 'node_modules' / '@a2ui' / 'web_core' / 'src' / 'v1_0' / 'schemas' /
+    'catalogs' / 'basic' / 'examples'
+)
+EXAMPLES = (
+    _NPM_EXAMPLES if _NPM_EXAMPLES.is_dir() else
+    ROOT / 'seeds' / 'a2ui' / 'catalogs' / 'basic' / 'v1' / 'examples'
+)
 if str(ROOT) not in sys.path:
   sys.path.insert(0, str(ROOT))
 from render import cdp as _cdp  # pylint: disable=g-import-not-at-top,wrong-import-position

@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 node_modules/
+/web/vendor/
 .DS_Store
 /data/
 *.log

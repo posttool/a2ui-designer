@@ -8,22 +8,23 @@ large sets of realistic data and packages the result as a design system that
 any A2UI agent and web renderer can use.
 
 - **Protocol:** A2UI **v1.0** (release candidate), on the unmodified upstream
-  [Basic catalog](seeds/a2ui/catalogs/basic/v1/catalog.json).
+  Basic catalog shipped in `@a2ui/web_core`.
 - **Renderer:** the official, unmodified
   [`@a2ui/web_core` + `@a2ui/lit`](https://github.com/a2ui-project/a2ui)
-  packages, vendored as one prebuilt ES module
-  ([web/vendor/a2ui.bundle.js](web/vendor/a2ui.bundle.js)).
-- **Runtime:** Python ≥ 3.10 standard library + SQLite. You also need
-  Chrome/Chromium for screenshots and a Gemini API key. There is no build step
-  and nothing to `pip install` or `npm install`.
+  npm packages (declared in [`package.json`](package.json) and bundled at build
+  time by `npm run build`).
+- **Runtime:** Python ≥ 3.10 standard library + SQLite, Node.js ≥ 20 + npm (for
+  installing `@a2ui/web_core` and `@a2ui/lit` and building the web renderer),
+  Chrome/Chromium for screenshots, and a Gemini API key.
 
 ## Quick start
 
 ```bash
 git clone https://github.com/posttool/a2ui-designer.git
 cd a2ui-designer
+npm install && npm run build     # installs @a2ui/web_core + @a2ui/lit and builds the renderer
 export GEMINI_API_KEY=...        # https://aistudio.google.com/apikey
-./run.sh                         # http://localhost:8100
+./run.sh                         # http://localhost:8100 (also runs npm install/build if needed)
 ```
 
 Click **New project**, pick a few scenario areas, and you land in an
@@ -96,8 +97,7 @@ container that has Chromium installed.
 
 | What | Where | Status |
 |---|---|---|
-| A2UI v1.0 spec JSON, Basic catalog v1, its 43 examples, protocol doc | [seeds/a2ui/](seeds/a2ui/) | **Verbatim** from `github.com/a2ui-project/a2ui` @ the commit in [UPSTREAM.json](seeds/a2ui/UPSTREAM.json); `tests/seeds_test.py` fails if any byte changes |
-| Web renderer | [web/vendor/a2ui.bundle.js](web/vendor/a2ui.bundle.js) | **Unmodified** published `@a2ui/web_core` + `@a2ui/lit` ([versions](web/vendor/A2UI_VERSIONS.json)), bundled by [tools/renderer/](tools/renderer/) |
+| A2UI v1.0 spec JSON, Basic catalog v1, its 43 examples, and web renderer | [`package.json`](package.json) (`@a2ui/web_core` + `@a2ui/lit`) | **Unmodified** published npm packages installed into `node_modules/@a2ui/` and bundled into `web/vendor/a2ui.bundle.js` by `npm run build` ([`tools/renderer/build.mjs`](tools/renderer/build.mjs)) |
 | Host layer: design tokens → CSS variables, inspect/boxes, custom-component wrappers, composition lowering | [web/renderer/](web/renderer/) | Ours. Uses only the libraries' public APIs (`MessageProcessor`, `Catalog`, `A2uiLitElement`, …) |
 | Extension catalog: `HeroCard` (full-bleed image + scrim) and `SvgIcon` (image/inline-SVG icon) | [seeds/a2ui_designer_catalog.json](seeds/a2ui_designer_catalog.json) | Ours. A separate catalog with its own id (`https://posttool.github.io/a2ui-designer/catalogs/extensions/v1/catalog.json`). **Off by default**; enable it per project in Design system |
 | Project catalogs (your custom components) | generated | Each project publishes its own v1.0 catalog. The default id is `https://posttool.github.io/a2ui-designer/catalogs/projects/<slug>/catalog.json`; set your own in Package settings |
@@ -106,11 +106,10 @@ Payloads mix catalogs as A2UI v1.0 specifies: `createSurface.catalogId` is the
 Basic catalog, and components from the extension catalog or a project catalog
 carry their own `catalogId`.
 
-To re-pin to a newer upstream (for example, the final 1.0 release):
+To upgrade to a newer A2UI release (for example, the final 1.0 release):
 
 ```bash
-python3 tools/sync_a2ui.py --ref <tag-or-sha>               # refresh seeds/a2ui + UPSTREAM.json
-(cd tools/renderer && npm install @a2ui/web_core@X @a2ui/lit@X && node build.mjs)   # rebuild the bundle
+npm install @a2ui/web_core@X @a2ui/lit@X && npm run build     # upgrade A2UI packages & rebuild renderer
 python3 tools/build_starter_cache.py                          # regenerate starter cards (needs GEMINI_API_KEY + Chrome)
 ```
 

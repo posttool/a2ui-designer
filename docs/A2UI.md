@@ -4,7 +4,7 @@ A2UI Designer is built on the **A2UI v1.0** specification. It combines the unmod
 
 ## Upstream vs Ours
 
-- **Verbatim upstream**: Files in `seeds/a2ui/` are exact copies from the upstream A2UI repository. The official renderer bundle in `web/vendor/a2ui.bundle.js` is built from unmodified `@a2ui/web_core@0.14.0` and `@a2ui/lit@0.14.0`.
+- **Unmodified upstream npm packages**: `@a2ui/web_core` and `@a2ui/lit` are installed via `npm install` (see [`package.json`](../package.json)). Python loads the Basic v1 catalog, JSON schemas, and 43 spec examples directly from `node_modules/@a2ui/web_core/src/v1_0/schemas/`, and `npm run build` bundles the renderer into `web/vendor/a2ui.bundle.js` at build time.
 - **Ours**: The host layer (`web/renderer/host.js`), which handles design tokens, inspection, and composition lowering. The extension catalog (`seeds/a2ui_designer_catalog.json`) and any project-specific catalogs.
 
 ## Catalog IDs
@@ -43,14 +43,12 @@ Example:
 }
 ```
 
-## How to Re-pin Upstream
+## How to Upgrade Upstream
 
 To update to a newer upstream release (e.g., the final 1.0 release):
 
 ```bash
-python3 tools/sync_a2ui.py --ref <tag-or-sha>
-cd tools/renderer && npm install @a2ui/web_core@X @a2ui/lit@X && node build.mjs
-cd ../..
+npm install @a2ui/web_core@X @a2ui/lit@X && npm run build
 python3 tools/build_starter_cache.py
 ```
 

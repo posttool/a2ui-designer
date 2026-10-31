@@ -73,9 +73,9 @@ def prompt_sha() -> str:
 
 
 # Files whose content changes what a cached screenshot / payload looks like:
-# the vendored official renderer bundle and the host layer around it.
+# the pinned renderer package versions and the host layer around it.
 RENDERER_FILES = (
-    ("web", "vendor", "a2ui.bundle.js"),
+    ("package.json",),
     ("web", "renderer", "host.js"),
     ("web", "renderer", "tokens.js"),
     ("web", "renderer", "host.css"),

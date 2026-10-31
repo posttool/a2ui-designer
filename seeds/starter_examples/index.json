@@ -1,486 +1,500 @@
 {
- "dry_run": false,
- "entries": {
-  "054cf835a2f8b1e73721070fec731459e9467dc179d5fffba3efd0b4bc467140": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
+  "dry_run": false,
+  "entries": {
+    "157bb3ac96d8b2df7293d06e98650155a4354c748994465f0101c41cad6d6571": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "7f1b3fb0115318e4e8a9fb3ecf199ecc858c0d105a0076e91dd8f9ff5e181ec5",
+        "seed_id": "seed_care_elder",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_care_elder/phone",
+      "seed_id": "seed_care_elder",
+      "viewport": "phone",
+      "key": "157bb3ac96d8b2df7293d06e98650155a4354c748994465f0101c41cad6d6571"
     },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
+    "2264b5900c1ae10936ea35425fed06fbaba2c8fff8acc7d89715058b4c044270": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "d37517be27fc6c0f567d2cebb1f342d2e0cf4acbf3e21e9b0b5f69358416d5e0",
+        "seed_id": "seed_assistant_dinner",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_assistant_dinner/phone",
+      "seed_id": "seed_assistant_dinner",
+      "viewport": "phone",
+      "key": "2264b5900c1ae10936ea35425fed06fbaba2c8fff8acc7d89715058b4c044270"
     },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "7f1b3fb0115318e4e8a9fb3ecf199ecc858c0d105a0076e91dd8f9ff5e181ec5",
-    "seed_id": "seed_care_elder",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_care_elder/phone",
-   "seed_id": "seed_care_elder",
-   "viewport": "phone"
+    "b95034af53d65401dad3a787b968f581738e90cce6f158e2f52f22d713ed1c5b": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "7ab2fd78f5d38b432700b6c66dd9f35bfbe5dc6b8585d5cc41ae74a907a6e3db",
+        "seed_id": "seed_agentic_disambiguation",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_agentic_disambiguation/phone",
+      "seed_id": "seed_agentic_disambiguation",
+      "viewport": "phone",
+      "key": "b95034af53d65401dad3a787b968f581738e90cce6f158e2f52f22d713ed1c5b"
+    },
+    "d157623cfe1d6cb4ed5222cab2676b46781aa7e957b40f66c43d8b05bccbdaba": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "2a91e1ebdab1c7f2380a33eeebaecc9beb8315c40f44c931b50738ac0d2a69a7",
+        "seed_id": "seed_assistant_scheduling",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_assistant_scheduling/phone",
+      "seed_id": "seed_assistant_scheduling",
+      "viewport": "phone",
+      "key": "d157623cfe1d6cb4ed5222cab2676b46781aa7e957b40f66c43d8b05bccbdaba"
+    },
+    "0999acdf24334d57e10dd7675d99b3cf945d987c10ca8991270f35655d2f8f84": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "695ca045414174617c194da9db52983fc9a3de83cad440f4d345af4cf06f3826",
+        "seed_id": "seed_agentic_task",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_agentic_task/phone",
+      "seed_id": "seed_agentic_task",
+      "viewport": "phone",
+      "key": "0999acdf24334d57e10dd7675d99b3cf945d987c10ca8991270f35655d2f8f84"
+    },
+    "e3c869b77bc8097ca88636590b41044b592850e53b86794d2f80340e460b2961": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "95b6b51490024883d3a6fe99ca4d87608651944cea2d3e9f4ac156a2e7b161e6",
+        "seed_id": "seed_editorial_magazine",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_editorial_magazine/phone",
+      "seed_id": "seed_editorial_magazine",
+      "viewport": "phone",
+      "key": "e3c869b77bc8097ca88636590b41044b592850e53b86794d2f80340e460b2961"
+    },
+    "c821a0914beac1210b5c33d5251cd453f828c3ec70c3fd9cdc5e1032d571501c": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "1e743f96ec5889a3cd88977d186b49ff537ef37cf5b0b224a87871316f82350d",
+        "seed_id": "seed_comms_messaging",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_comms_messaging/phone",
+      "seed_id": "seed_comms_messaging",
+      "viewport": "phone",
+      "key": "c821a0914beac1210b5c33d5251cd453f828c3ec70c3fd9cdc5e1032d571501c"
+    },
+    "1ddf3fbe02990428c61fe47a1be467a408763f53918733d9e7f07336a57a940a": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "4627aa45960bd5647920a3895255f6da747a5d4472e67b84d2b3e7fab6689987",
+        "seed_id": "seed_care_pediatric",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_care_pediatric/phone",
+      "seed_id": "seed_care_pediatric",
+      "viewport": "phone",
+      "key": "1ddf3fbe02990428c61fe47a1be467a408763f53918733d9e7f07336a57a940a"
+    },
+    "f200fb2b6bdc26d21bd7894d850e9f336afa6454c9c50bf9ce989321df5d3eb4": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "a778d71e9a010689205767e9ffcd6a654b06141868c53a0623a5d0dfa359842a",
+        "seed_id": "seed_enterprise_event",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_enterprise_event/phone",
+      "seed_id": "seed_enterprise_event",
+      "viewport": "phone",
+      "key": "f200fb2b6bdc26d21bd7894d850e9f336afa6454c9c50bf9ce989321df5d3eb4"
+    },
+    "d2db8a52ae128d870eb0cf2602961deeb82a6b1c619d6c148f71d7c18298fc04": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "9db1e42b186aa0ee67bceb71eff7d27265b0c8bf757d0040d9e9d2406fb44cbe",
+        "seed_id": "seed_apps_commerce",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_apps_commerce/phone",
+      "seed_id": "seed_apps_commerce",
+      "viewport": "phone",
+      "key": "d2db8a52ae128d870eb0cf2602961deeb82a6b1c619d6c148f71d7c18298fc04"
+    },
+    "403cf038ed88b49aa70f77244ff3018ee5077f28d2b58ac9295cdc99f4a167ea": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "e3da3070c1a3a45a5c69964875b717b89583a2ea27e4760f72812711e975f4a7",
+        "seed_id": "seed_apps_itinerary",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_apps_itinerary/phone",
+      "seed_id": "seed_apps_itinerary",
+      "viewport": "phone",
+      "key": "403cf038ed88b49aa70f77244ff3018ee5077f28d2b58ac9295cdc99f4a167ea"
+    },
+    "3006b604d5b628a3d428ca4d8eda165e8ed5bc24e88ffa4d51961a4eeb04a144": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "4c3cd5930c602ff6a305d2b246fae4ec0de55f24780089d6d8f19aae7de47aa6",
+        "seed_id": "seed_comms_media",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_comms_media/phone",
+      "seed_id": "seed_comms_media",
+      "viewport": "phone",
+      "key": "3006b604d5b628a3d428ca4d8eda165e8ed5bc24e88ffa4d51961a4eeb04a144"
+    },
+    "f432f755ecee5480f3f7c9b02d8ced8dff3f189cc77b74e41ed16cc25f19f205": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "a8b1016b879f87ddc786f1caf4b9ec8b0e321854973a2b357ecc9936b8e55443",
+        "seed_id": "seed_enterprise_building",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_enterprise_building/phone",
+      "seed_id": "seed_enterprise_building",
+      "viewport": "phone",
+      "key": "f432f755ecee5480f3f7c9b02d8ced8dff3f189cc77b74e41ed16cc25f19f205"
+    },
+    "657be7e7f0b272605f5c98cda21e3fc1723dcf05725d77b8226c2d500d32ee00": {
+      "inputs": {
+        "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
+        "catalog_hash": "c77aaa3c3dd9",
+        "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "generator": {
+          "framing": "card",
+          "include_guidelines": false,
+          "max_repairs": 1,
+          "model": "gemini-3.8-flash",
+          "temperature": 0.7
+        },
+        "guidelines_sha": "",
+        "imagery": {
+          "enabled": true,
+          "image_model": "gemini-3.1-flash-image",
+          "svg_model": "gemini-3.8-flash"
+        },
+        "imagery_styles_sha": "",
+        "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
+        "protocol": "v1.0",
+        "renderer": "web",
+        "renderer_sha": "99a3317fa7fb3abed72cdc6f8f464e6bc7297a97a7dfa548954cb16e218779f4",
+        "sample_sha": "a485c2c669185f3f05bfb8361d45bfb76714d5226e072ac6cf38ddcec10b7608",
+        "seed_id": "seed_editorial_report",
+        "stage": "result",
+        "templates_hash": "4f53cda18c2b",
+        "theme_hash": "80e57cbe3482",
+        "viewport": "phone"
+      },
+      "path": "seed_editorial_report/phone",
+      "seed_id": "seed_editorial_report",
+      "viewport": "phone",
+      "key": "657be7e7f0b272605f5c98cda21e3fc1723dcf05725d77b8226c2d500d32ee00"
+    }
   },
-  "149caadf9e87f3929838b88c57895f0ea58d744a2094d5e0b79e9f7eb6b2bda2": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "d37517be27fc6c0f567d2cebb1f342d2e0cf4acbf3e21e9b0b5f69358416d5e0",
-    "seed_id": "seed_assistant_dinner",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_assistant_dinner/phone",
-   "seed_id": "seed_assistant_dinner",
-   "viewport": "phone"
-  },
-  "1ad7d5b6eee76ad0ebdb77aa0cc79cf0db7094bfb923ffdfa65efae95ad2e6dc": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "7ab2fd78f5d38b432700b6c66dd9f35bfbe5dc6b8585d5cc41ae74a907a6e3db",
-    "seed_id": "seed_agentic_disambiguation",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_agentic_disambiguation/phone",
-   "seed_id": "seed_agentic_disambiguation",
-   "viewport": "phone"
-  },
-  "373cbe05915c73746d08a7cebbfd89a39cd0bf23defe33a1a1b43682bd64e31c": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "2a91e1ebdab1c7f2380a33eeebaecc9beb8315c40f44c931b50738ac0d2a69a7",
-    "seed_id": "seed_assistant_scheduling",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_assistant_scheduling/phone",
-   "seed_id": "seed_assistant_scheduling",
-   "viewport": "phone"
-  },
-  "3b5d77cd6b75e80d23079cb491a44e3aeea8439d08edfdf917ec87d9ffd3555c": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "695ca045414174617c194da9db52983fc9a3de83cad440f4d345af4cf06f3826",
-    "seed_id": "seed_agentic_task",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_agentic_task/phone",
-   "seed_id": "seed_agentic_task",
-   "viewport": "phone"
-  },
-  "3ca304fb23b761bb8c5d6ff7f6e7f09c05bc08d3d1bc96e741af5c2abb3ddf20": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "95b6b51490024883d3a6fe99ca4d87608651944cea2d3e9f4ac156a2e7b161e6",
-    "seed_id": "seed_editorial_magazine",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_editorial_magazine/phone",
-   "seed_id": "seed_editorial_magazine",
-   "viewport": "phone"
-  },
-  "456b010f47deeacdf6f00cea9030e74d71269ffd929db6bc16dd6071353cff96": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "1e743f96ec5889a3cd88977d186b49ff537ef37cf5b0b224a87871316f82350d",
-    "seed_id": "seed_comms_messaging",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_comms_messaging/phone",
-   "seed_id": "seed_comms_messaging",
-   "viewport": "phone"
-  },
-  "50982cd1ae9b575caadca47819db83823cf911a7b87ae0a63f9a107d9ff78265": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "4627aa45960bd5647920a3895255f6da747a5d4472e67b84d2b3e7fab6689987",
-    "seed_id": "seed_care_pediatric",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_care_pediatric/phone",
-   "seed_id": "seed_care_pediatric",
-   "viewport": "phone"
-  },
-  "6abfff738e5614fda2e0e8a6765d4788c112f2922244e572cda6e7fb33f39a17": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "a778d71e9a010689205767e9ffcd6a654b06141868c53a0623a5d0dfa359842a",
-    "seed_id": "seed_enterprise_event",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_enterprise_event/phone",
-   "seed_id": "seed_enterprise_event",
-   "viewport": "phone"
-  },
-  "71c8e1023689225c284b554b7de6153263509a465abab33628036480ff93ff85": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "9db1e42b186aa0ee67bceb71eff7d27265b0c8bf757d0040d9e9d2406fb44cbe",
-    "seed_id": "seed_apps_commerce",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_apps_commerce/phone",
-   "seed_id": "seed_apps_commerce",
-   "viewport": "phone"
-  },
-  "7c166b8f180b97327b49a651cac9a7106ecb407ba74a069a2f1febf76a81eca6": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "e3da3070c1a3a45a5c69964875b717b89583a2ea27e4760f72812711e975f4a7",
-    "seed_id": "seed_apps_itinerary",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_apps_itinerary/phone",
-   "seed_id": "seed_apps_itinerary",
-   "viewport": "phone"
-  },
-  "86dcc878518b3da2c4d266dc2f5f832a3fdd2c55345947a04846e0ea92b51c3e": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "4c3cd5930c602ff6a305d2b246fae4ec0de55f24780089d6d8f19aae7de47aa6",
-    "seed_id": "seed_comms_media",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_comms_media/phone",
-   "seed_id": "seed_comms_media",
-   "viewport": "phone"
-  },
-  "8c8535f26bdce92c1705f85f6e4a7e04bc315d3ae8c151021c75996c79837771": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "a8b1016b879f87ddc786f1caf4b9ec8b0e321854973a2b357ecc9936b8e55443",
-    "seed_id": "seed_enterprise_building",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_enterprise_building/phone",
-   "seed_id": "seed_enterprise_building",
-   "viewport": "phone"
-  },
-  "ff34f5f2cc09ba5c3a82ab95ba268f5702d5196d4d234db92191f56567fb7c16": {
-   "inputs": {
-    "catalog_cfg_sha": "aea2eab30ef2e535ff6ed1be6386d843aed8ebc74c56f7b2f90bc9f8adaf585b",
-    "catalog_hash": "c77aaa3c3dd9",
-    "constitution_sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "generator": {
-     "framing": "card",
-     "include_guidelines": false,
-     "max_repairs": 1,
-     "model": "gemini-3.8-flash",
-     "temperature": 0.7
-    },
-    "guidelines_sha": "",
-    "imagery": {
-     "enabled": true,
-     "image_model": "gemini-3.1-flash-image",
-     "svg_model": "gemini-3.8-flash"
-    },
-    "imagery_styles_sha": "",
-    "prompt_sha": "9d2c87824e6e77fc996d8eee577b311d91a0d7fe05159eceaf3d201fab264a71",
-    "protocol": "v1.0",
-    "renderer": "web",
-    "renderer_sha": "57c8786699defe64ae306c5b7bd9dfd5a31dee5bf8e0734c19bd4ce282fa618a",
-    "sample_sha": "a485c2c669185f3f05bfb8361d45bfb76714d5226e072ac6cf38ddcec10b7608",
-    "seed_id": "seed_editorial_report",
-    "stage": "result",
-    "templates_hash": "4f53cda18c2b",
-    "theme_hash": "80e57cbe3482",
-    "viewport": "phone"
-   },
-   "path": "seed_editorial_report/phone",
-   "seed_id": "seed_editorial_report",
-   "viewport": "phone"
-  }
- },
- "generated_at": "2026-10-31T16:28:47Z",
- "model": "gemini-3.8-flash",
- "protocol": "v1.0",
- "renderer": "web",
- "version": 1
+  "generated_at": "2026-10-31T16:28:47Z",
+  "model": "gemini-3.8-flash",
+  "protocol": "v1.0",
+  "renderer": "web",
+  "version": 1
 }

@@ -29,13 +29,30 @@ ROOT = os.path.dirname(
 )
 SEEDS = os.path.join(ROOT, "seeds")
 A2UI_SEEDS = os.path.join(SEEDS, "a2ui")
-BASIC_CATALOG_PATH = os.path.join(
-    A2UI_SEEDS, "catalogs", "basic", "v1", "catalog.json"
+NPM_A2UI_SCHEMAS = os.path.join(
+    ROOT, "node_modules", "@a2ui", "web_core", "src", "v1_0", "schemas"
 )
-BASIC_EXAMPLES_DIR = os.path.join(
-    A2UI_SEEDS, "catalogs", "basic", "v1", "examples"
+NPM_BASIC_CATALOG_PATH = os.path.join(
+    NPM_A2UI_SCHEMAS, "catalogs", "basic", "catalog.json"
 )
-SPEC_JSON_DIR = os.path.join(A2UI_SEEDS, "specification", "v1_0", "json")
+NPM_BASIC_EXAMPLES_DIR = os.path.join(
+    NPM_A2UI_SCHEMAS, "catalogs", "basic", "examples"
+)
+BASIC_CATALOG_PATH = (
+    NPM_BASIC_CATALOG_PATH
+    if os.path.isfile(NPM_BASIC_CATALOG_PATH)
+    else os.path.join(A2UI_SEEDS, "catalogs", "basic", "v1", "catalog.json")
+)
+BASIC_EXAMPLES_DIR = (
+    NPM_BASIC_EXAMPLES_DIR
+    if os.path.isdir(NPM_BASIC_EXAMPLES_DIR)
+    else os.path.join(A2UI_SEEDS, "catalogs", "basic", "v1", "examples")
+)
+SPEC_JSON_DIR = (
+    NPM_A2UI_SCHEMAS
+    if os.path.isdir(NPM_A2UI_SCHEMAS)
+    else os.path.join(A2UI_SEEDS, "specification", "v1_0", "json")
+)
 EXTENSION_CATALOG_PATH = os.path.join(SEEDS, "a2ui_designer_catalog.json")
 
 PROTOCOL_VERSION = "v1.0"  # message envelope "version"

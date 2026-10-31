@@ -1,0 +1,24 @@
+{
+  "name": "a2ui-designer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A2UI v1.0 Design System Studio — teach by example, build custom A2UI components, and export standalone design packages.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/posttool/a2ui-designer.git"
+  },
+  "dependencies": {
+    "@a2ui/lit": "0.14.0",
+    "@a2ui/web_core": "0.14.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  },
+  "scripts": {
+    "build": "node tools/renderer/build.mjs",
+    "start": "./run.sh",
+    "test": "python3 -B -W ignore::ResourceWarning -m unittest discover -s tests -p '*_test.py' && python3 -B tests/renderer_check.py"
+  }
+}

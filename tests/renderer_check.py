@@ -40,6 +40,18 @@ sys.path.insert(0, ROOT)
 from render import cdp  # pylint: disable=g-import-not-at-top
 
 EXAMPLES_DIRS = [
+    os.path.join(
+        ROOT,
+        "node_modules",
+        "@a2ui",
+        "web_core",
+        "src",
+        "v1_0",
+        "schemas",
+        "catalogs",
+        "basic",
+        "examples",
+    ),
     os.path.join(ROOT, "seeds", "a2ui", "catalogs", "basic", "v1", "examples"),
 ]
 BASIC = "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json"

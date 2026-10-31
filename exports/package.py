@@ -1288,7 +1288,14 @@ def package_files(
   )
   put("README.md", readme)
   put("index.html", _gallery(project, cat.catalog_id, comps, theme))
-  put_file("LICENSE-A2UI.txt", os.path.join(A2UI_SEEDS, "LICENSE"))
+  a2ui_license = os.path.join(
+      PKG, "node_modules", "@a2ui", "web_core", "LICENSE"
+  )
+  if not os.path.isfile(a2ui_license):
+    a2ui_license = os.path.join(A2UI_SEEDS, "LICENSE")
+  if not os.path.isfile(a2ui_license):
+    a2ui_license = os.path.join(PKG, "LICENSE")
+  put_file("LICENSE-A2UI.txt", a2ui_license)
 
   # Asset materialization over every generated text file (not the verbatim
   # renderer copies).

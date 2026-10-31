@@ -8,6 +8,7 @@ import os
 from typing import Any
 
 from core import util
+from core.a2ui import catalog as catalog_mod
 from core.version import APP_VERSION
 from core.components import ComponentManager
 from core.service import ApiError, Service
@@ -37,10 +38,8 @@ from sim.teach_ledger import TeachLedger
 PKG = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WEB = os.path.join(PKG, "web")
 SEEDS = os.path.join(PKG, "seeds")
-# Upstream A2UI v1 Basic catalog examples (verbatim, seeds/a2ui/).
-EXAMPLES_DIR = os.path.join(
-    SEEDS, "a2ui", "catalogs", "basic", "v1", "examples"
-)
+# Upstream A2UI v1 Basic catalog examples (from @a2ui/web_core npm package).
+EXAMPLES_DIR = catalog_mod.BASIC_EXAMPLES_DIR
 DOCS = os.path.join(PKG, "docs")
 PUBLIC_DOCS = ("DESIGN_REFERENCE_GUIDELINES.md",)
 

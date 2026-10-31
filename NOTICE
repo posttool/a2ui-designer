@@ -11,10 +11,9 @@ https://github.com/a2ui-project/a2ui
 Copyright The A2UI Authors
 Licensed under the Apache License, Version 2.0.
 
-The A2UI specification files, the Basic component catalog, common types,
-spec examples and the prebuilt renderer bundle (built from the published
-@a2ui/web_core and @a2ui/lit packages) are redistributed under that license.
-Vendored copies live under seeds/ and web/vendor/.
+The A2UI specification files, Basic component catalog, common types, spec
+examples, and web renderer are installed from the published `@a2ui/web_core`
+and `@a2ui/lit` npm packages via `package.json` and bundled at build time.
 
 ------------------------------------------------------------------------
 Material Color Utilities
