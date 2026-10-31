@@ -147,7 +147,31 @@ def upgrade_component(
 
 
 def _heading_variant(comp: dict[str, Any]) -> None:
-  """v0.9 Text.variant h1..h5 → a Markdown heading in the text (v1.0)."""
+  """v0.9 Text.variant h1..h5 → a Markdown heading in the text (v1.0).
+
+  Also strips Markdown bold/italic markers from `caption` Text (the official
+  `a2ui-basic-text` component renders `caption` as plain `<em>` without parsing
+  Markdown).
+  """
+  if comp.get("variant") == "caption":
+    text = comp.get("text")
+    if isinstance(text, str) and ("**" in text or "__" in text):
+      comp["text"] = re.sub(r"(\*\*|__)(?=\S)([\s\S]*?\S)\1", r"\2", text)
+    elif (
+        isinstance(text, dict)
+        and text.get("@call") == "formatString"
+        and isinstance((text.get("args") or {}).get("value"), str)
+    ):
+      val = text["args"]["value"]
+      if "**" in val or "__" in val:
+        comp["text"] = dict(
+            text,
+            args=dict(
+                text["args"],
+                value=re.sub(r"(\*\*|__)(?=\S)([\s\S]*?\S)\1", r"\2", val),
+            ),
+        )
+    return
   m = re.fullmatch(r"h([1-6])", str(comp.get("variant") or ""))
   if not m:
     return

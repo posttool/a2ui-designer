@@ -88,7 +88,7 @@
      {
       "component": "Text",
       "id": "cancelledBadge",
-      "text": "**CANCELLED**",
+      "text": "CANCELLED",
       "variant": "caption"
      },
      {
@@ -147,7 +147,7 @@
      {
       "component": "Text",
       "id": "recBadge",
-      "text": "**★ RECOMMENDED OPTION**",
+      "text": "★ RECOMMENDED OPTION",
       "variant": "caption"
      },
      {
@@ -169,13 +169,13 @@
      {
       "component": "Text",
       "id": "recSeatRow",
-      "text": "**Seat:** 11C (Economy Plus, Aisle)",
+      "text": "Seat: 11C (Economy Plus, Aisle)",
       "variant": "caption"
      },
      {
       "component": "Text",
       "id": "recPriceRow",
-      "text": "**Fare Difference:** $0 (No charge)",
+      "text": "Fare Difference: $0 (No charge)",
       "variant": "caption"
      },
      {
@@ -233,13 +233,13 @@
      {
       "component": "Text",
       "id": "altSeatRow",
-      "text": "**Seat:** 19A (Window)",
+      "text": "Seat: 19A (Window)",
       "variant": "caption"
      },
      {
       "component": "Text",
       "id": "altPriceRow",
-      "text": "**Fare Difference:** +$45.00 USD",
+      "text": "Fare Difference: +$45.00 USD",
       "variant": "caption"
      },
      {
@@ -354,8 +354,8 @@
    {
     "h": 18,
     "k": "cancelledBadge|",
-    "w": 95,
-    "x": 285,
+    "w": 72,
+    "x": 308,
     "y": 122
    },
    {
@@ -410,7 +410,7 @@
    {
     "h": 18,
     "k": "recBadge|",
-    "w": 185,
+    "w": 163,
     "x": 32,
     "y": 305
    },

@@ -55,9 +55,12 @@ Component rules (A2UI v1.0):
     copying the same structure many times. Inside a template, paths are
     relative to the item (e.g. `{"@path": "name"}`).
 -   `Text.variant` is only `body` (default) or `caption`. Express hierarchy with
-    Markdown inside the text: `"# Title"`, `"## Section"`, `"### Label"`,
-    `**bold**`, lists. Keep copy faithful to the input data; you may summarize
-    or shorten, never invent facts, numbers, names or prices.
+    Markdown inside `body` text: `"# Title"`, `"## Section"`, `"### Label"`,
+    `**bold**`, lists. Note: `variant: "caption"` renders plain italicized text
+    without parsing Markdown, so never put `**...**` or `#` inside a `caption`
+    `Text` (use `variant: "body"` if you want bold/Markdown). Keep copy faithful
+    to the input data; you may summarize or shorten, never invent facts,
+    numbers, names or prices.
 -   **Images & Generated Media**:
     -   For photos that already exist in the input data, use their exact URLs
         (real photo URLs or local `/img/...` placeholders).

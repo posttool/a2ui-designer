@@ -44,7 +44,7 @@
       "text": {
        "@call": "formatString",
        "args": {
-        "value": "👶 **${/child/name}** · ${/child/age_months} mos · ${/child/weight_lbs} lbs"
+        "value": "👶 ${/child/name} · ${/child/age_months} mos · ${/child/weight_lbs} lbs"
        }
       },
       "variant": "caption"
@@ -438,7 +438,7 @@
    {
     "h": 18,
     "k": "childBadge|",
-    "w": 166,
+    "w": 143,
     "x": 16,
     "y": 16
    },

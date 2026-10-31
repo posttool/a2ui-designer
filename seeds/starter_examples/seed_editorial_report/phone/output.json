@@ -53,7 +53,7 @@
      {
       "component": "Text",
       "id": "badgeText",
-      "text": "**RESEARCH SYNTHESIS** · SOLID-STATE RELIABILITY",
+      "text": "RESEARCH SYNTHESIS · SOLID-STATE RELIABILITY",
       "variant": "caption"
      },
      {
@@ -68,7 +68,7 @@
      {
       "component": "Text",
       "id": "takeawayTitle",
-      "text": "**KEY TAKEAWAY**",
+      "text": "KEY TAKEAWAY",
       "variant": "caption"
      },
      {
@@ -173,7 +173,7 @@
       "text": {
        "@call": "formatString",
        "args": {
-        "value": "**Fast charge (2C):** ${fast_charge_2c}"
+        "value": "Fast charge (2C): ${fast_charge_2c}"
        }
       },
       "variant": "caption"
@@ -184,7 +184,7 @@
       "text": {
        "@call": "formatString",
        "args": {
-        "value": "**Manufacturability:** ${manufacturability}"
+        "value": "Manufacturability: ${manufacturability}"
        }
       },
       "variant": "caption"
@@ -319,7 +319,7 @@
    {
     "h": 18,
     "k": "badgeText|",
-    "w": 313,
+    "w": 291,
     "x": 64,
     "y": 35
    },

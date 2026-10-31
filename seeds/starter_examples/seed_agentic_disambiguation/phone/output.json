@@ -53,7 +53,7 @@
      {
       "component": "Text",
       "id": "badgeText",
-      "text": "**Action Required · Recipient Disambiguation**",
+      "text": "Action Required · Recipient Disambiguation",
       "variant": "caption"
      },
      {
@@ -336,7 +336,7 @@
    {
     "h": 18,
     "k": "badgeText|",
-    "w": 275,
+    "w": 253,
     "x": 64,
     "y": 35
    },

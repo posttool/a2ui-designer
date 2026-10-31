@@ -60,7 +60,7 @@
      {
       "component": "Text",
       "id": "severityText",
-      "text": "**P1 WARNING**",
+      "text": "P1 WARNING",
       "variant": "caption"
      },
      {
@@ -361,7 +361,7 @@
    {
     "h": 25,
     "k": "severityTag|",
-    "w": 129,
+    "w": 107,
     "x": 32,
     "y": 32
    },
@@ -375,7 +375,7 @@
    {
     "h": 18,
     "k": "severityText|",
-    "w": 97,
+    "w": 75,
     "x": 64,
     "y": 35
    },

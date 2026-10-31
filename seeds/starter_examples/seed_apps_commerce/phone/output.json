@@ -89,7 +89,7 @@
       "text": {
        "@call": "formatString",
        "args": {
-        "value": "✨ **${badge}**"
+        "value": "✨ ${badge}"
        }
       },
       "variant": "caption"
@@ -375,7 +375,7 @@
    {
     "h": 18,
     "k": "badgeText|/products/0",
-    "w": 175,
+    "w": 152,
     "x": 48,
     "y": 358
    },
@@ -529,7 +529,7 @@
    {
     "h": 18,
     "k": "badgeText|/products/1",
-    "w": 156,
+    "w": 134,
     "x": 48,
     "y": 902
    },
@@ -683,7 +683,7 @@
    {
     "h": 18,
     "k": "badgeText|/products/2",
-    "w": 119,
+    "w": 96,
     "x": 48,
     "y": 1446
    },

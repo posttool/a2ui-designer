@@ -151,7 +151,7 @@
       "text": {
        "@call": "formatString",
        "args": {
-        "value": "**Allergy Verified**: ${/payload/recommended_restaurant/dietary_note}"
+        "value": "Allergy Verified: ${/payload/recommended_restaurant/dietary_note}"
        }
       },
       "variant": "caption"
@@ -983,7 +983,13 @@
   ],
   "captured_height": 1081,
   "components": 48,
-  "console": [],
+  "console": [
+   {
+    "at": 1793464122.1371856,
+    "level": "error",
+    "text": "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:44771/favicon.ico"
+   }
+  ],
   "custom": [],
   "errors": [],
   "height": 1081,

@@ -58,7 +58,7 @@
       "text": {
        "@call": "formatString",
        "args": {
-        "value": "**${/payload/kicker}**"
+        "value": "${/payload/kicker}"
        }
       },
       "variant": "caption"
@@ -206,7 +206,7 @@
       "text": {
        "@call": "formatString",
        "args": {
-        "value": "**${year}**"
+        "value": "${year}"
        }
       },
       "variant": "caption"
@@ -313,7 +313,7 @@
  "render_meta": {
   "boxes": [
    {
-    "h": 1197,
+    "h": 1175,
     "k": "root|",
     "w": 380,
     "x": 16,
@@ -404,14 +404,14 @@
     "y": 574
    },
    {
-    "h": 568,
+    "h": 545,
     "k": "itinerarySection|",
     "w": 380,
     "x": 16,
     "y": 646
    },
    {
-    "h": 536,
+    "h": 513,
     "k": "itineraryContent|",
     "w": 348,
     "x": 32,
@@ -439,7 +439,7 @@
     "y": 662
    },
    {
-    "h": 440,
+    "h": 418,
     "k": "stopsList|",
     "w": 348,
     "x": 32,
@@ -476,8 +476,8 @@
    {
     "h": 18,
     "k": "stopYearText|/payload/stops/0",
-    "w": 46,
-    "x": 318,
+    "w": 23,
+    "x": 341,
     "y": 716
    },
    {
@@ -525,8 +525,8 @@
    {
     "h": 18,
     "k": "stopYearText|/payload/stops/1",
-    "w": 49,
-    "x": 315,
+    "w": 26,
+    "x": 338,
     "y": 856
    },
    {
@@ -544,85 +544,85 @@
     "y": 910
    },
    {
-    "h": 151,
+    "h": 129,
     "k": "stopCardTemplate|/payload/stops/2",
     "w": 332,
     "x": 48,
     "y": 982
    },
    {
-    "h": 127,
+    "h": 105,
     "k": "stopItemContent|/payload/stops/2",
     "w": 300,
     "x": 64,
     "y": 994
    },
    {
-    "h": 45,
+    "h": 23,
     "k": "stopHeaderRow|/payload/stops/2",
     "w": 300,
     "x": 64,
     "y": 994
    },
    {
-    "h": 45,
+    "h": 23,
     "k": "stopNameText|/payload/stops/2",
-    "w": 244,
+    "w": 251,
     "x": 64,
     "y": 994
    },
    {
     "h": 18,
     "k": "stopYearText|/payload/stops/2",
-    "w": 48,
-    "x": 316,
-    "y": 1008
+    "w": 25,
+    "x": 339,
+    "y": 997
    },
    {
     "h": 18,
     "k": "stopArchitectText|/payload/stops/2",
     "w": 300,
     "x": 64,
-    "y": 1047
+    "y": 1025
    },
    {
     "h": 48,
     "k": "stopHighlightText|/payload/stops/2",
     "w": 300,
     "x": 64,
-    "y": 1073
+    "y": 1051
    },
    {
     "h": 52,
     "k": "walkActionRow|",
     "w": 348,
     "x": 32,
-    "y": 1145
+    "y": 1123
    },
    {
     "h": 52,
     "k": "saveRouteButton|",
     "w": 227,
     "x": 93,
-    "y": 1145
+    "y": 1123
    },
    {
     "h": 20,
     "k": "saveRouteText|",
     "w": 187,
     "x": 113,
-    "y": 1161
+    "y": 1139
    }
   ],
-  "captured_height": 1230,
+  "captured_height": 1207,
   "components": 29,
   "console": [],
   "custom": [],
   "errors": [],
-  "height": 1230,
+  "height": 1207,
   "missingImages": 0,
   "overflowX": false,
-  "page_height": 1229,
+  "page_height": 1207,
   "scale": 2.0,
   "surfaces": 1,
   "truncated": false,

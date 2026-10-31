@@ -91,7 +91,7 @@
       "text": {
        "@call": "formatString",
        "args": {
-        "value": "**${/show}**"
+        "value": "${/show}"
        }
       },
       "variant": "caption"

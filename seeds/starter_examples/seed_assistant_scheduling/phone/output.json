@@ -55,7 +55,7 @@
      {
       "component": "Text",
       "id": "warningBadgeText",
-      "text": "**Schedule Conflict Detected**",
+      "text": "Schedule Conflict Detected",
       "variant": "caption"
      },
      {
@@ -200,7 +200,7 @@
      {
       "component": "Text",
       "id": "recTag",
-      "text": "⭐ **RECOMMENDED**",
+      "text": "⭐ RECOMMENDED",
       "variant": "caption"
      },
      {
@@ -338,7 +338,7 @@
    {
     "h": 18,
     "k": "warningBadgeText|",
-    "w": 184,
+    "w": 161,
     "x": 64,
     "y": 35
    },
@@ -571,9 +571,9 @@
   "components": 38,
   "console": [
    {
-    "at": 1793463733.3927305,
+    "at": 1793464121.9777925,
     "level": "error",
-    "text": "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:8160/favicon.ico"
+    "text": "Failed to load resource: the server responded with a status of 404 (Not Found) http://127.0.0.1:44771/favicon.ico"
    }
   ],
   "custom": [],

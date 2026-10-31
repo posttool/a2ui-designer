@@ -136,6 +136,15 @@ function preprocess(messages, env) {
     if (env.extensions && EXTENSION_COMPONENTS.has(name)) return {...c, catalogId: EXTENSION_CATALOG_ID};
     if (BASIC_COMPONENT_NAMES.has(name)) {
       const {catalogId: _drop, ...rest} = c;
+      if (name === 'Text' && rest.variant === 'caption') {
+        const stripMd = (s) => s.replace(/(\*\*|__)(?=\S)([\s\S]*?\S)\1/g, '$2');
+        if (typeof rest.text === 'string' && (rest.text.includes('**') || rest.text.includes('__'))) {
+          rest.text = stripMd(rest.text);
+        } else if (isObj(rest.text) && rest.text['@call'] === 'formatString' &&
+                   isObj(rest.text.args) && typeof rest.text.args.value === 'string') {
+          rest.text = {...rest.text, args: {...rest.text.args, value: stripMd(rest.text.args.value)}};
+        }
+      }
       return rest;
     }
     env.unsupported.add(name);
