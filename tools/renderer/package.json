@@ -1,0 +1,16 @@
+{
+  "name": "a2ui-designer-renderer-bundle",
+  "private": true,
+  "type": "module",
+  "description": "Builds web/vendor/a2ui.bundle.js from the unmodified, published @a2ui/web_core + @a2ui/lit packages.",
+  "dependencies": {
+    "@a2ui/lit": "0.14.0",
+    "@a2ui/web_core": "0.14.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  },
+  "scripts": {
+    "build": "node build.mjs"
+  }
+}

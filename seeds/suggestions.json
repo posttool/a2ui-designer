@@ -1,0 +1,68 @@
+[
+  {
+    "id": "data-shape",
+    "title": "Choose structure from the data's shape",
+    "body": "What should the layout engine do when the data is one entity, many similar items, a sequence, a comparison, or a hierarchy? Name the template for each and when to break the pattern.",
+    "example_md": "## Structure follows data shape\n\n- One entity with details → a single Card: identity first, then the 2–4 facts that matter for the intent, then actions.\n- Many similar items → a List with a template; show the fields that let someone choose, not every field.\n- A sequence (steps, timeline, itinerary) → ordered Column with status per step; the current step is visually first or expanded.\n- A comparison of 2–4 options → a Row of equal Cards on wide viewports, a List on phones.\n- <!-- add your own cases -->\n"
+  },
+  {
+    "id": "first-thing",
+    "title": "What does the person need first?",
+    "body": "Given the intent and context, what must be visible without scrolling, and what can wait? How should urgency or a pending decision change that order?",
+    "example_md": "## Lead with what the person needs now\n\n- The first component answers the intent in one glance (status, answer, or decision needed).\n- If the agent needs input, the question and its options come before any background.\n- Urgent or safety-critical information outranks everything else and is never hidden in Tabs or a Modal.\n- <!-- add your own rules -->\n"
+  },
+  {
+    "id": "density",
+    "title": "Density per viewport",
+    "body": "How many items, fields, or sections before summarizing, paging or disclosing progressively? Do the limits differ on phone, desktop, smart display and watch?",
+    "example_md": "## Density\n\n- Phone: at most N list items before a \"See all\" action; at most N facts per card.\n- Desktop: may show two columns when the data has two independent parts.\n- Watch: one fact and at most one action.\n- <!-- set your numbers -->\n"
+  },
+  {
+    "id": "disclosure",
+    "title": "Progressive disclosure",
+    "body": "When should detail go behind Tabs, a Modal, or a follow-up action instead of being shown inline? What must never be hidden?",
+    "example_md": "## Progressive disclosure\n\n- Use Tabs only for parallel views of the same thing (Overview / Details / History), never for a sequence.\n- Long explanations, terms and raw logs go behind a Modal or a \"Details\" action.\n- <!-- add your own rules -->\n"
+  },
+  {
+    "id": "ask-act-punt",
+    "title": "When to ask, act, or hand off",
+    "body": "When should the interface ask a clarifying question, offer one primary action, or hand the person off to a full app or document? How many actions are too many?",
+    "example_md": "## Ask, act, or hand off\n\n- One primary action per surface; secondary actions are borderless.\n- Ask only for information that blocks the next step; prefer choices over free text.\n- Multi-field editing, long reading, payments and navigation hand off to the dedicated app via an action.\n- <!-- add your own rules -->\n"
+  },
+  {
+    "id": "no-component",
+    "title": "Data with no matching component",
+    "body": "How should charts, maps, code, tables, or rich media be represented when the catalog has no component for them?",
+    "example_md": "## When there's no component for it\n\n- Time series: state the latest value, the change and the direction in Text; offer a \"View chart\" action.\n- Tables: show the 3–5 rows that matter as a List; summarize the rest.\n- <!-- add your own rules -->\n"
+  },
+  {
+    "id": "states",
+    "title": "Loading, empty and error states",
+    "body": "What should each state show and offer? How should partial data or stale data be communicated?",
+    "example_md": "## States\n\n- Loading: show what is already known plus progress; never a blank surface.\n- Empty: say what would appear here and offer the action that fills it.\n- Error: say what failed in plain words, what still works, and the recovery action.\n"
+  },
+  {
+    "id": "long-content",
+    "title": "Long text, long lists, missing images",
+    "body": "What should happen with very long names or notes, hundreds of items, or content whose images are missing?",
+    "example_md": "## Long and missing content\n\n- Summarize long free text to its first useful sentence and offer the full text behind an action.\n- Hundreds of items: show counts and the top few by relevance, not the first few by order.\n- If images are missing, don't reserve space for them.\n"
+  },
+  {
+    "id": "care-safety",
+    "title": "Care, health and safety-critical content",
+    "body": "How should medication, dosing, symptoms, alerts and consent be presented so nothing important is missed and nobody is alarmed unnecessarily?",
+    "example_md": "## Care and safety\n\n- Medication and dosing appear as explicit, complete items (name, dose, time); never truncated.\n- Alerts state what happened, when, and the one recommended next step.\n- Consent and permissions are a clear explicit choice, never pre-selected.\n"
+  },
+  {
+    "id": "roles-approvals",
+    "title": "Roles, approvals and multiple people",
+    "body": "How should the layout change for viewers vs approvers, and when several people (caregivers, vendors, teammates) are involved?",
+    "example_md": "## Roles and approvals\n\n- An approver sees the decision, its impact and Approve/Decline first; a viewer sees status.\n- When several people are involved, show who owns the next step.\n"
+  },
+  {
+    "id": "copy",
+    "title": "Generated copy and labels",
+    "body": "How long should headings, summaries and button labels be? How should the tone change for urgency or sensitive topics?",
+    "example_md": "## Copy\n\n- Headings state the subject or outcome in a few words.\n- Button labels are verbs that say what happens (\"Approve refill\", not \"OK\").\n"
+  }
+]

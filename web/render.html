@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2UI render</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
+<link rel="stylesheet" href="/renderer/a2ui.css">
+<style>
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--a2ui-surface, #fff); overflow-x: hidden; }
+  #surface { width: 100%; }
+  .rp-toast {
+    position: fixed; left: 50%; bottom: 16px; transform: translate(-50%, 8px);
+    background: #1f1f1f; color: #fff; font: 500 13px/18px "Google Sans Flex", system-ui, sans-serif;
+    padding: 8px 14px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    opacity: 0; transition: opacity 160ms ease, transform 160ms ease; pointer-events: none;
+    max-width: calc(100vw - 32px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    z-index: 10;
+  }
+  .rp-toast.rp-show { opacity: 1; transform: translate(-50%, 0); }
+  .rp-error {
+    margin: 16px; padding: 12px 14px; border-radius: 10px; background: #fce8e6; color: #8c1d18;
+    font: 14px/20px system-ui, sans-serif; white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+<div id="surface"></div>
+<script type="module">
+import {applyTheme, ensureThemeFonts, mountSurface, themeToCssVars, resolveTheme, waitForThemeFonts} from '/renderer/a2ui.js';
+
+const VIEWPORTS = {
+  phone: {id: 'phone', width: 412, height: 915},
+  tablet: {id: 'tablet', width: 834, height: 1194},
+  desktop: {id: 'desktop', width: 1280, height: 800},
+  smart_display: {id: 'smart_display', width: 1024, height: 600},
+  watch: {id: 'watch', width: 192, height: 192},
+};
+
+const q = new URLSearchParams(location.search);
+const el = document.getElementById('surface');
+const inIframe = window.parent && window.parent !== window;
+const post = (msg) => { if (inIframe) { try { window.parent.postMessage(msg, '*'); } catch {} } };
+let surface = null;
+
+function toast(text) {
+  let t = document.querySelector('.rp-toast');
+  if (!t) { t = document.createElement('div'); t.className = 'rp-toast'; document.body.append(t); }
+  t.textContent = text;
+  t.classList.add('rp-show');
+  clearTimeout(toast._h);
+  toast._h = setTimeout(() => t.classList.remove('rp-show'), 1800);
+}
+
+function dataUrl() {
+  const parts = location.pathname.split('/').filter(Boolean).map(decodeURIComponent);
+  // /render/example/{name} | /render/component/{cid} | /render/{output_id} |
+  // ?example= | ?component= | ?output=
+  const i = parts.indexOf('render');
+  const rest = i >= 0 ? parts.slice(i + 1) : [];
+  const token = encodeURIComponent(q.get('token') || '');
+  const component = q.get('component') || (rest[0] === 'component' ? rest.slice(1).join('/') : null);
+  if (component) {
+    const vp = q.get('viewport') ? `&viewport=${encodeURIComponent(q.get('viewport'))}` : '';
+    return `/api/render_component/${encodeURIComponent(component)}?token=${token}${vp}`;
+  }
+  const example = q.get('example') || (rest[0] === 'example' ? rest.slice(1).join('/') : null);
+  if (example) return `/api/render_example/${encodeURIComponent(example)}`;
+  const id = q.get('output') || (rest[0] && rest[0] !== 'live' ? rest[0] : null);
+  if (id && !/\.html$/.test(id)) {
+    const themeParam = q.get('theme') ? `&theme=${encodeURIComponent(q.get('theme'))}` : '';
+    const trParam = q.get('token_rev') ? `&token_rev=${encodeURIComponent(q.get('token_rev'))}` : '';
+    return `/api/render_data/${encodeURIComponent(id)}?token=${token}${themeParam}${trParam}`;
+  }
+  return null;  // live mode: wait for postMessage({type:'a2ui-render', ...})
+}
+
+function render(data) {
+  const theme = {...(data.theme || {})};
+  if (q.get('scheme')) theme.scheme = q.get('scheme');
+  const resolved = resolveTheme(theme);
+  const vp = VIEWPORTS[q.get('viewport')] || data.viewport || VIEWPORTS.phone;
+  const width = Number(q.get('width')) || Number(vp.width) || 412;
+  const framing = q.get('framing') || data.framing || 'card';
+  const interactive = q.get('interactive') !== '0' && data.interactive !== false;
+  document.body.style.width = `${width}px`;
+  document.documentElement.style.background = resolved.surface;
+  document.body.style.background = resolved.surface;
+  try { ensureThemeFonts(theme, document); } catch {}
+  for (const [k, v] of Object.entries(themeToCssVars(theme))) document.documentElement.style.setProperty(k, v);
+  if (surface) surface.destroy();
+  el.replaceChildren();
+  // Render data carries `custom_components`; live postMessage uses `components`.
+  const customComponents = data.custom_components || data.components || {};
+  surface = mountSurface(el, data.messages || [], {
+    theme, framing, interactive, injectAssets: false,
+    customComponents: (customComponents && typeof customComponents === 'object' && !Array.isArray(customComponents)) ? customComponents : {},
+    onAction: (payload) => {
+      toast(`action: ${payload.action.name}`);
+      post({type: 'a2ui-action', payload});
+    },
+    onOpenUrl: (url) => {
+      toast(`openUrl: ${url}`);
+      post({type: 'a2ui-open-url', url});
+      try { window.open(url, '_blank', 'noopener,noreferrer'); } catch {}
+    },
+  });
+  window.__a2uiSurface = surface;
+  return surface.settled(4000).then(() => {
+    const doc = document.documentElement;
+    const m = surface.meta;
+    const ready = {
+      height: Math.ceil(Math.max(el.scrollHeight, el.getBoundingClientRect().height)),
+      width,
+      overflowX: doc.scrollWidth > width + 1 || el.scrollWidth > width + 1 || measureOverflow(width),
+      unsupported: m.unsupported,
+      custom: m.custom,
+      missingImages: m.missingImages,
+      errors: m.errors,
+      surfaces: m.surfaces,
+      components: m.components,
+    };
+    // Document height == content height (no min-height shell), so
+    // screenshotters can use either this or document scrollHeight.
+    ready.height = Math.ceil(Math.max(el.getBoundingClientRect().height, doc.scrollHeight > window.innerHeight ? doc.scrollHeight : 0));
+    if (selectedId) applySelection(selectedId, {scroll: false});
+    window.__a2uiReady = ready;
+    post({type: 'a2ui-ready', height: ready.height, ready});
+    return ready;
+  });
+}
+
+/**
+ * Document-space boxes of every rendered component instance, keyed like the
+ * layout diff (`id|scope`). Called by the screenshotter after the viewport is
+ * resized for the full-height capture, so boxes line up with the PNG.
+ */
+window.__a2uiBoxes = function() {
+  const out = [];
+  const sx = window.scrollX, sy = window.scrollY;
+  for (const n of el.querySelectorAll('[data-a2ui-id]')) {
+    if (n.closest('dialog')) continue;
+    const r = n.getBoundingClientRect();
+    if (!r.width || !r.height) continue;
+    out.push({
+      k: `${n.dataset.a2uiId}|${n.dataset.a2uiScope || ''}`,
+      x: Math.round(r.left + sx), y: Math.round(r.top + sy),
+      w: Math.round(r.width), h: Math.round(r.height),
+    });
+    if (out.length >= 2500) break;
+  }
+  return out;
+};
+
+/** True if any rendered component pokes past the viewport's right edge. */
+function measureOverflow(width) {
+  // Content must stay inside the surface's content box (inside the card
+  // framing padding) and inside the viewport.
+  let right = width;
+  let left = 0;
+  const root = el.querySelector('.a2ui-root');
+  if (root) {
+    const cs = getComputedStyle(root);
+    const rr = root.getBoundingClientRect();
+    right = Math.min(width, rr.right - parseFloat(cs.paddingRight || '0'));
+    left = rr.left + parseFloat(cs.paddingLeft || '0');
+  }
+  for (const n of el.querySelectorAll('[data-a2ui-id]')) {
+    if (n.closest('dialog')) continue;
+    const r = n.getBoundingClientRect();
+    if (r.width && (r.right > right + 1 || r.left < left - 1)) return true;
+  }
+  return false;
+}
+
+/** Live theme preview (parent inspector edits): re-applies CSS vars in place. */
+function retheme(raw) {
+  const theme = {...raw};
+  if (q.get('scheme')) theme.scheme = q.get('scheme');
+  const resolved = resolveTheme(theme);
+  document.documentElement.style.background = resolved.surface;
+  document.body.style.background = resolved.surface;
+  try { ensureThemeFonts(theme, document); } catch {}
+  applyTheme(document.documentElement, theme);
+  applyTheme(el, theme);
+  el.querySelectorAll('.a2ui-root').forEach((root) => {
+    applyTheme(root, theme);
+    root.classList.remove('a2ui-scheme-light', 'a2ui-scheme-dark');
+    root.classList.add(`a2ui-scheme-${resolved.scheme}`);
+  });
+  waitForThemeFonts(theme, document, 2000).finally(() => {
+    post({type: 'a2ui-themed'});
+  });
+}
+
+function fail(msg) {
+  const box = document.createElement('div');
+  box.className = 'rp-error';
+  box.textContent = msg;
+  el.replaceChildren(box);
+  window.__a2uiReady = {height: el.scrollHeight, width: document.body.clientWidth, overflowX: false,
+    unsupported: [], custom: [], missingImages: 0, errors: [msg]};
+  post({type: 'a2ui-ready', height: window.__a2uiReady.height, ready: window.__a2uiReady});
+}
+
+// Inspect mode: hover outlines + click selection + parent-driven highlight.
+let selectedId = null;
+
+/**
+ * Nodes for one target: "id" (every instance) or "id|scope" (one template row).
+ */
+function targetNodes(target) {
+  const t = String(target);
+  const bar = t.indexOf('|');
+  const cid = bar < 0 ? t : t.slice(0, bar);
+  let sel = `[data-a2ui-id="${CSS.escape(cid)}"]`;
+  if (bar >= 0) {
+    const scope = t.slice(bar + 1);
+    sel += scope ? `[data-a2ui-scope="${CSS.escape(scope)}"]` :
+                   ':not([data-a2ui-scope]), ' + sel + '[data-a2ui-scope=""]';
+  }
+  return [...document.querySelectorAll(sel)];
+}
+
+function asTargets(id) {
+  if (Array.isArray(id)) return id.filter((x) => x != null && x !== '').map(String);
+  return id ? [String(id)] : [];
+}
+
+function applySelection(id, {scroll = false} = {}) {
+  const targets = asTargets(id);
+  selectedId = targets[0] || null;
+  document.querySelectorAll('.a2ui-inspect-selected, .a2ui-inspect-highlight')
+      .forEach((n) => n.classList.remove('a2ui-inspect-selected', 'a2ui-inspect-highlight'));
+  targets.forEach((t, i) => {
+    const nodes = targetNodes(t);
+    nodes.forEach((n) => n.classList.add('a2ui-inspect-selected', 'a2ui-inspect-highlight'));
+    if (scroll && i === 0) nodes[0]?.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+  });
+}
+
+function applyHover(id, {scroll = false} = {}) {
+  document.querySelectorAll('.a2ui-inspect-hover')
+      .forEach((n) => n.classList.remove('a2ui-inspect-hover'));
+  document.querySelectorAll('.a2ui-inspect-highlight:not(.a2ui-inspect-selected)')
+      .forEach((n) => n.classList.remove('a2ui-inspect-highlight'));
+  asTargets(id).forEach((t, i) => {
+    const nodes = targetNodes(t);
+    nodes.forEach((n) => n.classList.add('a2ui-inspect-hover'));
+    if (scroll && i === 0) nodes[0]?.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+  });
+}
+
+if (q.get('inspect') === '1') {
+  let hovered = null;
+  el.addEventListener('mouseover', (e) => {
+    const t = e.target.closest('[data-a2ui-id]');
+    if (t === hovered) return;
+    hovered?.classList.remove('a2ui-inspect-hover');
+    hovered = t;
+    if (t) {
+      t.classList.add('a2ui-inspect-hover');
+      post({type: 'a2ui-hover', id: t.dataset.a2uiId, scope: t.dataset.a2uiScope || ''});
+    } else {
+      post({type: 'a2ui-hover', id: null});
+    }
+  });
+  el.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-a2ui-id]');
+    const nextId = t ? t.dataset.a2uiId : null;
+    applySelection(nextId);
+    post({type: 'a2ui-click', id: nextId, scope: t ? (t.dataset.a2uiScope || '') : ''});
+  }, true);
+  el.addEventListener('mouseleave', () => {
+    hovered?.classList.remove('a2ui-inspect-hover');
+    hovered = null;
+    post({type: 'a2ui-hover', id: null});
+  });
+}
+
+window.addEventListener('message', (e) => {
+  const d = e.data;
+  if (!d || typeof d !== 'object') return;
+  if (d.type === 'a2ui-select') {
+    applySelection(d.ids ?? d.id ?? null, {scroll: d.scroll !== false});
+  } else if (d.type === 'a2ui-highlight') {
+    if (d.select) {
+      applySelection(d.ids ?? d.id ?? null, {scroll: d.scroll !== false});
+    } else {
+      applyHover(d.ids ?? d.id ?? null, {scroll: d.scroll !== false});
+    }
+  } else if (d.type === 'a2ui-render') {
+    window.__a2uiReady = null;
+    render(d).catch((err) => fail(String(err)));
+  } else if (d.type === 'a2ui-update' && surface) {
+    surface.update(d.messages || []);
+  } else if (d.type === 'a2ui-theme' && d.theme) {
+    retheme(d.theme);
+  }
+});
+
+const url = dataUrl();
+if (url) {
+  fetch(url, {credentials: 'same-origin'})
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}: ${(await r.text()).slice(0, 300)}`);
+        return r.json();
+      })
+      .then(render)
+      .catch((err) => fail(`Could not load render data from ${url}\n${err.message || err}`));
+} else {
+  post({type: 'a2ui-render-page-ready'});
+}
+</script>
+</body>
+</html>

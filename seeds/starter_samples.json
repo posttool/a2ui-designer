@@ -1,0 +1,569 @@
+[
+  {
+    "seed_id": "seed_assistant_dinner",
+    "group": "assistant",
+    "genre": "dinner_ordering",
+    "title": "Weeknight family dinner order (4 people, 1 gluten-free)",
+    "intent": "Pick a restaurant and confirm a balanced dinner order that arrives before 7:15 PM and respects Maya's gluten allergy.",
+    "size_class": "m",
+    "state": "content",
+    "context": {
+      "surface": "home screen card",
+      "user_state": "cooking fatigue after work",
+      "role": "parent",
+      "locale": "en-US",
+      "time_of_day": "evening",
+      "urgency": "time-sensitive"
+    },
+    "edge_cases": ["dietary allergy warning", "multiple items in cart"],
+    "tags": ["dinner", "food delivery", "dietary"],
+    "payload": {
+      "recommended_restaurant": {
+        "name": "Osteria Verde",
+        "cuisine": "Modern Italian",
+        "rating": 4.8,
+        "review_count": 640,
+        "eta_minutes": 32,
+        "delivery_fee_usd": 2.99,
+        "hero_image": "/img/italian-pasta-table/640x360",
+        "dietary_note": "Dedicated gluten-free pasta station verified"
+      },
+      "draft_cart": [
+        {"item": "GF Rigatoni alla Norma (Gluten-Free)", "for": "Maya", "price_usd": 19.50, "notes": "Celiac-safe prep"},
+        {"item": "Margherita Wood-Fired Pizza", "for": "Kids (shared)", "price_usd": 21.00, "notes": "Sliced into 8"},
+        {"item": "Charred Broccolini & Lemon", "for": "Table", "price_usd": 11.00, "notes": ""},
+        {"item": "Pappardelle Bolognese", "for": "Alex", "price_usd": 22.00, "notes": "Extra parmesan"}
+      ],
+      "totals": {
+        "subtotal_usd": 73.50,
+        "tax_and_fees_usd": 8.45,
+        "tip_usd": 12.00,
+        "total_usd": 93.95
+      },
+      "alternatives": [
+        {"name": "Saffron Kitchen", "cuisine": "Indian", "eta_minutes": 28, "rating": 4.7},
+        {"name": "Harbor Poke & Grill", "cuisine": "Hawaiian", "eta_minutes": 25, "rating": 4.6}
+      ]
+    }
+  },
+  {
+    "seed_id": "seed_assistant_scheduling",
+    "group": "assistant",
+    "genre": "scheduling",
+    "title": "Reschedule conflicting 1:1 and school pickup",
+    "intent": "Resolve a 3:30 PM calendar collision between a VP product review and elementary school pickup.",
+    "size_class": "s",
+    "state": "content",
+    "context": {
+      "surface": "chat reply",
+      "user_state": "between meetings",
+      "role": "working parent",
+      "locale": "en-US",
+      "time_of_day": "morning",
+      "urgency": "time-sensitive"
+    },
+    "edge_cases": ["calendar conflict"],
+    "tags": ["calendar", "conflict", "reschedule"],
+    "payload": {
+      "conflict_date": "Thursday, Oct 18",
+      "window": "3:30 PM – 4:30 PM",
+      "events": [
+        {
+          "title": "Q4 Product Strategy Review with Dana (VP)",
+          "time": "3:30 PM – 4:15 PM",
+          "organizer": "Dana Chen",
+          "attendees": 4,
+          "movable": true
+        },
+        {
+          "title": "Pick up Leo from Oakridge Elementary",
+          "time": "3:45 PM – 4:15 PM",
+          "location": "Oakridge Elementary North Gate",
+          "movable": false
+        }
+      ],
+      "suggested_options": [
+        {
+          "id": "opt_move_fri",
+          "label": "Move Product Review to Friday 10:30 AM",
+          "detail": "All 4 attendees are free; keeps school pickup untouched.",
+          "recommended": true
+        },
+        {
+          "id": "opt_partner_pickup",
+          "label": "Ask Sam to cover Thursday pickup",
+          "detail": "Sam's calendar shows a 30-min block free at 3:30 PM.",
+          "recommended": false
+        }
+      ]
+    }
+  },
+  {
+    "seed_id": "seed_care_elder",
+    "group": "care",
+    "genre": "elder_care",
+    "title": "Mom's morning medication check & blood pressure alert",
+    "intent": "See whether Evelyn took her morning heart medication and respond to a slightly elevated systolic BP reading.",
+    "size_class": "m",
+    "state": "content",
+    "context": {
+      "surface": "home screen card",
+      "user_state": "checking in before work",
+      "role": "family caregiver",
+      "locale": "en-US",
+      "time_of_day": "morning",
+      "urgency": "urgent"
+    },
+    "edge_cases": ["urgent item buried in routine ones"],
+    "tags": ["elder care", "medications", "vitals"],
+    "payload": {
+      "care_recipient": {
+        "name": "Evelyn Morales (Mom)",
+        "age": 78,
+        "caregiver_on_duty": "Maria (Home Health Aide, arrives 10:00 AM)"
+      },
+      "alert": {
+        "severity": "elevated",
+        "metric": "Blood Pressure",
+        "reading": "148/88 mmHg",
+        "recorded_at": "8:12 AM",
+        "baseline": "125/78 mmHg",
+        "guidance": "Re-check after morning Lisinopril and 15 minutes seated rest."
+      },
+      "morning_medications": [
+        {"name": "Lisinopril 10mg", "purpose": "Blood pressure", "scheduled": "8:00 AM", "status": "missed_or_unconfirmed"},
+        {"name": "Atorvastatin 20mg", "purpose": "Cholesterol", "scheduled": "8:00 AM", "status": "taken", "taken_at": "8:04 AM"},
+        {"name": "Vitamin D3 2000 IU", "purpose": "Supplement", "scheduled": "8:00 AM", "status": "taken", "taken_at": "8:04 AM"}
+      ],
+      "upcoming_today": [
+        {"time": "10:00 AM", "event": "Maria arrives for morning visit"},
+        {"time": "2:30 PM", "event": "Telehealth check-in with Dr. Patel"}
+      ]
+    }
+  },
+  {
+    "seed_id": "seed_care_pediatric",
+    "group": "care",
+    "genre": "child_care",
+    "title": "Toddler fever log & overnight dosing guide",
+    "intent": "Track Noah's fever trend and know the exact safe time and dose for the next children's acetaminophen.",
+    "size_class": "m",
+    "state": "content",
+    "context": {
+      "surface": "home screen card",
+      "user_state": "tired parent at night",
+      "role": "parent",
+      "locale": "en-US",
+      "time_of_day": "night",
+      "urgency": "safety-critical"
+    },
+    "edge_cases": ["safety-critical dosing"],
+    "tags": ["pediatrics", "fever", "dosing"],
+    "payload": {
+      "child": {"name": "Noah", "age_months": 28, "weight_lbs": 29},
+      "latest_temperature": {"fahrenheit": 101.4, "recorded_at": "9:40 PM", "method": "ear", "trend": "down from 102.2°F at 6:30 PM"},
+      "medication_safety": {
+        "drug": "Children's Acetaminophen (160 mg / 5 mL)",
+        "weight_based_dose": "5 mL (160 mg)",
+        "last_dose_at": "6:45 PM",
+        "next_eligible_at": "10:45 PM",
+        "doses_in_last_24h": 3,
+        "max_doses_24h": 5
+      },
+      "recent_readings": [
+        {"time": "9:40 PM", "temp_f": 101.4, "note": "Sleeping comfortably, drank water"},
+        {"time": "6:30 PM", "temp_f": 102.2, "note": "Fussy, gave 5 mL acetaminophen at 6:45 PM"},
+        {"time": "2:15 PM", "temp_f": 100.8, "note": "After nap"}
+      ]
+    }
+  },
+  {
+    "seed_id": "seed_agentic_task",
+    "group": "agentic",
+    "genre": "agent_task",
+    "title": "Flight rebooking approval after gate cancellation",
+    "intent": "Approve one of two hold options before the seat lock expires in 9 minutes.",
+    "size_class": "m",
+    "state": "content",
+    "context": {
+      "surface": "chat reply",
+      "user_state": "standing at airport gate",
+      "role": "traveler",
+      "locale": "en-US",
+      "time_of_day": "afternoon",
+      "urgency": "urgent"
+    },
+    "edge_cases": ["expiring hold timer"],
+    "tags": ["agent", "travel", "approval"],
+    "payload": {
+      "cancelled_flight": {"flight": "UA 1422", "route": "SFO → ORD", "reason": "Mechanical issue"},
+      "agent_progress": [
+        {"step": "Checked Star Alliance direct rebooking inventory", "status": "done"},
+        {"step": "Placed courtesy 10-minute seat hold on UA 1890", "status": "done"},
+        {"step": "Confirm rebooking & reissue mobile boarding pass", "status": "awaiting_user_approval"}
+      ],
+      "hold_expires_in_minutes": 9,
+      "options": [
+        {
+          "id": "ua1890",
+          "flight": "UA 1890 (Nonstop)",
+          "departs": "3:55 PM (Gate F12)",
+          "arrives": "10:02 PM",
+          "seat": "11C (Economy Plus, Aisle)",
+          "fare_diff_usd": 0,
+          "recommended": true
+        },
+        {
+          "id": "aa410",
+          "flight": "AA 410 (Nonstop)",
+          "departs": "4:20 PM (Terminal 1)",
+          "arrives": "10:30 PM",
+          "seat": "19A (Window)",
+          "fare_diff_usd": 45
+        }
+      ]
+    }
+  },
+  {
+    "seed_id": "seed_agentic_disambiguation",
+    "group": "agentic",
+    "genre": "disambiguation",
+    "title": "Clarify recipient before sending Q3 board deck",
+    "intent": "Pick which 'Chris Miller' should receive the confidential Q3 financials attachment.",
+    "size_class": "s",
+    "state": "content",
+    "context": {
+      "surface": "chat reply",
+      "user_state": "sending email via assistant",
+      "role": "finance lead",
+      "locale": "en-US",
+      "time_of_day": "afternoon",
+      "urgency": "time-sensitive"
+    },
+    "edge_cases": ["duplicate-looking entries"],
+    "tags": ["disambiguation", "permissions", "email"],
+    "payload": {
+      "action": "Share 'Q3 Board Financials (Confidential).pdf'",
+      "question": "There are 2 contacts named Chris Miller. Which one should receive edit access?",
+      "candidates": [
+        {
+          "id": "chris_internal",
+          "name": "Chris Miller",
+          "title": "VP, Corporate Finance",
+          "org": "Internal · Finance Leadership",
+          "email": "cmiller@acme.corp",
+          "avatar": "https://randomuser.me/api/portraits/men/32.jpg",
+          "recent_context": "Attended Q3 Pre-Board Sync yesterday"
+        },
+        {
+          "id": "chris_external",
+          "name": "Chris Miller",
+          "title": "Account Director",
+          "org": "External · Miller Creative Agency",
+          "email": "chris@millercreative.io",
+          "avatar": "https://randomuser.me/api/portraits/men/64.jpg",
+          "recent_context": "Last emailed 4 months ago regarding brand assets"
+        }
+      ]
+    }
+  },
+  {
+    "seed_id": "seed_apps_commerce",
+    "group": "apps",
+    "genre": "commerce",
+    "title": "Compare 3 espresso machines for a small kitchen",
+    "intent": "Compare footprint, warm-up time, and price across 3 compact espresso machines.",
+    "size_class": "l",
+    "state": "content",
+    "context": {
+      "surface": "full screen",
+      "user_state": "shopping research",
+      "role": "shopper",
+      "locale": "en-US",
+      "time_of_day": "weekend",
+      "urgency": "routine"
+    },
+    "edge_cases": ["mixed units"],
+    "tags": ["commerce", "comparison", "appliances"],
+    "payload": {
+      "category": "Compact Espresso Machines (Under 12\" Wide)",
+      "products": [
+        {
+          "id": "bambino_plus",
+          "name": "Breville Bambino Plus",
+          "price_usd": 499,
+          "rating": 4.7,
+          "reviews": 1820,
+          "width_inches": 7.7,
+          "heat_up_seconds": 3,
+          "steam_wand": "Auto microfoam + manual",
+          "image": "/img/espresso-machine-silver/480x360",
+          "badge": "Best for small counters"
+        },
+        {
+          "id": "gaggia_classic",
+          "name": "Gaggia Classic Evo Pro",
+          "price_usd": 449,
+          "rating": 4.5,
+          "reviews": 940,
+          "width_inches": 8.0,
+          "heat_up_seconds": 300,
+          "steam_wand": "Commercial manual wand",
+          "image": "/img/espresso-machine-classic/480x360",
+          "badge": "Best for enthusiasts"
+        },
+        {
+          "id": "profitec_go",
+          "name": "Profitec GO PID",
+          "price_usd": 999,
+          "rating": 4.9,
+          "reviews": 310,
+          "width_inches": 8.3,
+          "heat_up_seconds": 360,
+          "steam_wand": "Manual pro wand + PID temp",
+          "image": "/img/espresso-machine-black/480x360",
+          "badge": "Upgrade pick"
+        }
+      ]
+    }
+  },
+  {
+    "seed_id": "seed_apps_itinerary",
+    "group": "apps",
+    "genre": "itinerary",
+    "title": "Kyoto day-trip transit & temple reservation timeline",
+    "intent": "Follow today's train connections and timed entry QR code for Moss Temple.",
+    "size_class": "m",
+    "state": "content",
+    "context": {
+      "surface": "home screen card",
+      "user_state": "walking to train station",
+      "role": "traveler",
+      "locale": "en-US",
+      "time_of_day": "morning",
+      "urgency": "time-sensitive"
+    },
+    "edge_cases": [],
+    "tags": ["travel", "itinerary", "transit"],
+    "payload": {
+      "day_title": "Day 3: Western Kyoto & Saiho-ji (Moss Temple)",
+      "weather": "64°F · Partly cloudy",
+      "next_leg": {
+        "depart_time": "9:18 AM",
+        "station": "Kyoto Station (Track 32)",
+        "line": "JR Sagano Line Rapid → Saga-Arashiyama",
+        "duration_min": 16,
+        "fare_jpy": 240
+      },
+      "schedule": [
+        {"time": "9:18 AM", "title": "JR Sagano Line to Arashiyama", "status": "next", "detail": "Platform 32 · 4 stops"},
+        {"time": "10:00 AM", "title": "Saiho-ji (Moss Temple) Timed Entry", "status": "booked", "detail": "Permit #SH-4092 · Bring 4,000 JPY cash per person"},
+        {"time": "12:30 PM", "title": "Soba lunch at Arashiyama Yoshimura", "status": "booked", "detail": "Riverside table reserved under Karam"},
+        {"time": "2:15 PM", "title": "Otagi Nenbutsu-ji stone statues", "status": "planned", "detail": "10 min taxi north of bamboo grove"}
+      ]
+    }
+  },
+  {
+    "seed_id": "seed_enterprise_building",
+    "group": "enterprise",
+    "genre": "building_management",
+    "title": "Chiller loop pressure alarm in Building 4 Data Lab",
+    "intent": "Dispatch facilities technician and switch Lab 4B to backup cooling before rack temperatures exceed threshold.",
+    "size_class": "m",
+    "state": "content",
+    "context": {
+      "surface": "side panel",
+      "user_state": "on-call facilities ops",
+      "role": "approver",
+      "locale": "en-US",
+      "time_of_day": "afternoon",
+      "urgency": "urgent"
+    },
+    "edge_cases": ["urgent item buried in routine ones"],
+    "tags": ["facilities", "hvac", "incident"],
+    "payload": {
+      "incident_id": "FAC-8841",
+      "zone": "Building 4 · Floor 2 · Hardware Lab 4B",
+      "severity": "P1 Warning",
+      "current_temp_f": 79.4,
+      "threshold_temp_f": 82.0,
+      "chiller_loop_psi": 18.2,
+      "normal_psi_range": "38–45 PSI",
+      "recommended_actions": [
+        {"action": "Engage secondary chilled-water loop B4-AUX", "impact": "Restores pressure in ~3 mins"},
+        {"action": "Assign work order to Marcus Vance (On-site HVAC Tech)", "eta": "6 mins away in Bldg 3"}
+      ],
+      "routine_tickets_in_building": 14
+    }
+  },
+  {
+    "seed_id": "seed_enterprise_event",
+    "group": "enterprise",
+    "genre": "event_planning",
+    "title": "Keynote day-of run-of-show & AV readiness check",
+    "intent": "Verify presenter mic check status and approve a 10-minute stage buffer before doors open.",
+    "size_class": "m",
+    "state": "content",
+    "context": {
+      "surface": "full screen",
+      "user_state": "backstage producer",
+      "role": "editor",
+      "locale": "en-US",
+      "time_of_day": "morning",
+      "urgency": "time-sensitive"
+    },
+    "edge_cases": [],
+    "tags": ["events", "run-of-show", "av"],
+    "payload": {
+      "event": "Cloud Builders Summit — Main Stage",
+      "doors_open": "8:45 AM (in 22 mins)",
+      "checked_in_attendees": 1140,
+      "capacity": 1200,
+      "av_status": [
+        {"item": "Main LED Wall (4K 60Hz)", "status": "ready"},
+        {"item": "Keynote Clicker & Confidence Monitor", "status": "ready"},
+        {"item": "Guest Demo Laptop HDMI #2", "status": "attention", "note": "HDCP handshake flicker; switching to USB-C SDI adapter"}
+      ],
+      "segments": [
+        {"time": "9:00 AM", "title": "Opening Keynote — Maya Lin", "duration_min": 30, "speaker_ready": true},
+        {"time": "9:30 AM", "title": "Live Architecture Demo — Devon Brooks", "duration_min": 20, "speaker_ready": false},
+        {"time": "9:50 AM", "title": "Customer Fireside Chat", "duration_min": 25, "speaker_ready": true}
+      ]
+    }
+  },
+  {
+    "seed_id": "seed_editorial_report",
+    "group": "editorial",
+    "genre": "research_report",
+    "title": "Battery solid-state electrolyte reliability synthesis",
+    "intent": "Scan the key findings and cycle-life comparison across 3 solid-state battery chemistries.",
+    "size_class": "l",
+    "state": "content",
+    "context": {
+      "surface": "full screen",
+      "user_state": "reading technical brief",
+      "role": "researcher",
+      "locale": "en-US",
+      "time_of_day": "afternoon",
+      "urgency": "routine"
+    },
+    "edge_cases": ["very long free-text notes"],
+    "tags": ["research", "synthesis", "benchmarks"],
+    "payload": {
+      "headline": "Sulfide vs. Oxide Solid-State Electrolytes: 2026 Cycle-Life Synthesis",
+      "takeaway": "Argydorite sulfide cells with 2 MPa stack pressure retained 89% capacity at 1,200 cycles, outperforming garnet oxides at fast-charge rates above 2C.",
+      "chemistries_compared": [
+        {"chemistry": "Li6PS5Cl (Sulfide)", "cycles_to_80pct": 1450, "fast_charge_2c": "Pass", "manufacturability": "High (roll-to-roll)"},
+        {"chemistry": "LLZO Garnet (Oxide)", "cycles_to_80pct": 920, "fast_charge_2c": "Dendrite risk >1.5C", "manufacturability": "Medium (high-temp sintering)"},
+        {"chemistry": "PEO-LiTFSI (Polymer)", "cycles_to_80pct": 680, "fast_charge_2c": "Requires 60°C operating temp", "manufacturability": "High"}
+      ],
+      "citations": [
+        {"id": "1", "source": "Nature Energy (2026) — Interfacial mechanics in low-pressure solid cells"},
+        {"id": "2", "source": "Argonne National Lab Q2 Cell Test Dossier #441"}
+      ]
+    }
+  },
+  {
+    "seed_id": "seed_editorial_magazine",
+    "group": "editorial",
+    "genre": "magazine",
+    "title": "Weekend architecture walk: Brutalist libraries of the Pacific Northwest",
+    "intent": "Read an illustrated editorial guide with pull quotes and stops for a Saturday walking tour.",
+    "size_class": "l",
+    "state": "content",
+    "context": {
+      "surface": "full screen",
+      "user_state": "leisure reading",
+      "role": "reader",
+      "locale": "en-US",
+      "time_of_day": "weekend",
+      "urgency": "routine"
+    },
+    "edge_cases": [],
+    "tags": ["editorial", "architecture", "magazine"],
+    "payload": {
+      "kicker": "Architecture & Cities",
+      "headline": "Concrete & Cedar: How Pacific Northwest Libraries Warmed Up Brutalism",
+      "deck": "Board-formed concrete, rain-washed courtyards, and skylit reading rooms that turned civic fortresses into neighborhood living rooms.",
+      "byline": "By Clara Vane · 6 min read",
+      "hero_image": "/img/brutalist-library-concrete/800x450",
+      "pull_quote": "When it rains two hundred days a year, a public library isn't a monument—it's a lantern.",
+      "stops": [
+        {"name": "Suzzallo North Annex", "year": 1971, "architect": "Kirk, Wallace, McKinley", "highlight": "Waffle-slab ceiling & Douglas fir study carrels"},
+        {"name": "Bellevue Old Civic Branch", "year": 1968, "architect": "Ridenour & Cochran", "highlight": "Sunken moss garden visible from every desk"},
+        {"name": "Tacoma Harbor Reading Room", "year": 1974, "architect": "L. Bassetti", "highlight": "Cantilevered bay window over Commencement Bay"}
+      ]
+    }
+  },
+  {
+    "seed_id": "seed_comms_messaging",
+    "group": "comms",
+    "genre": "messaging",
+    "title": "Priority inbox triage: 3 threads needing a quick reply",
+    "intent": "Triage 3 high-priority messages and send a 1-tap or quick reply before boarding a flight.",
+    "size_class": "m",
+    "state": "content",
+    "context": {
+      "surface": "home screen card",
+      "user_state": "boarding flight",
+      "role": "team lead",
+      "locale": "en-US",
+      "time_of_day": "afternoon",
+      "urgency": "time-sensitive"
+    },
+    "edge_cases": [],
+    "tags": ["messaging", "triage", "replies"],
+    "payload": {
+      "unread_total": 27,
+      "priority_threads": [
+        {
+          "sender": "Elena Rostova",
+          "avatar": "https://randomuser.me/api/portraits/women/44.jpg",
+          "channel": "Direct Message",
+          "received": "6m ago",
+          "snippet": "Can we lock the 16px card radius token before the 4 PM Android freeze?",
+          "suggested_replies": ["Yes, lock 16px", "Wait — let's check tablet first"]
+        },
+        {
+          "sender": "Liam O'Connor",
+          "avatar": "https://randomuser.me/api/portraits/men/22.jpg",
+          "channel": "Release Eng",
+          "received": "18m ago",
+          "snippet": "RC2 passed all 43 spec surfaces. Ready to tag v0.9.2?",
+          "suggested_replies": ["Ship it!", "Hold for Elena's token PR"]
+        }
+      ]
+    }
+  },
+  {
+    "seed_id": "seed_comms_media",
+    "group": "comms",
+    "genre": "media",
+    "title": "Podcast episode chapter jump & transcript highlights",
+    "intent": "Resume a design podcast at the chapter on generative layout systems and bookmark a key quote.",
+    "size_class": "m",
+    "state": "content",
+    "context": {
+      "surface": "home screen card",
+      "user_state": "commuting",
+      "role": "listener",
+      "locale": "en-US",
+      "time_of_day": "morning",
+      "urgency": "routine"
+    },
+    "edge_cases": [],
+    "tags": ["media", "podcast", "audio"],
+    "payload": {
+      "show": "Systems & Surfaces",
+      "episode_title": "Ep. 84 — Why Generative UI Needs a Constitution, Not Hardcoded Templates",
+      "cover_image": "/img/podcast-studio-microphone/400x400",
+      "position": "18:42 / 46:10",
+      "chapters": [
+        {"time": "00:00", "title": "The template explosion problem", "done": true},
+        {"time": "14:20", "title": "Separating layout decisions from CSS tokens", "active": true},
+        {"time": "29:05", "title": "Testing against synthetic edge cases", "done": false}
+      ],
+      "highlighted_quote": "A design constitution tells the model how to prioritize in context; your design tokens handle how it looks."
+    }
+  }
+]
