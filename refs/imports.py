@@ -2916,19 +2916,20 @@ class ImportManager:
         default_ds_set = True
 
     now = util.now_iso()
-    for xid, targets in merged_into.items():
-      x = self.store.get("import_extractions", xid)
-      if not x:
-        continue
-      self.store.update(
-          "import_extractions",
-          xid,
-          {
-              "status": "merged",
-              "merged_into": (x.get("merged_into") or []) + targets,
-              "updated_at": now,
-          },
-      )
+    with self.store._write_lock:
+      for xid, targets in merged_into.items():
+        x = self.store.get("import_extractions", xid)
+        if not x:
+          continue
+        self.store.update(
+            "import_extractions",
+            xid,
+            {
+                "status": "merged",
+                "merged_into": (x.get("merged_into") or []) + targets,
+                "updated_at": now,
+            },
+        )
     msg = self._chat_summary(
         user, r, applied, sample_set=sample_set, default_ds_set=default_ds_set
     )

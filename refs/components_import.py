@@ -920,20 +920,21 @@ class ComponentBuilder:
           upd_ref["merge_log"] = log
         self.store.update("design_references", iid, upd_ref)
         if xid:
-          x_row = self.store.get("import_extractions", xid)
-          if x_row:
-            cur_merged = list(x_row.get("merged_into") or [])
-            for tgt in new_targets:
-              if not any(
-                  m.get("type") == "tokens" and m.get("id") == tgt["id"]
-                  for m in cur_merged
-              ):
-                cur_merged.append(tgt)
-            self.store.update(
-                "import_extractions",
-                xid,
-                {"merged_into": cur_merged, "updated_at": now},
-            )
+          with self.store._write_lock:
+            x_row = self.store.get("import_extractions", xid)
+            if x_row:
+              cur_merged = list(x_row.get("merged_into") or [])
+              for tgt in new_targets:
+                if not any(
+                    m.get("type") == "tokens" and m.get("id") == tgt["id"]
+                    for m in cur_merged
+                ):
+                  cur_merged.append(tgt)
+              self.store.update(
+                  "import_extractions",
+                  xid,
+                  {"merged_into": cur_merged, "updated_at": now},
+              )
       return applied_log
 
   def _render_compare_repair(

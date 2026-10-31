@@ -41,8 +41,6 @@ from render import cdp  # pylint: disable=g-import-not-at-top
 
 EXAMPLES_DIRS = [
     os.path.join(ROOT, "seeds", "a2ui", "catalogs", "basic", "v1", "examples"),
-    "/google/src/cloud/dkaram/create_a2ui_designer/google3/third_party/a2ui/"
-    "catalogs/basic/v1/examples",
 ]
 BASIC = "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json"
 EXT = "https://posttool.github.io/a2ui-designer/catalogs/extensions/v1/catalog.json"

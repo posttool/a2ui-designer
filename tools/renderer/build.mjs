@@ -6,7 +6,7 @@ const out = new URL('../../web/vendor/', import.meta.url);
 mkdirSync(out, {recursive: true});
 await build({
   entryPoints: [new URL('./entry.js', import.meta.url).pathname],
-  bundle: true, format: 'esm', target: 'es2022', minify: true, sourcemap: true,
+  bundle: true, format: 'esm', target: 'es2022', minify: true, sourcemap: false,
   legalComments: 'eof', outfile: new URL('a2ui.bundle.js', out).pathname,
   logLevel: 'info',
 });
