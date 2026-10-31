@@ -559,9 +559,8 @@ def format_css(css: str, indent: str = "") -> str:
         continue
       if ":" in p and not p.startswith("/*"):
         k, v = p.split(":", 1)
-        decls.append(
-            f"{indent}  {k.strip()}: {re.sub(r'\\s+', ' ', v).strip()};"
-        )
+        val_clean = re.sub(r"\s+", " ", v).strip()
+        decls.append(f"{indent}  {k.strip()}: {val_clean};")
       else:
         decls.append(f"{indent}  {p};")
     if decls:

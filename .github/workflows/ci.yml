@@ -30,4 +30,4 @@ jobs:
       - name: Check for internal references
         if: matrix.python-version == '3.13'
         run: |
-          ! git grep -nE "google3|googlers\.com|/google/bin|b/[0-9]{6,}|corp\.google" -- . ':!.github/workflows/ci.yml'
+          ! git grep -nE "google3|googlers\.com|/google/bin|b/[0-9]{6,}|corp\.google|airlock|uplink\.goog|artifact-foundry" -- . ':!.github/workflows/ci.yml'
